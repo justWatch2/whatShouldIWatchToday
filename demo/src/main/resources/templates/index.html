@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="kr">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <p th:text="'hello '+${Hello}">message</p>
+    <span>수정 완료</span>
+    <form action="/test" method="get">
+        <input type="text" name="name" value="abcx">
+        <button type="submit">등록</button>
+    </form>
+</body>
+</html>
