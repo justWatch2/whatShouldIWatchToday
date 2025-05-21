@@ -19,7 +19,8 @@ spring:
       enabled: true
   thymeleaf:
     cache: false
-
+  profiles:
+    active: multiflex-jpa-local
 
 
 server:
