@@ -1,10 +1,10 @@
-package org.example.whatshouldiwatchtoday;
+package avengers.waffle.whatshouldiwatchtoday;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class WhatShouldIWatchTodayApplicationTests {
+class waffleApplicationTests {
 
     @Test
     void contextLoads() {
