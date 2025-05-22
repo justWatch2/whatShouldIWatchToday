@@ -20,7 +20,7 @@ import java.util.List;
 @Table(name = "movie_member")
 public class MovieMember implements Serializable {
     @Id
-    @Column(name = "member_id" , length = 20)
+    @Column(name = "member_id" , length = 100)
     private String memberId;
 
     @Column(name = "member_pw", length = 80)

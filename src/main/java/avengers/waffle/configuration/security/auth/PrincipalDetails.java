@@ -1,7 +1,6 @@
 package avengers.waffle.configuration.security.auth;
 
 
-import avengers.waffle.configuration.security.model.User;
 import avengers.waffle.entity.MovieMember;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

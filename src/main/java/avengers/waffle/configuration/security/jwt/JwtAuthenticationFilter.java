@@ -1,7 +1,8 @@
 package avengers.waffle.configuration.security.jwt;
 
 import avengers.waffle.configuration.security.auth.PrincipalDetails;
-import avengers.waffle.configuration.security.model.User;
+
+import avengers.waffle.entity.MovieMember;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
@@ -45,10 +46,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
             //username, password 받아서 처리한다.
             ObjectMapper mapper = new ObjectMapper();
-            User user = mapper.readValue(request.getInputStream(),User.class);
+            MovieMember user = mapper.readValue(request.getInputStream(),MovieMember.class);
 
             //토큰 생성
-            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(user.getUsername(),user.getPassword());
+            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(user.getMemberId(),user.getMemberPw());
 
             //이부분이 실제로 인증이 수행되는 핵심
             //1. Spring Security는 내부적으로 UserDetailsService를 호출해 DB에서 유저 정보를 찾는다.

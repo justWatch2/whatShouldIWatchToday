@@ -3,7 +3,7 @@ package avengers.waffle.configuration.security.oauth2;
 
 
 import avengers.waffle.configuration.security.auth.PrincipalDetails;
-import avengers.waffle.configuration.security.model.User;
+
 import avengers.waffle.configuration.security.oauth2.provider.*;
 import avengers.waffle.entity.MovieMember;
 import avengers.waffle.repository.MovieMemberRepository;

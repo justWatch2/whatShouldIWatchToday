@@ -58,15 +58,15 @@
 
     // JWT 로그인
     function login() {
-        const username = document.getElementById("username").value;
-        const password = document.getElementById("password").value;
+        const memberId = document.getElementById("username").value;
+        const memberPw = document.getElementById("password").value;
 
         fetch("/api/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ memberId, memberPw })
         })
             .then(async res => {
                 const token = res.headers.get("Authorization");
