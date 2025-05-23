@@ -96,7 +96,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         System.out.println("successfulAuthentication 인증이 완료되었다는 뜻");
 
         PrincipalDetails principalDetails = (PrincipalDetails) authResult.getPrincipal();
-
+        System.out.println("principalDetails.getUsername() = " + principalDetails.getUsername());
         //RSA방식은 아니고 hash암호 방식
         String jwtToken =  JWT.create()
 //        Secret Key는 외부에 노출하지 않습니다. 바로 밑에 "cos토큰"이라고 하는거처럼?
@@ -109,10 +109,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         //Bearer 뒤에 한칸뛰어야 한다
         response.addHeader("Authorization", "Bearer " + jwtToken);
 
-//        // JSON으로 응답 보내기
-//        response.setContentType("application/json");
-//        response.setCharacterEncoding("UTF-8");
-//        response.getWriter().write("{\"token\": \"Bearer " + jwtToken + "\"}");
+//      // ✅ JSON으로 응답 본문도 함께 전달
+//    response.setContentType("application/json");
+//    response.setCharacterEncoding("UTF-8");
+//    response.getWriter().write("{\"token\": \"Bearer " + jwtToken + "\"}");
 
 
     }

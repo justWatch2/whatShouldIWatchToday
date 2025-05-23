@@ -17,7 +17,7 @@ import java.util.Date;
 
 
 @RequiredArgsConstructor
-public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
+public class    OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtProperties jwtProperties;
 
