@@ -40,6 +40,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web-services'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+
+
+
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'
@@ -50,6 +53,15 @@ dependencies {
 
     //jwt토큰 생성을 위해서
     implementation 'com.auth0:java-jwt:4.4.0'
+
+    //redis설정을 위해서
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    //refreshToken 파싱을 위해서 사용할려고 했지만 토큰 만들떄 auth를 통해 만들었기때문에 통일을 위해서 사용하지 않음
+    // 또한 현업에서는 auth라이브러리 많이 사용함.
+//    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+//    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+//    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // JSON 파싱용 Jackson
 }
 
 tasks.named('test') {
