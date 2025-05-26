@@ -56,7 +56,7 @@ public class SecurityConfig {
 
         // JwtAuthenticationFilter 설정
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, stringRedisTemplate,jwtProperties);
-        jwtAuthenticationFilter.setFilterProcessesUrl("/ttt/api/login"); // <- 이거 안 하면 필터가 동작 안 함 +  클라이언트 쪽에서
+        jwtAuthenticationFilter.setFilterProcessesUrl("/api/login"); // <- 이거 안 하면 필터가 동작 안 함 +  클라이언트 쪽에서
         //로그인을 할려고 /api/login으로 요청으로 보내면 필터가 작동할수 있도록 하는 메서드이다.
 
         http

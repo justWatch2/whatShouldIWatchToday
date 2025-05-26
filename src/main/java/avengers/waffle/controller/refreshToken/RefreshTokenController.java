@@ -91,11 +91,28 @@ public class RefreshTokenController {
         // Redis에 갱신
         stringRedisTemplate.opsForValue().set(memberId, newRefreshToken);
 
+//        // 3-2.1: 기존 refreshToken 쿠키를 만료시킴
+//        Cookie[] existingCookies = request.getCookies();
+//        for (Cookie cookie : existingCookies) {
+//            if ("refreshToken".equals(cookie.getName())) {
+//                // 기존 refreshToken 쿠키를 만료시킴
+//                cookie.setMaxAge(0);
+//                cookie.setPath("/api/auth/refresh");
+//                cookie.setHttpOnly(true);
+//                cookie.setSecure(false);  // https 일 경우 true 설정
+//                response.addCookie(cookie);  // 만료된 쿠키를 응답에 추가하여 클라이언트에 삭제를 지시
+//                break;
+//            }
+//        }
+
+
+
+
         //    3-3	클라이언트에 전달 (헤더 or JSON or 쿠키)
         ResponseCookie newRefreshCookie = ResponseCookie.from("refreshToken", newRefreshToken)
                 .httpOnly(true)
                 .secure(false)     //true :  https 통신일 경우에만 쿠키 전송 false : http 통신일 경우에만 쿠키 전송
-                .path("/api/auth/refresh")
+                .path("/")
                 .maxAge(Duration.ofDays(7))   //JWT의 refreshToken 만료 시간과 쿠키의 maxAge를 동일
                 .sameSite("Lax")  //  sameSite 설정을 해줘야지 csrf보안 처리를 안할수 있고
 //                .secure(true) // HTTPS일 경우

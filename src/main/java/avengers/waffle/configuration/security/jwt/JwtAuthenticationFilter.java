@@ -99,7 +99,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         System.out.println("principalDetails.getUsername() = " + principalDetails.getUsername());
         //RSA방식은 아니고 hash암호 방식
         String accessToken = JWT.create()
-                .withExpiresAt(new Date(System.currentTimeMillis() + (jwtProperties.getExpirationTime())))  //토큰 만료시간 60000 기준 1분
+                .withExpiresAt(new Date(System.currentTimeMillis() + (jwtProperties.getExpirationTime()/6)))  //토큰 만료시간 60000 기준 1분
 //                .withClaim("id",principalDetails.getId())  //withClaim은 키 벨류값설
                 .withClaim("memberId", principalDetails.getUsername())
                 .sign(Algorithm.HMAC512(jwtProperties.getSecret()));
