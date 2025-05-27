@@ -50,6 +50,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             ObjectMapper mapper = new ObjectMapper();
             MovieMember user = mapper.readValue(request.getInputStream(), MovieMember.class);
 
+//            if (stringRedisTemplate.opsForValue().get(user.getMemberId()) != null){
+//                System.out.println(" 들어오는지 확인!!" );
+//                throw new AuthenticationServiceException("이미 로그인된 계정입니다. 다른 아이디로 로그인하세요.");
+//            }
             //토큰 생성
             UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(user.getMemberId(), user.getMemberPw());
 

@@ -69,7 +69,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         String jwtToken = jwtHeader.replace("Bearer ", "");
         String memberId = null;
         try {
-            memberId = JWT.require(Algorithm.HMAC512(jwtProperties.getSecret())).build().verify(jwtToken).getClaim("username").asString();
+            memberId = JWT.require(Algorithm.HMAC512(jwtProperties.getSecret())).build().verify(jwtToken).getClaim("memberId").asString();
         } catch (Exception e) {
             // JWT 검증 실패 시 그냥 다음 필터로 넘김
             chain.doFilter(request, response);
@@ -79,7 +79,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
         //서명이 정상적으로 된경우
         if (memberId != null) {
-
+            System.out.println(" 인가쪽 제대로 시행된다는거지");
+            System.out.println("memberId = " + memberId);
             // 이부분에서 username이 db에 있으면 찾아지는거니까 인증이됨
             MovieMember userEntity = movieMemberRepository.findByMemberId(memberId);
 

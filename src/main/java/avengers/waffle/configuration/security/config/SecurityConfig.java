@@ -2,6 +2,7 @@ package avengers.waffle.configuration.security.config;
 
 
 import avengers.waffle.configuration.security.handler.OAuth2SuccessHandler;
+import avengers.waffle.configuration.security.jwt.CustomAuthenticationFailureHandler;
 import avengers.waffle.configuration.security.jwt.JwtAuthenticationEntryPoint;
 import avengers.waffle.configuration.security.jwt.JwtAuthenticationFilter;
 import avengers.waffle.configuration.security.jwt.JwtAuthorizationFilter;
@@ -33,6 +34,7 @@ public class SecurityConfig {
     private final JwtProperties jwtProperties;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final StringRedisTemplate stringRedisTemplate;
+    private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
     //Spring Boot 3.x 이상에서는 AuthenticationManager를 직접 빌드해서 넣어줘야 필터에서 사용할 수 있음.
     //@Bean으로 분리해 두면 다른 클래스에서도 재사용 가능해서 더 좋다.
@@ -48,7 +50,7 @@ public class SecurityConfig {
 
     @Bean
     public OAuth2SuccessHandler oAuth2SuccessHandler() {
-        return new OAuth2SuccessHandler(jwtProperties);
+        return new OAuth2SuccessHandler(jwtProperties, stringRedisTemplate);
     }
 
     @Bean
@@ -57,6 +59,7 @@ public class SecurityConfig {
         // JwtAuthenticationFilter 설정
         JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, stringRedisTemplate,jwtProperties);
         jwtAuthenticationFilter.setFilterProcessesUrl("/api/login"); // <- 이거 안 하면 필터가 동작 안 함 +  클라이언트 쪽에서
+        jwtAuthenticationFilter.setAuthenticationFailureHandler(customAuthenticationFailureHandler);
         //로그인을 할려고 /api/login으로 요청으로 보내면 필터가 작동할수 있도록 하는 메서드이다.
 
         http
@@ -74,7 +77,7 @@ public class SecurityConfig {
                                 .requestMatchers("/manager/**").hasAnyRole("MANAGER", "ADMIN")  // 여러 권한중 하나만 있어도 허용
                                 .requestMatchers("/admin/**").hasRole("ADMIN")  //  특정 하나의 권한만 허용
 
-                                .requestMatchers("/api/auth/refresh", "/css/**", "/js/**", "/images/**", "/join", "/login2.html").permitAll() // 로그인 페이지, 정적 파일은 모두 허용
+                                .requestMatchers("/api/auth/refresh", "/css/**", "/js/**", "/images/**", "/join", "/api/join").permitAll() // 로그인 페이지, 정적 파일은 모두 허용
                                 .requestMatchers("/").permitAll() // 기본 홈 페이지도 허용
                                 .anyRequest().authenticated() // 나머지 요청은 인증이 필요
                         //             .anyRequest().permitAll()  이건 가장마지막에 위치해야된다.

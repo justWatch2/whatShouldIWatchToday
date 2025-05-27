@@ -69,7 +69,7 @@ public class UserController {
     @PostMapping("/logout")
     @ResponseBody
     public String logout() {
-        // 실제로 서버에서 JWT를 무효화하는 로직은 없음 (Stateless)
+
         return "클라이언트에서 JWT 삭제 필요";
     }
 }
