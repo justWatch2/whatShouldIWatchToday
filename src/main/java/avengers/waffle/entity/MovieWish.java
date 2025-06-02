@@ -17,18 +17,17 @@ public class MovieWish implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int no;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="id")
-    private Movie movieId;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name="id")
+//    private MoviesPartitioned movieId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="")
+    @JoinColumn(name="member_id")
     private MovieMember memberId;
 
     @Builder(toBuilder = true)
-    public MovieWish(int no, Movie movieId, MovieMember memberId) {
+    public MovieWish(int no, MovieMember memberId) {
         this.no = no;
-        this.movieId = movieId;
         this.memberId = memberId;
     }
 }

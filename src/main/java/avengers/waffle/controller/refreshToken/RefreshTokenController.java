@@ -170,6 +170,10 @@ public class RefreshTokenController {
         }
         stringRedisTemplate.delete(memberId);
 
+        //카카오톡 서버에서 받아온 자체 accessToken 도 삭제
+        String kakaoAccessToken = memberId + ":kakaoAccessToken";
+        stringRedisTemplate.delete(kakaoAccessToken);
+
         //기존 쿠키들도 삭제한다
         // 3-2.1: 기존 refreshToken 쿠키를 만료시킴
         Cookie[] existingCookies = request.getCookies();
