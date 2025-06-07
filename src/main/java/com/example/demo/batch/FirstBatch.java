@@ -49,7 +49,7 @@ public class FirstBatch {
 
     @Bean
     public Step firstStep() {
-        return new StepBuilder("firstStep", jobRepository)
+        return new StepBuilder("keyStep", jobRepository)
                 .<BeforeEntity, AfterEntity>chunk(40, transactionManager) // chunk: 한번에 읽어올 데이터 수량
                 .reader(beforeReader())
                 .processor(beforeProcessor())
@@ -65,7 +65,7 @@ public class FirstBatch {
         executor.setCorePoolSize(3);
         executor.setMaxPoolSize(3);
         executor.setQueueCapacity(10);
-        executor.setThreadNamePrefix("taskExecutor-");
+        executor.setThreadNamePrefix("keytaskExecutor-");
         executor.initialize();
         return executor;
     }

@@ -39,4 +39,14 @@ public class MainController {
 
         return "ok";
     }
+    @GetMapping("/third")
+    public String third() throws Exception {
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addString("data", "first")
+                .toJobParameters();
+
+        jobLauncher.run(jobRegistry.getJob("keyJob"), jobParameters);
+
+        return "ok";
+    }
 }

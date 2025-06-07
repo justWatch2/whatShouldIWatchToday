@@ -10,18 +10,18 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
     jdbc-url: jdbc:mariadb://localhost:3306/report
     username: root
-    password: 1234
+    password: 1111
   meta:
     datasource:
       driver-class-name: org.mariadb.jdbc.Driver
       jdbc-url: jdbc:mariadb://localhost:3306/report
       username: root
-      password: 1234
+      password: 1111
   data:
     datasource:
       driver-class-name: org.mariadb.jdbc.Driver
       jdbc-url: jdbc:mariadb://localhost:3306/sample
       username: root
-      password: 1234
+      password: 1111
 
 
