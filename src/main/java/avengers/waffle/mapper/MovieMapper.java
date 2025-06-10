@@ -1,4 +1,8 @@
 package avengers.waffle.mapper;
+import org.apache.ibatis.annotations.Mapper;
 
-public class MovieMapper {
+
+@Mapper
+public interface MovieMapper {
+
 }

@@ -18,18 +18,21 @@ public class MemberViewList implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int no;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
-    private MovieMember id;
+    //    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name="id")
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)) // 외래키 제약 없음
+//    private MoviesPartitioned movieId;
+    @Column(name = "id") // 단순 ID 값
+    private Integer movieId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    private MovieMember member_id;
+    private MovieMember memberId;
 
     @Builder(toBuilder = true)
-    public MemberViewList(int no, MovieMember id, MovieMember member_id) {
+    public MemberViewList(int no, MovieMember memberId) {
         this.no = no;
-        this.id = id;
-        this.member_id = member_id;
+        this.memberId = memberId;
     }
 }

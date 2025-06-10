@@ -76,11 +76,11 @@ public class SecurityConfig {
                                 .requestMatchers("/user/**").authenticated()  // 이부분은 사용자가 jwt토큰을 들고 요청하면 인증만되어있다고 확인이 된다면 통과 시키는 부분
                                 .requestMatchers("/manager/**").hasAnyRole("MANAGER", "ADMIN")  // 여러 권한중 하나만 있어도 허용
                                 .requestMatchers("/admin/**").hasRole("ADMIN")  //  특정 하나의 권한만 허용
-                                .requestMatchers("/api/auth/refresh", "/css/**", "/js/**", "/images/**", "/join", "/api/join").permitAll() // 로그인 페이지, 정적 파일은 모두 허용
+
+                                .requestMatchers("/api/auth/refresh", "/css/**", "/js/**", "/images/**", "/join", "/api/join","/friend/**","/recommend/**").permitAll() // 로그인 페이지, 정적 파일은 모두 허용
                                 .requestMatchers("/").permitAll() // 기본 홈 페이지도 허용
-                                .requestMatchers("/api/getGullist").permitAll()
-//                                .anyRequest().authenticated() // 나머지 요청은 인증이 필요
-                                .anyRequest().permitAll()  // 이건 가장마지막에 위치해야된다.
+                                .anyRequest().authenticated() // 나머지 요청은 인증이 필요
+                        //             .anyRequest().permitAll()  이건 가장마지막에 위치해야된다.
                 )
                 .oauth2Login(oauth2 -> oauth2
                                 .userInfoEndpoint(userInfo -> userInfo
@@ -98,6 +98,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.addAllowedOrigin("http://localhost:3000");
+        //.allowedOriginPatterns("*")  // ✅ Spring Boot 2.4 이상에서 지원
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
         configuration.setAllowCredentials(true);

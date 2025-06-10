@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="avengers.waffle.mapper.FriendMapper">
+
+    <select id="getFriendsInfoByMemberId" resultType="avengers.waffle.VO.recommendFriends.RecommendFriendsInfoDTO">
+        SELECT
+        mm.member_name AS name,
+        COUNT(DISTINCT mw.id) AS numWish,
+        COUNT(DISTINCT mv.id) AS numViewedMovie,
+        icon.img_url AS icon
+        FROM movie_member mm
+        LEFT JOIN movie_wish mw ON mw.member_id = mm.member_id
+        LEFT JOIN member_viewlist mv ON mv.member_id = mm.member_id
+        LEFT JOIN icon on mm.icon_num = icon.icon_num
+        WHERE mm.member_id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        GROUP BY mm.member_id, icon.img_url
+        ORDER BY numWish DESC, numViewedMovie DESC
+    </select>
+
+    <!-- 친구 선택 안했을떄 로그인된 유저 기준으로 추천-->
+    <select id="getRecommendMovieByUserId" resultType="avengers.waffle.VO.recommendFriends.RecommendMoviesInfoDTO">
+        WITH combined_keywords AS (
+            SELECT mk.keywords_id
+            FROM movie_wish mw
+                     JOIN movie_keywords mk ON mw.id = mk.id
+            WHERE mw.member_id = #{userId}
+            UNION ALL
+            SELECT mk.keywords_id
+            FROM member_viewlist mv
+                     JOIN movie_keywords mk ON mv.id = mk.id
+            WHERE mv.member_id = #{userId}
+        ),
+             keyword_counts AS (
+                 SELECT keywords_id,
+                        COUNT(*) AS cnt
+                 FROM combined_keywords
+                 GROUP BY keywords_id
+                 HAVING COUNT(*) >= 2
+             ),
+             top_keywords AS (
+                 SELECT keywords_id
+                 FROM keyword_counts
+                 ORDER BY cnt DESC
+            LIMIT 2
+            ),
+            movies_with_keywords AS (
+        SELECT mk.id AS movie_id,
+            COUNT(DISTINCT mk.keywords_id) AS match_count
+        FROM movie_keywords mk
+            JOIN top_keywords tk ON mk.keywords_id = tk.keywords_id
+        GROUP BY mk.id
+        HAVING COUNT(DISTINCT mk.keywords_id) = 2  -- 두 키워드 모두 포함한 영화만
+            )
+        SELECT DISTINCT mp.id AS movieId,
+                        mp.title,
+                        mp.poster_path AS poster,
+                        r.averageRating AS rating,
+                        mp.overview AS description
+        FROM movies_with_keywords mwk
+                 JOIN movies_partitioned mp ON mwk.movie_id = mp.id
+                 LEFT JOIN ratings r ON r.tconst = mp.tmdb
+        WHERE mp.id NOT IN (
+            SELECT id
+            FROM member_viewlist
+            WHERE member_id = #{userId}
+        )
+        ORDER BY r.averageRating DESC;
+
+    </select>
+
+    <!--찜목록과 유사한 작품 추천 userId 기준으로!!-->
+    <select id="getRecommendMovieByUserIdFromMovieWish" resultType="avengers.waffle.VO.recommendFriends.RecommendMoviesInfoDTO">
+        WITH keyword_counts AS (
+            SELECT mk.keywords_id,
+                   COUNT(*) AS cnt
+            FROM movie_wish mw
+                     JOIN movie_keywords mk ON mw.id = mk.id
+            WHERE mw.member_id = #{userId}
+            GROUP BY mk.keywords_id
+            HAVING COUNT(*) >= 2
+        ),
+             top_keywords AS (
+                 SELECT keywords_id
+                 FROM keyword_counts
+                 ORDER BY cnt DESC
+            LIMIT 2
+            ),
+            movies_with_keywords AS (
+        SELECT mk.id AS movie_id,
+            COUNT(DISTINCT mk.keywords_id) AS match_count
+        FROM movie_keywords mk
+            JOIN top_keywords tk ON mk.keywords_id = tk.keywords_id
+        GROUP BY mk.id
+        HAVING COUNT(DISTINCT mk.keywords_id) = 2  -- 두 키워드 모두 포함한 영화만
+            )
+        SELECT DISTINCT mp.id AS movie_id,
+                        mp.title,
+                        mp.poster_path AS poster,
+                        r.averageRating AS rating,
+                        mp.overview AS description
+        FROM movies_with_keywords mwk
+                 JOIN movies_partitioned mp ON mwk.movie_id = mp.id
+                 LEFT JOIN ratings r ON r.tconst = CONCAT('tt', LPAD(mp.id, 7, '0'))
+        WHERE mp.id NOT IN (
+            SELECT id
+            FROM member_viewlist
+            WHERE member_id = #{userId}
+        )
+        ORDER BY r.averageRating DESC
+
+    </select>
+
+
+    <!--시청한 목록과 유사한 작품 추천 userId 기준으로!!-->
+    <select id="getRecommendMovieByUserIdFromMemberViewlist" resultType="avengers.waffle.VO.recommendFriends.RecommendMoviesInfoDTO">
+        WITH keyword_counts AS (
+            SELECT mk.keywords_id,
+                   COUNT(*) AS cnt
+            FROM member_viewlist mv
+                     JOIN movie_keywords mk ON mv.id = mk.id
+            WHERE mv.member_id = #{userId}
+            GROUP BY mk.keywords_id
+            HAVING COUNT(*) >= 2
+        ),
+             top_keywords AS (
+                 SELECT keywords_id
+                 FROM keyword_counts
+                 ORDER BY cnt DESC
+            LIMIT 2
+            ),
+            movies_with_keywords AS (
+        SELECT mk.id AS movie_id,
+            COUNT(DISTINCT mk.keywords_id) AS match_count
+        FROM movie_keywords mk
+            JOIN top_keywords tk ON mk.keywords_id = tk.keywords_id
+        GROUP BY mk.id
+        HAVING COUNT(DISTINCT mk.keywords_id) = 2  -- 두 키워드 모두 포함한 영화만
+            )
+        SELECT DISTINCT mp.id AS movie_id,
+                        mp.title,
+                        mp.poster_path AS poster,
+                        r.averageRating AS rating,
+                        mp.overview AS description
+        FROM movies_with_keywords mwk
+                 JOIN movies_partitioned mp ON mwk.movie_id = mp.id
+                 LEFT JOIN ratings r ON r.tconst = CONCAT('tt', LPAD(mp.id, 7, '0'))
+        WHERE mp.id NOT IN (
+            SELECT id
+            FROM member_viewlist
+            WHERE member_id = #{userId}
+        )
+        ORDER BY r.averageRating DESC;
+
+    </select>
+
+    <select id="getRecommendMovieByMemberIds" resultType="avengers.waffle.VO.recommendFriends.RecommendMoviesInfoDTO">
+        WITH combined_keywords AS (
+        SELECT mk.keywords_id
+        FROM movie_wish mw
+        JOIN movie_keywords mk ON mw.id = mk.id
+        WHERE mw.member_id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+
+        UNION ALL
+
+        SELECT mk.keywords_id
+        FROM member_viewlist mv
+        JOIN movie_keywords mk ON mv.id = mk.id
+        WHERE mv.member_id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ),
+        keyword_counts AS (
+        SELECT keywords_id,
+        COUNT(*) AS cnt
+        FROM combined_keywords
+        GROUP BY keywords_id
+        HAVING COUNT(*) >= 2
+        ),
+        top_keywords AS (
+        SELECT keywords_id
+        FROM keyword_counts
+        ORDER BY cnt DESC
+        LIMIT 2
+        ),
+        movies_with_keywords AS (
+        SELECT mk.id AS movie_id,
+        COUNT(DISTINCT mk.keywords_id) AS match_count
+        FROM movie_keywords mk
+        JOIN top_keywords tk ON mk.keywords_id = tk.keywords_id
+        GROUP BY mk.id
+        HAVING COUNT(DISTINCT mk.keywords_id) = 2  -- 두 키워드 모두 포함한 영화만
+        )
+        SELECT DISTINCT mp.id AS movie_id,
+        mp.title,
+        mp.poster_path AS poster,
+        r.averageRating AS rating,
+        mp.overview AS description
+        FROM movies_with_keywords mwk
+        JOIN movies_partitioned mp ON mwk.movie_id = mp.id
+        LEFT JOIN ratings r ON r.tconst = CONCAT('tt', LPAD(mp.id, 7, '0'))
+        WHERE mp.id NOT IN (
+        SELECT id
+        FROM member_viewlist
+        WHERE member_id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        )
+        ORDER BY r.averageRating DESC;
+
+
+    </select>
+
+
+    <select id="getRecommendMovieByMemberIdsFromWish" resultType="avengers.waffle.VO.recommendFriends.RecommendMoviesInfoDTO">
+        WITH combined_keywords AS (
+        SELECT mk.keywords_id
+        FROM movie_wish mw
+        JOIN movie_keywords mk ON mw.id = mk.id
+        WHERE mw.member_id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ),
+        keyword_counts AS (
+        SELECT keywords_id,
+        COUNT(*) AS cnt
+        FROM combined_keywords
+        GROUP BY keywords_id
+        HAVING COUNT(*) >= 2
+        ),
+        top_keywords AS (
+        SELECT keywords_id
+        FROM keyword_counts
+        ORDER BY cnt DESC
+        LIMIT 2
+        ),
+        movies_with_keywords AS (
+        SELECT mk.id AS movie_id,
+        COUNT(DISTINCT mk.keywords_id) AS match_count
+        FROM movie_keywords mk
+        JOIN top_keywords tk ON mk.keywords_id = tk.keywords_id
+        GROUP BY mk.id
+        HAVING COUNT(DISTINCT mk.keywords_id) = 2
+        )
+        SELECT DISTINCT mp.id AS movie_id,
+        mp.title,
+        mp.poster_path AS poster,
+        r.averageRating AS rating,
+        mp.overview AS description
+        FROM movies_with_keywords mwk
+        JOIN movies_partitioned mp ON mwk.movie_id = mp.id
+        LEFT JOIN ratings r ON r.tconst = CONCAT('tt', LPAD(mp.id, 7, '0'))
+        WHERE mp.id NOT IN (
+        SELECT id
+        FROM member_viewlist
+        WHERE member_id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        )
+        ORDER BY r.averageRating DESC;
+    </select>
+
+    <select id="getRecommendMovieByMemberIdsFromViewlist" resultType="avengers.waffle.VO.recommendFriends.RecommendMoviesInfoDTO">
+        WITH combined_keywords AS (
+        SELECT mk.keywords_id
+        FROM member_viewlist mv
+        JOIN movie_keywords mk ON mv.id = mk.id
+        WHERE mv.member_id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        ),
+        keyword_counts AS (
+        SELECT keywords_id,
+        COUNT(*) AS cnt
+        FROM combined_keywords
+        GROUP BY keywords_id
+        HAVING COUNT(*) >= 2
+        ),
+        top_keywords AS (
+        SELECT keywords_id
+        FROM keyword_counts
+        ORDER BY cnt DESC
+        LIMIT 2
+        ),
+        movies_with_keywords AS (
+        SELECT mk.id AS movie_id,
+        COUNT(DISTINCT mk.keywords_id) AS match_count
+        FROM movie_keywords mk
+        JOIN top_keywords tk ON mk.keywords_id = tk.keywords_id
+        GROUP BY mk.id
+        HAVING COUNT(DISTINCT mk.keywords_id) = 2
+        )
+        SELECT DISTINCT mp.id AS movieId,
+        mp.title,
+        mp.poster_path AS poster,
+        r.averageRating AS rating,
+        mp.overview AS description
+        FROM movies_with_keywords mwk
+        JOIN movies_partitioned mp ON mwk.movie_id = mp.id
+        LEFT JOIN ratings r ON r.tconst = CONCAT('tt', LPAD(mp.id, 7, '0'))
+        WHERE mp.id NOT IN (
+        SELECT id
+        FROM member_viewlist
+        WHERE member_id IN
+        <foreach item="id" collection="list" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        )
+        ORDER BY r.averageRating DESC;
+    </select>
+
+
+</mapper>
