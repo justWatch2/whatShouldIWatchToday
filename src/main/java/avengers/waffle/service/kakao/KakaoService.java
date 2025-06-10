@@ -27,22 +27,22 @@ public class KakaoService {
     private final RestTemplate restTemplate;
     private final MovieMemberRepository movieMemberRepository;
 
-    public KakaoDTO findFriends(String memberId) {
-
-        String kakaoAccessToken  = stringRedisTemplate.opsForValue().get(memberId + ":kakaoAccessToken");
-
-
-        //HttpHeaders -> javaspring프레임워크 3번째 것으로 import
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(kakaoAccessToken);
-        headers.set("Content-Type", "application/x-www-form-urlencoded");
-
-        HttpEntity<String> entity = new HttpEntity<>(headers);
-
-        ResponseEntity<KakaoDTO> response = restTemplate.exchange("https://kapi.kakao.com/v1/api/talk/friends", HttpMethod.GET, entity, KakaoDTO.class);
-
-        return response.getBody();
-    }
+//    public KakaoDTO findFriends(String memberId) {
+//
+//        String kakaoAccessToken  = stringRedisTemplate.opsForValue().get(memberId + ":kakaoAccessToken");
+//
+//
+//        //HttpHeaders -> javaspring프레임워크 3번째 것으로 import
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setBearerAuth(kakaoAccessToken);
+//        headers.set("Content-Type", "application/x-www-form-urlencoded");
+//
+//        HttpEntity<String> entity = new HttpEntity<>(headers);
+//
+//        ResponseEntity<KakaoDTO> response = restTemplate.exchange("https://kapi.kakao.com/v1/api/talk/friends", HttpMethod.GET, entity, KakaoDTO.class);
+//
+//        return response.getBody();
+//    }
 
     public String createURL(String memberId) {
         String uuid = UUID.randomUUID().toString();
@@ -63,12 +63,9 @@ public class KakaoService {
 
         System.out.println("링크통해서 초대한사람id = " + inviterId);
 
-
-
         if (inviterId == null) {
             return null;
         }
-
 
         // 3. 나랑 친구가 되어 있는지 그친구가 나랑 친구 되어 있는지 체크
         // 우선 초대한사람 아이디 있는지 부터 체크후

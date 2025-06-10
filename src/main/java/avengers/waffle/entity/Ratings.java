@@ -18,6 +18,11 @@ public class Ratings {
     private Float averageRating;
     private Integer numVotes;
 
+//    // Ratings는 관계를 몰라도 된다면 이대로 유지 (단방향)
+//    // 양방향 관계를 원하면 아래처럼 추가 가능
+//    @OneToOne(mappedBy = "ratings", fetch = FetchType.LAZY)
+//    private MoviesPartitioned movie;
+
     @Builder
     public Ratings(String tconst, Float averageRating, Integer numVotes) {
         this.tconst = tconst;

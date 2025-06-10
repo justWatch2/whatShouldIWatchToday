@@ -47,6 +47,14 @@ public class MoviesPartitioned {
     private String keywords;
 
 
+//    //1ㄷㅐ1이고 단방향일경우 이렇게 한쪽에서만 적어도 된다.
+//    @OneToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "imdb_id", referencedColumnName = "tconst", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+//    private Ratings ratings;
+
+//    @OneToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "imdb_id", referencedColumnName = "tconst", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+//    private TitleAdult titleAdult;
 
     @Builder
     public MoviesPartitioned(Integer id, String title, Float voteAverage, Integer voteCount, String status, LocalDate releaseDate, Long revenue, Integer runtime, Boolean adult, String backdropPath, Long budget, String homepage, String imdbId, String originalLanguage, String originalTitle, String overview, Float popularity, String posterPath, String tagline, String genres, String productionCompanies, String productionCountries, String spokenLanguages, String keywords) {

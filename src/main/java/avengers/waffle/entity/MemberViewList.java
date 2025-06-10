@@ -20,7 +20,11 @@ public class MemberViewList implements Serializable {
 
     //    @ManyToOne(fetch = FetchType.LAZY)
 //    @JoinColumn(name="id")
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)) // 외래키 제약 없음
 //    private MoviesPartitioned movieId;
+    @Column(name = "id") // 단순 ID 값
+    private Integer movieId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")

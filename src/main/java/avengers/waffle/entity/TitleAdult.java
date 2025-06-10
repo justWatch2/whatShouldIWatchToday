@@ -18,6 +18,8 @@ public class TitleAdult {
     @Column(name = "is_adult")
     private Boolean isAdult;
 
+
+
     @Builder
     public TitleAdult(String tconst, Boolean isAdult) {
         this.tconst = tconst;
