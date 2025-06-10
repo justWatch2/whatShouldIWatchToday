@@ -1,38 +1,31 @@
 package avengers.waffle.controller;
 
-import avengers.waffle.VO.PostVO;
-import avengers.waffle.entity.Post;
-import avengers.waffle.repository.PostRepository;
+import avengers.waffle.VO.MovieSearch;
+import avengers.waffle.entity.Movies;
+import avengers.waffle.service.If_GullService;
+import avengers.waffle.service.MovieService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RestController
 public class MovieController {
-    private final PostRepository postRepository;
 
-//    @GetMapping("/getGullist")
-//    public List<PostVO> getGullist(@RequestParam int page) {
-//        List<Post> postList = postRepository.findAll();
-//        List<PostVO> postVOList = new ArrayList<>();
-//        for (Post post : postList) {
-//            PostVO postVo = PostVO.builder()
-//                    .no(post.getNo())
-//                    .title(post.getTitle())
-//                    .name(post.getMovieMember().getMemberName())
-//                    .indate(post.getIndate())
-//                    .count(post.getCount())
-//                    .build();
-//            postVOList.add(postVo);
-//        }
-//        System.out.println(postList.get(1));
-//        return postVOList;
-//    }
+    private final MovieService movieService;
+    private final If_GullService GullService;
 
+    @GetMapping("team/search/movie/")
+    public List<Movies> viewlist(@ModelAttribute MovieSearch movie) {
+        System.out.println(movie.getTitle());
+        System.out.println(movie.getGenres());
+        System.out.println(movie.getYears());
+        System.out.println(movie.isKorean());
+        System.out.println(movie.isAdult());
 
+        return movieService.searchMovie(movie);
+    }
 }

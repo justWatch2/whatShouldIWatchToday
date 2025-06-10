@@ -1,18 +1,18 @@
 package avengers.waffle.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
 @Getter
 @Table(name="reply")
-public class Reply implements Serializable {
+public class Reply extends BaseEntity implements Serializable {
     @Id
     @Column(name = "reply_num", length = 10)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,9 +26,9 @@ public class Reply implements Serializable {
     @JoinColumn(name = "member_id", referencedColumnName = "member_id", nullable = false)
     private MovieMember movieMember;
 
-    @LastModifiedDate
-    @Column(name = "indate")
-    private LocalDateTime indate;
+//    @LastModifiedDate
+//    @Column(name = "indate")
+//    private LocalDateTime indate;
 
     @Column(name = "contents", nullable = false,length = 1000)
     private String contents;

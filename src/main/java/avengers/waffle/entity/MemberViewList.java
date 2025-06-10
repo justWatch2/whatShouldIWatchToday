@@ -2,7 +2,6 @@ package avengers.waffle.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,18 +17,17 @@ public class MemberViewList implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int no;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
-    private MovieMember id;
+    @Column(name = "id", nullable = false)
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private MovieMember member_id;
+    @JoinColumn(name="member_id")
+    private MovieMember memberId;
 
     @Builder(toBuilder = true)
-    public MemberViewList(int no, MovieMember id, MovieMember member_id) {
+    public MemberViewList(int no, Integer id, MovieMember memberId) {
         this.no = no;
         this.id = id;
-        this.member_id = member_id;
+        this.memberId = memberId;
     }
 }
