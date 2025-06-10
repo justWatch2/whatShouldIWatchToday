@@ -3,6 +3,8 @@ package avengers.waffle.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.io.Serializable;
@@ -16,7 +18,7 @@ public class Reply implements Serializable {
     @Id
     @Column(name = "reply_num", length = 10)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int replyNum;
+    private long replyNum;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "no", referencedColumnName = "no", nullable = false)
@@ -27,6 +29,7 @@ public class Reply implements Serializable {
     private MovieMember movieMember;
 
     @LastModifiedDate
+    @CreatedDate
     @Column(name = "indate")
     private LocalDateTime indate;
 

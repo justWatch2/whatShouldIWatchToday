@@ -2,8 +2,11 @@ package avengers.waffle.service.impl;
 
 import avengers.waffle.VO.PageVO;
 import avengers.waffle.VO.PostVO;
+import avengers.waffle.VO.ReplyVO;
 import avengers.waffle.entity.Post;
+import avengers.waffle.entity.Reply;
 import avengers.waffle.repository.PostRepository;
+import avengers.waffle.repository.ReplyRepository;
 import avengers.waffle.service.If_GullService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -13,12 +16,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class GullServiceImpl implements If_GullService {
     private final PostRepository postRepository;
-    private PageVO pageVO = new PageVO();
+    private final ReplyRepository replyRepository;
 
 
     @Override
@@ -48,6 +52,32 @@ public class GullServiceImpl implements If_GullService {
         pageVO.setPage(page);
         pageVO.setTotalCount(postRepository.CountByCategory(category));
         return pageVO;
+    }
+
+    @Override
+    public Post getPost(int no) {
+        Optional<Post> optional = postRepository.findByNo(no);
+        if (optional.isPresent()) {
+            return optional.get();
+        }
+        return null;
+    }
+
+    @Override
+    public List<ReplyVO> getReplyList(int no) {
+        List<ReplyVO> replyVOs = new ArrayList<>();
+        List<Reply> replies = replyRepository.findAllByPost_No(no);
+        for (Reply reply : replies) {
+            ReplyVO replyVO = ReplyVO.builder()
+                    .no((int) reply.getReplyNum())
+                    .memberId(reply.getMovieMember().getMemberId())
+                    .content(reply.getContents())
+                    .time(String.valueOf(reply.getIndate()))
+                    .likeCount(reply.getLikeCount())
+                    .build();
+            replyVOs.add(replyVO);
+        }
+        return replyVOs;
     }
 
 
