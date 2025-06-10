@@ -82,8 +82,8 @@ public class KeygenBatch {
         return new ItemProcessor<NewMovies, List<Keywords>>() {
             @Override
             public List<Keywords> process(NewMovies item) throws Exception {
-                List<Keywords> keywords = new ArrayList<>();
                 if (!Objects.equals(item.getKeywords(), "")) {
+                    List<Keywords> keywords = new ArrayList<>();
                     StringTokenizer tokenizer = new StringTokenizer(item.getKeywords(), ",");
                     while (tokenizer.hasMoreTokens()) {
                         String keyW = tokenizer.nextToken();
@@ -94,9 +94,10 @@ public class KeygenBatch {
                                     .build();
                             keywords.add(keyword);
                         }
+                        return keywords;
                     }
                 }
-                return keywords;
+                return null;
             }
         };
     }
