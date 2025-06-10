@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
 import java.io.Serializable;
@@ -30,6 +32,7 @@ public class Post implements Serializable { // 게시글
     private String title;
     @Column(name = "indate", nullable = false) // 날짜
     @LastModifiedDate
+    @CreatedDate
     private LocalDateTime indate;
     @Lob
     @Column(name = "contents", nullable = false, length = 256) // 내용
