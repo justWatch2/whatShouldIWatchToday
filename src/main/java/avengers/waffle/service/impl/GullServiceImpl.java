@@ -50,7 +50,7 @@ public class GullServiceImpl implements If_GullService {
     public PageVO getPage(int page, String category) {
         PageVO pageVO = new PageVO();
         pageVO.setPage(page);
-        pageVO.setTotalCount(postRepository.CountByCategory(category));
+        pageVO.setTotalCount(postRepository.countByCategory(category));
         return pageVO;
     }
 

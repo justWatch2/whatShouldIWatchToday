@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/api")
 @RequiredArgsConstructor
 public class GullController {
 
@@ -27,12 +26,12 @@ public class GullController {
 
     @GetMapping("/api/Gullist")
     @ResponseBody
-    public Map<String,Object> Gullist(@RequestParam int page, @RequestParam String category) {
-        List<PostVO> list = GullService.getPostList(page,category);
-        PageVO pageVO = GullService.getPage(page,category);
-        Map<String,Object> map = new HashMap<>();
-        map.put("list",list);
-        map.put("pageVO",pageVO);
+    public Map<String, Object> Gullist(@RequestParam int page, @RequestParam String category) {
+        List<PostVO> list = GullService.getPostList(page, category);
+        PageVO pageVO = GullService.getPage(page, category);
+        Map<String, Object> map = new HashMap<>();
+        map.put("list", list);
+        map.put("pageVO", pageVO);
         return map;
     }
 
@@ -41,9 +40,9 @@ public class GullController {
     public Map<String, Object> GullDetail(@RequestParam int no) {
         Post post = GullService.getPost(no);
         List<ReplyVO> replyList = GullService.getReplyList(no);
-        Map<String,Object> map = new HashMap<>();
-        map.put("post",post);
-        map.put("replyList",replyList);
+        Map<String, Object> map = new HashMap<>();
+        map.put("post", post);
+        map.put("replyList", replyList);
         return map;
     }
 }

@@ -13,6 +13,6 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> findAllByCategoryOrderByIndateDesc(String category, Pageable pageable);
-    int CountByCategory(String category);
+    int countByCategory(String category);
     Optional<Post> findByNo(long no);
 }
