@@ -14,7 +14,7 @@ public interface If_GullService {
 
     PageVO getPage(int page, String category);
 
-    Post getPost(int no);
+    PostVO getPost(int no);
 
     List<ReplyVO> getReplyList(int no);
 }

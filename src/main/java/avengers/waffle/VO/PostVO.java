@@ -15,4 +15,7 @@ public class PostVO {
     private String name;
     private LocalDateTime indate;
     private int count;
+    private String[] fileUrl;
+    private int likeCount;
+
 }
