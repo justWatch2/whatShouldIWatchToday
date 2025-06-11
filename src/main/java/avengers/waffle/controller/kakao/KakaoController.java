@@ -3,7 +3,7 @@ package avengers.waffle.controller.kakao;
 import avengers.waffle.VO.kakao.KakaoDTO;
 import avengers.waffle.VO.kakao.UuidDTO;
 import avengers.waffle.configuration.security.oauth2.JwtProperties;
-import avengers.waffle.service.kakao.KakaoService;
+import avengers.waffle.service.IF.kakao.IF_KakaoService;
 import avengers.waffle.utils.GetMemberId;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -23,7 +23,7 @@ import java.util.UUID;
 @Controller
 @RequiredArgsConstructor
 public class KakaoController {
-    private final KakaoService kakaoService;
+    private final IF_KakaoService kakaoService;
     private final JwtProperties jwtProperties;
     private final GetMemberId getMemberId;
 
