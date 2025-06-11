@@ -10,7 +10,7 @@ import lombok.Getter;
 public class MovieSearch {
     private String title;
     private String genres;
-    private String years;
+    private String[] years;
     private boolean adult;
     private boolean korea;
     private boolean korean;

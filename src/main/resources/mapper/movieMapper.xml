@@ -5,7 +5,7 @@
 <mapper namespace="avengers.waffle.mapper.MovieMapper">
     <select id="search" parameterType="avengers.waffle.VO.MovieSearch" resultType="avengers.waffle.VO.MovieSearchResultVO">
         select id,poster_path,imdb_id,overview,korean_title,title
-        from movies partition (${years})
+        from movies
         WHERE
         <if test="korea">
             original_language='ko' and
@@ -21,8 +21,21 @@
             <if test="genres!=null and genres!=''">
                 and MATCH(genres) AGAINST(#{genres} IN BOOLEAN MODE)
             </if>
-
+        and
+        <foreach item="year" collection="years" separator="or" open="(" close=")">
+            <choose>
+                <when test="year=='future'">
+                    release_date <![CDATA[>]]> 2030
+                </when>
+                <when test="year=='1990'">
+                    release_date <![CDATA[<]]> 2000
+                </when>
+                <otherwise>
+                    YEAR(release_date) BETWEEN ${year} AND ${year}+10
+                </otherwise>
+            </choose>
+        </foreach>
+        order by release_date desc
         limit 20;
     </select>
-
 </mapper>
