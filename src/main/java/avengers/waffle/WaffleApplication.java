@@ -9,6 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication
 @MapperScan("avengers.waffle.mapper")
+@EnableJpaAuditing
 public class WaffleApplication {
 
     @Bean

@@ -2,7 +2,7 @@ package avengers.waffle.configuration.security.auth;
 
 
 
-import avengers.waffle.entity.MovieMember;
+import avengers.waffle.entity.Member;
 import avengers.waffle.repository.MovieMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,7 +18,7 @@ public class PrincipalDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String memberId) throws UsernameNotFoundException {
-        MovieMember userEntity = movieMemberRepository.findByMemberId(memberId);
+        Member userEntity = movieMemberRepository.findByMemberId(memberId);
 
         if (userEntity == null) {
             throw new UsernameNotFoundException("해당 사용자를 찾을 수 없습니다: " + memberId);

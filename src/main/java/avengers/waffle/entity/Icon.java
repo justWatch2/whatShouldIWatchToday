@@ -1,29 +1,27 @@
 package avengers.waffle.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @Getter
+@Setter
 @Table(name = "icon")
+@Builder
+@AllArgsConstructor
 public class Icon implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "icon_num", length = 2)
-    private int iconNum;
+    @Column(name = "no", length = 10)
+    private int iconNo;
 
     @Column(name = "img_url", length = 70)
     private String imgUrl;
 
-    @Builder(toBuilder = true)
-    public Icon(String imgUrl) {
-        this.imgUrl = imgUrl;
-    }
-
+    @OneToOne
+    @JoinColumn(name="member_id", referencedColumnName = "member_id", nullable = false)
+    private Member member;
 }

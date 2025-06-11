@@ -2,7 +2,7 @@ package avengers.waffle.configuration.security.jwt;
 
 import avengers.waffle.configuration.security.auth.PrincipalDetails;
 import avengers.waffle.configuration.security.oauth2.JwtProperties;
-import avengers.waffle.entity.MovieMember;
+import avengers.waffle.entity.Member;
 import avengers.waffle.repository.MovieMemberRepository;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -11,7 +11,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -82,7 +81,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             System.out.println(" 인가쪽 제대로 시행된다는거지");
             System.out.println("memberId = " + memberId);
             // 이부분에서 username이 db에 있으면 찾아지는거니까 인증이됨
-            MovieMember userEntity = movieMemberRepository.findByMemberId(memberId);
+            Member userEntity = movieMemberRepository.findByMemberId(memberId);
 
             PrincipalDetails principalDetails = new PrincipalDetails(userEntity);
 

@@ -40,7 +40,7 @@ public class GullServiceImpl implements If_GullService {
             postVOs.add(PostVO.builder()
                     .no(post.getNo())
                     .title(post.getTitle())
-                    .name(post.getMovieMember().getMemberName())
+                    .name(post.getMember().getMemberName())
                     .indate(post.getIndate())
                     .count(post.getCount())
                     .build()
@@ -61,7 +61,6 @@ public class GullServiceImpl implements If_GullService {
     public PostVO getPost(int no) {
         Optional<Post> optional = postRepository.findByNo(no);
         List<attachMapping> attachs = postAttachRepository.findAllByPost_no(no);
-        String[]
         for(attachMapping mapping : attachs) {
 
         }
@@ -69,7 +68,7 @@ public class GullServiceImpl implements If_GullService {
             Post post = optional.get();
             PostVO pvo = PostVO.builder()
                     .title(post.getTitle())
-                    .name(post.getMovieMember().getMemberName())
+                    .name(post.getMember().getMemberName())
                     .indate(post.getIndate())
                     .count(post.getCount())
                     .likeCount(post.getLikeCount())
@@ -87,7 +86,7 @@ public class GullServiceImpl implements If_GullService {
         for (Reply reply : replies) {
             ReplyVO replyVO = ReplyVO.builder()
                     .no((int) reply.getReplyNum())
-                    .memberId(reply.getMovieMember().getMemberId())
+                    .memberId(reply.getMember().getMemberId())
                     .content(reply.getContents())
                     .time(String.valueOf(reply.getIndate()))
                     .likeCount(reply.getLikeCount())

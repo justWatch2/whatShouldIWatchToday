@@ -4,7 +4,7 @@ package avengers.waffle.configuration.security.oauth2;
 import avengers.waffle.configuration.security.auth.PrincipalDetails;
 
 import avengers.waffle.configuration.security.oauth2.provider.*;
-import avengers.waffle.entity.MovieMember;
+import avengers.waffle.entity.Member;
 import avengers.waffle.repository.MovieMemberRepository;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -63,9 +63,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
 
         //db에 유저정보가 있는지 확인
-        MovieMember user = movieMemberRepository.findByMemberId(memberId);
+        Member user = movieMemberRepository.findByMemberId(memberId);
         if (user == null) {
-            user = MovieMember.builder()
+            user = Member.builder()
                     .memberId(memberId)
                     .memberPw("") // 소셜 로그인은 비번 없음
                     .roles(role)

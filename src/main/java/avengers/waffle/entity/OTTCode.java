@@ -4,17 +4,17 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 
 @Entity
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @Getter
+@Setter
 @Table(name = "OTT_code")
+@Builder
+@AllArgsConstructor
 public class OTTCode  implements Serializable {
 
     @Id
@@ -24,9 +24,4 @@ public class OTTCode  implements Serializable {
     @Column(name = "OTT_name" ,length = 20)
     private String OTTName;
 
-    @Builder(toBuilder = true)
-    public OTTCode(int code, String OTTName) {
-        this.code = code;
-        this.OTTName = OTTName;
-    }
 }
