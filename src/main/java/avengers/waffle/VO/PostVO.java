@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder(toBuilder = true)
@@ -15,7 +16,7 @@ public class PostVO {
     private String name;
     private LocalDateTime indate;
     private int count;
-    private String[] fileUrl;
+    private List<String> fileUrl;
     private int likeCount;
 
 }

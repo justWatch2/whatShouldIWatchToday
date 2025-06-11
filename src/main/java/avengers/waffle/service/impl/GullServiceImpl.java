@@ -61,8 +61,9 @@ public class GullServiceImpl implements If_GullService {
     public PostVO getPost(int no) {
         Optional<Post> optional = postRepository.findByNo(no);
         List<attachMapping> attachs = postAttachRepository.findAllByPost_no(no);
+        List<String> attachments = new ArrayList<>();
         for(attachMapping mapping : attachs) {
-
+            attachments.add(mapping.getFileUrl());
         }
         if (optional.isPresent()) {
             Post post = optional.get();
@@ -72,9 +73,9 @@ public class GullServiceImpl implements If_GullService {
                     .indate(post.getIndate())
                     .count(post.getCount())
                     .likeCount(post.getLikeCount())
-                    .fileUrl()
+                    .fileUrl(attachments)
                     .build();
-
+            return pvo;
         }
         return null;
     }
