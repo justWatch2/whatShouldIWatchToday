@@ -8,8 +8,7 @@ import avengers.waffle.configuration.security.jwt.JwtAuthenticationFilter;
 import avengers.waffle.configuration.security.jwt.JwtAuthorizationFilter;
 import avengers.waffle.configuration.security.oauth2.CustomOAuth2UserService;
 import avengers.waffle.configuration.security.oauth2.JwtProperties;
-import avengers.waffle.repository.MovieMemberRepository;
-import jakarta.servlet.http.HttpServletResponse;
+import avengers.waffle.repository.posts.MovieMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -79,8 +78,10 @@ public class SecurityConfig {
 
                                 .requestMatchers("/api/auth/refresh", "/css/**", "/js/**", "/images/**", "/join", "/api/join","/friend/**","/recommend/**").permitAll() // 로그인 페이지, 정적 파일은 모두 허용
                                 .requestMatchers("/").permitAll() // 기본 홈 페이지도 허용
-                                .anyRequest().authenticated() // 나머지 요청은 인증이 필요
-                        //             .anyRequest().permitAll()  이건 가장마지막에 위치해야된다.
+                                .requestMatchers("*").permitAll()
+                                .requestMatchers("/*").permitAll()
+                            //    .anyRequest().authenticated() // 나머지 요청은 인증이 필요
+                                .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
                                 .userInfoEndpoint(userInfo -> userInfo
