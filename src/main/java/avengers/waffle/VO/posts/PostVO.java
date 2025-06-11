@@ -1,4 +1,4 @@
-package avengers.waffle.VO;
+package avengers.waffle.VO.posts;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
