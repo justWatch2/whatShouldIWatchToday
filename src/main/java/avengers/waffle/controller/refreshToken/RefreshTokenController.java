@@ -1,9 +1,9 @@
 package avengers.waffle.controller.refreshToken;
 
-import avengers.waffle.VO.MemberVO;
+import avengers.waffle.VO.security.MemberVO;
 import avengers.waffle.configuration.security.oauth2.JwtProperties;
 import avengers.waffle.entity.Member;
-import avengers.waffle.repository.MovieMemberRepository;
+import avengers.waffle.repository.posts.MovieMemberRepository;
 import avengers.waffle.utils.GetMemberId;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
