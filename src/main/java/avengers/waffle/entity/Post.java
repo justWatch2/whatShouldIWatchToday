@@ -4,20 +4,18 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-<<<<<<< HEAD
-=======
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
->>>>>>> 717ac2530a1f92c433767ce7361f6046b03b8ead
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
 @NoArgsConstructor
 @Getter
 @Table(name = "post")
-public class Post extends BaseEntity implements Serializable { // 게시글
+public class Post implements Serializable { // 게시글
     @Id
     @Column(name = "no")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,17 +30,10 @@ public class Post extends BaseEntity implements Serializable { // 게시글
 
     @Column(name = "title", nullable = false, length = 50) // 제목
     private String title;
-<<<<<<< HEAD
-//    @Column(name = "indate", nullable = false) // 날짜
-//    @LastModifiedDate
-//    @CreatedDate
-//    private LocalDateTime indate;
-=======
     @Column(name = "indate", nullable = false) // 날짜
     @LastModifiedDate
     @CreatedDate
     private LocalDateTime indate;
->>>>>>> 717ac2530a1f92c433767ce7361f6046b03b8ead
     @Lob
     @Column(name = "contents", nullable = false, length = 256) // 내용
     private String contents;
@@ -52,11 +43,13 @@ public class Post extends BaseEntity implements Serializable { // 게시글
     private int likeCount;
 
     @Builder(toBuilder = true)
-    public Post(long no, String category, MovieMember movieMember, String title, String contents, int count, int likeCount) {
+
+    public Post(long no, String category, MovieMember movieMember, String title, LocalDateTime indate, String contents, int count, int likeCount) {
         this.no = no;
         this.category = category;
         this.movieMember = movieMember;
         this.title = title;
+        this.indate = indate;
         this.contents = contents;
         this.count = count;
         this.likeCount = likeCount;
