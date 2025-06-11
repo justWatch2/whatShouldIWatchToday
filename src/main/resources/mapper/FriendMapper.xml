@@ -12,9 +12,9 @@
         COUNT(DISTINCT mv.id) AS numViewedMovie,
         icon.img_url AS icon
         FROM movie_member mm
-        LEFT JOIN movie_wish mw ON mw.member_id = mm.member_id
-        LEFT JOIN member_viewlist mv ON mv.member_id = mm.member_id
-        LEFT JOIN icon on mm.icon_num = icon.icon_num
+        JOIN movie_wish mw ON mw.member_id = mm.member_id
+        JOIN member_viewlist mv ON mv.member_id = mm.member_id
+        JOIN icon on mm.icon_num = icon.icon_num
         WHERE mm.member_id IN
         <foreach item="id" collection="list" open="(" separator="," close=")">
             #{id}
@@ -47,7 +47,7 @@
                  SELECT keywords_id
                  FROM keyword_counts
                  ORDER BY cnt DESC
-            LIMIT 2
+                 LIMIT 2
             ),
             movies_with_keywords AS (
         SELECT mk.id AS movie_id,

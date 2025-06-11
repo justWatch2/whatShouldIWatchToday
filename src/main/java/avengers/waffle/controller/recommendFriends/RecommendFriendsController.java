@@ -24,14 +24,6 @@ public class RecommendFriendsController {
     private final RecommendFriendsService recommendFriendsService;
     private final GetMemberId getMemberId;
 
-    @PostMapping("/api/frineds/match")
-    public ResponseEntity<String> match(HttpServletRequest request) {
-
-
-        log.info("dd");
-
-        return ResponseEntity.ok().build();
-    }
 
     @GetMapping("/friend/getList")
     public ResponseEntity<List<RecommendFriendsInfoDTO>> getFriendList() {
