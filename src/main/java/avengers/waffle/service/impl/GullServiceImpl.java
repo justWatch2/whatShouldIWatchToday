@@ -2,18 +2,29 @@ package avengers.waffle.service.impl;
 
 import avengers.waffle.VO.PageVO;
 import avengers.waffle.VO.PostVO;
+<<<<<<< HEAD
+import avengers.waffle.entity.MovieMember;
+import avengers.waffle.entity.Post;
+import avengers.waffle.entity.PostAttach;
+import avengers.waffle.repository.PostAttachRepository;
+import avengers.waffle.repository.PostJpaRepository;
+=======
 import avengers.waffle.VO.ReplyVO;
 import avengers.waffle.entity.Post;
 import avengers.waffle.entity.Reply;
 import avengers.waffle.repository.PostRepository;
 import avengers.waffle.repository.ReplyRepository;
+>>>>>>> 717ac2530a1f92c433767ce7361f6046b03b8ead
 import avengers.waffle.service.If_GullService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,18 +32,27 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class GullServiceImpl implements If_GullService {
+<<<<<<< HEAD
+    private final PostJpaRepository postRepository;
+    private final PostAttachRepository postAttachRepository;
+    private PageVO pageVO = new PageVO();
+=======
     private final PostRepository postRepository;
     private final ReplyRepository replyRepository;
+>>>>>>> 717ac2530a1f92c433767ce7361f6046b03b8ead
+
+
 
 
     @Override
     public List<PostVO> getPostList(int page, String category) {
-        Pageable pageable = PageRequest.of(page, 20);
+        Pageable pageable = PageRequest.of(page-1, 20);
         Page<Post> posts = postRepository.findAllByCategoryOrderByIndateDesc(category,pageable);
 //        pageVO.setPage(page);
 //        int totalCount = postRepository.countByCategory(category);
 //        pageVO.setTotalCount(totalCount);
         List<PostVO> postVOs = new ArrayList<>();
+
         for (Post post : posts) {
             postVOs.add(PostVO.builder()
                     .no(post.getNo())
@@ -43,6 +63,7 @@ public class GullServiceImpl implements If_GullService {
                     .build()
             );
         }
+
         return postVOs;
     }
 
@@ -54,6 +75,18 @@ public class GullServiceImpl implements If_GullService {
         return pageVO;
     }
 
+<<<<<<< HEAD
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Override
+    public void addPost(PostVO postVO, String[] fileUrl) throws IOException {
+        Post post = Post.builder()
+                .title(postVO.getTitle())
+                .category(postVO.getCategory())
+                .contents(postVO.getContents())
+                .movieMember(MovieMember.builder().memberId(postVO.getMemberId()).build())
+                .build();
+        postRepository.save(post);
+=======
     @Override
     public Post getPost(int no) {
         Optional<Post> optional = postRepository.findByNo(no);
@@ -80,5 +113,10 @@ public class GullServiceImpl implements If_GullService {
         return replyVOs;
     }
 
+>>>>>>> 717ac2530a1f92c433767ce7361f6046b03b8ead
 
+        for (String fileUrl1 : fileUrl) {
+            postAttachRepository.save(new PostAttach(post,fileUrl1));
+        }
+    }
 }
