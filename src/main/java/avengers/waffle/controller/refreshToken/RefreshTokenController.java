@@ -2,7 +2,7 @@ package avengers.waffle.controller.refreshToken;
 
 import avengers.waffle.VO.MemberVO;
 import avengers.waffle.configuration.security.oauth2.JwtProperties;
-import avengers.waffle.entity.MovieMember;
+import avengers.waffle.entity.Member;
 import avengers.waffle.repository.MovieMemberRepository;
 import avengers.waffle.utils.GetMemberId;
 import com.auth0.jwt.JWT;
@@ -184,13 +184,13 @@ public class RefreshTokenController {
     @PostMapping("/api/join")
     public String join(@RequestBody MemberVO user) {
         System.out.println("잘하자");
-        MovieMember movieMember = MovieMember.builder()
+        Member member = Member.builder()
                 .memberId(user.getMemberId())
                 .memberPw(bCryptPasswordEncoder.encode(user.getMemberPw())) // 소셜 로그인은 비번 없음
                 .roles("ROLE_USER")
                 .build();
 
-        movieMemberRepository.save(movieMember);
+        movieMemberRepository.save(member);
         return "redirect:/";
     }
 

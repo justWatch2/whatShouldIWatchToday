@@ -38,7 +38,7 @@ public class GullController {
     @GetMapping("/api/GullDetail")
     @ResponseBody
     public Map<String, Object> GullDetail(@RequestParam int no) {
-        Post post = GullService.getPost(no);
+        PostVO post = GullService.getPost(no);
         List<ReplyVO> replyList = GullService.getReplyList(no);
         Map<String, Object> map = new HashMap<>();
         map.put("post", post);

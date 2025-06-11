@@ -1,20 +1,13 @@
 package avengers.waffle.service.kakao;
 
-import avengers.waffle.VO.kakao.KakaoDTO;
-import avengers.waffle.entity.MovieMember;
+import avengers.waffle.entity.Member;
 import avengers.waffle.repository.MovieMemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -69,7 +62,7 @@ public class KakaoService {
 
         // 3. 나랑 친구가 되어 있는지 그친구가 나랑 친구 되어 있는지 체크
         // 우선 초대한사람 아이디 있는지 부터 체크후
-        MovieMember inviter = movieMemberRepository.findByMemberId(inviterId);
+        Member inviter = movieMemberRepository.findByMemberId(inviterId);
         if (inviter == null) {
             System.out.println(" 초대한 사람이 없어요!!");
             stringRedisTemplate.delete(redisKey);
@@ -90,7 +83,7 @@ public class KakaoService {
         inviter.getFriendList().add(memberId);
         movieMemberRepository.save(inviter);
         //초대받은 친구 목록에 추가
-        MovieMember member = movieMemberRepository.findByMemberId(memberId);
+        Member member = movieMemberRepository.findByMemberId(memberId);
         member.getFriendList().add(inviterId);
         movieMemberRepository.save(member);
 

@@ -1,7 +1,7 @@
 package avengers.waffle.configuration.security.auth;
 
 
-import avengers.waffle.entity.MovieMember;
+import avengers.waffle.entity.Member;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -10,17 +10,17 @@ import java.util.*;
 
 public class PrincipalDetails implements UserDetails, OAuth2User {
 
-    private final MovieMember movieMember;
+    private final Member member;
     private Map<String, Object> attributes;
 
     // 일반 로그인용 생성자
-    public PrincipalDetails(MovieMember movieMember) {
-        this.movieMember = movieMember;
+    public PrincipalDetails(Member member) {
+        this.member = member;
     }
 
     // OAuth2 로그인용 생성자
-    public PrincipalDetails(MovieMember movieMember, Map<String, Object> attributes) {
-        this.movieMember = movieMember;
+    public PrincipalDetails(Member member, Map<String, Object> attributes) {
+        this.member = member;
         this.attributes = attributes;
     }
 
@@ -28,8 +28,8 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
-        if (movieMember.getRoleList() != null) {
-            movieMember.getRoleList().forEach(role -> authorities.add(() -> role));
+        if (member.getRoleList() != null) {
+            member.getRoleList().forEach(role -> authorities.add(() -> role));
         }
         return authorities;
     }
@@ -37,13 +37,13 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
     // 비밀번호
     @Override
     public String getPassword() {
-        return movieMember.getMemberPw();
+        return member.getMemberPw();
     }
 
     // 사용자 id
     @Override
     public String getUsername() {
-        return movieMember.getMemberId();
+        return member.getMemberId();
     }
 
     // 계정 만료 여부
@@ -79,11 +79,11 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
     @Override
     public String getName() {
         // unique한 사용자 식별자 (보통 providerId 또는 username 사용)
-        return movieMember.getMemberName();
+        return member.getMemberName();
     }
 
     // 추가로 사용자 객체 반환이 필요한 경우
-    public MovieMember getUser() {
-        return movieMember;
+    public Member getUser() {
+        return member;
     }
 }

@@ -1,9 +1,7 @@
 package avengers.waffle.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import org.hibernate.annotations.Type;
 import com.vladmihalcea.hibernate.type.json.JsonType;
@@ -17,8 +15,11 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @Getter
-@Table(name = "movie_member")
-public class MovieMember implements Serializable {
+@Setter
+@Builder
+@AllArgsConstructor
+@Table(name = "member")
+public class Member implements Serializable{
     @Id
     @Column(name = "member_id" , length = 100)
     private String memberId;
@@ -38,10 +39,9 @@ public class MovieMember implements Serializable {
     @Column(name = "roles", length = 15)
     private String roles;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="icon_num")
-    private Icon iconNum;
-
+    @OneToOne
+    @JoinColumn(name="icon_num" , referencedColumnName = "no")
+    private Icon icon;
 
     @Type(JsonType.class)
     @Column(name = "friend_list" , columnDefinition = "JSON")
@@ -50,19 +50,6 @@ public class MovieMember implements Serializable {
     @Type(JsonType.class)
     @Column(name = "OTT_list" , columnDefinition = "JSON")
     private List<String> OTTList;
-
-    @Builder(toBuilder = true)
-    public MovieMember(String memberId, String memberPw, String memberName, String provider, String providerId, String roles, Icon iconNum, List<String> friendList, List<String> OTTList) {
-        this.memberId = memberId;
-        this.memberPw = memberPw;
-        this.memberName = memberName;
-        this.provider = provider;
-        this.providerId = providerId;
-        this.roles = roles;
-        this.iconNum = iconNum;
-        this.friendList = friendList;
-        this.OTTList = OTTList;
-    }
 
     public List<String> getRoleList(){           //role이 여러개 있을 경우 이런식으로 만들어 둔다. 하나만 있으면 안만들어도 된다.
         if (!this.roles.isEmpty()){

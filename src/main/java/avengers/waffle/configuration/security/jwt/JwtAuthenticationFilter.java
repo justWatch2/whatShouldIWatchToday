@@ -3,7 +3,7 @@ package avengers.waffle.configuration.security.jwt;
 import avengers.waffle.configuration.security.auth.PrincipalDetails;
 
 import avengers.waffle.configuration.security.oauth2.JwtProperties;
-import avengers.waffle.entity.MovieMember;
+import avengers.waffle.entity.Member;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
@@ -48,7 +48,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         try {
             //username, password 받아서 처리한다.
             ObjectMapper mapper = new ObjectMapper();
-            MovieMember user = mapper.readValue(request.getInputStream(), MovieMember.class);
+            Member user = mapper.readValue(request.getInputStream(), Member.class);
 
 //            if (stringRedisTemplate.opsForValue().get(user.getMemberId()) != null){
 //                System.out.println(" 들어오는지 확인!!" );

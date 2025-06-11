@@ -5,8 +5,10 @@ import avengers.waffle.VO.PostVO;
 import avengers.waffle.VO.ReplyVO;
 import avengers.waffle.entity.Post;
 import avengers.waffle.entity.Reply;
+import avengers.waffle.repository.PostAttachRepository;
 import avengers.waffle.repository.PostRepository;
 import avengers.waffle.repository.ReplyRepository;
+import avengers.waffle.repository.mapping.attachMapping;
 import avengers.waffle.service.If_GullService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,6 +25,7 @@ import java.util.Optional;
 public class GullServiceImpl implements If_GullService {
     private final PostRepository postRepository;
     private final ReplyRepository replyRepository;
+    private final PostAttachRepository postAttachRepository;
 
 
     @Override
@@ -37,7 +40,7 @@ public class GullServiceImpl implements If_GullService {
             postVOs.add(PostVO.builder()
                     .no(post.getNo())
                     .title(post.getTitle())
-                    .name(post.getMovieMember().getMemberName())
+                    .name(post.getMember().getMemberName())
                     .indate(post.getIndate())
                     .count(post.getCount())
                     .build()
@@ -55,10 +58,24 @@ public class GullServiceImpl implements If_GullService {
     }
 
     @Override
-    public Post getPost(int no) {
+    public PostVO getPost(int no) {
         Optional<Post> optional = postRepository.findByNo(no);
+        List<attachMapping> attachs = postAttachRepository.findAllByPost_no(no);
+        List<String> attachments = new ArrayList<>();
+        for(attachMapping mapping : attachs) {
+            attachments.add(mapping.getFileUrl());
+        }
         if (optional.isPresent()) {
-            return optional.get();
+            Post post = optional.get();
+            PostVO pvo = PostVO.builder()
+                    .title(post.getTitle())
+                    .name(post.getMember().getMemberName())
+                    .indate(post.getIndate())
+                    .count(post.getCount())
+                    .likeCount(post.getLikeCount())
+                    .fileUrl(attachments)
+                    .build();
+            return pvo;
         }
         return null;
     }
@@ -70,7 +87,7 @@ public class GullServiceImpl implements If_GullService {
         for (Reply reply : replies) {
             ReplyVO replyVO = ReplyVO.builder()
                     .no((int) reply.getReplyNum())
-                    .memberId(reply.getMovieMember().getMemberId())
+                    .memberId(reply.getMember().getMemberId())
                     .content(reply.getContents())
                     .time(String.valueOf(reply.getIndate()))
                     .likeCount(reply.getLikeCount())

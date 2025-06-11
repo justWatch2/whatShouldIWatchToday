@@ -1,10 +1,8 @@
 package avengers.waffle.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -14,8 +12,11 @@ import java.time.LocalDateTime;
 @Entity
 @NoArgsConstructor
 @Getter
+@Setter
 @Table(name = "post")
-public class Post implements Serializable { // 게시글
+@Builder
+@AllArgsConstructor
+public class Post extends BaseEntity implements Serializable { // 게시글
     @Id
     @Column(name = "no")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,32 +27,20 @@ public class Post implements Serializable { // 게시글
 
     @ManyToOne
     @JoinColumn(name = "member_id", referencedColumnName = "member_id", nullable = false) // 작성자 아이디
-    MovieMember movieMember;
+    Member member;
 
     @Column(name = "title", nullable = false, length = 50) // 제목
     private String title;
-    @Column(name = "indate", nullable = false) // 날짜
-    @LastModifiedDate
-    @CreatedDate
-    private LocalDateTime indate;
-    @Lob
-    @Column(name = "contents", nullable = false, length = 256) // 내용
+
+    @Column(name = "contents", nullable = false, columnDefinition = "TEXT") // 내용
     private String contents;
+
     @Column(name = "count", nullable = false, length = 5) // 조회수
+    @ColumnDefault("0")
     private int count;
+
     @Column(name = "like_count", nullable = false, length = 5) // 좋아요
+    @ColumnDefault("0")
     private int likeCount;
 
-    @Builder(toBuilder = true)
-
-    public Post(long no, String category, MovieMember movieMember, String title, LocalDateTime indate, String contents, int count, int likeCount) {
-        this.no = no;
-        this.category = category;
-        this.movieMember = movieMember;
-        this.title = title;
-        this.indate = indate;
-        this.contents = contents;
-        this.count = count;
-        this.likeCount = likeCount;
-    }
 }

@@ -1,7 +1,7 @@
 package avengers.waffle.configuration.security.controller;
 
 import avengers.waffle.configuration.security.auth.PrincipalDetails;
-import avengers.waffle.entity.MovieMember;
+import avengers.waffle.entity.Member;
 import avengers.waffle.repository.MovieMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -43,14 +43,14 @@ public class UserController {
 
 
     @PostMapping("/join")
-    public String join(@RequestBody MovieMember user){
-        MovieMember movieMember = new MovieMember();
-        movieMember = MovieMember.builder()
+    public String join(@RequestBody Member user){
+        Member member = new Member();
+        member = Member.builder()
                 .memberId(user.getMemberId())
                 .memberPw(bCryptPasswordEncoder.encode(user.getMemberPw())) // 소셜 로그인은 비번 없음
                 .roles("ROLE_USER")
                 .build();
-        movieMemberRepository.save(movieMember);
+        movieMemberRepository.save(member);
         return "redirect:/";
     }
 
