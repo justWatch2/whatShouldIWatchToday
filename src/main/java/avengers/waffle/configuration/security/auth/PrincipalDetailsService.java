@@ -3,7 +3,7 @@ package avengers.waffle.configuration.security.auth;
 
 
 import avengers.waffle.entity.Member;
-import avengers.waffle.repository.MovieMemberRepository;
+import avengers.waffle.repository.posts.MovieMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

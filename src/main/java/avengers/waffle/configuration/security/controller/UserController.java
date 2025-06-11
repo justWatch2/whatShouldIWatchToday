@@ -2,7 +2,7 @@ package avengers.waffle.configuration.security.controller;
 
 import avengers.waffle.configuration.security.auth.PrincipalDetails;
 import avengers.waffle.entity.Member;
-import avengers.waffle.repository.MovieMemberRepository;
+import avengers.waffle.repository.posts.MovieMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
