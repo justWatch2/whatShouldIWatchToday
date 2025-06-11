@@ -12,6 +12,7 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -74,6 +75,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             movieMemberRepository.save(user);
         }
 
-        return (OAuth2User) new PrincipalDetails(user, oAuth2User.getAttributes());
+        // 카카오서버 자체에서 오는 accessToken 저장하기
+        Map<String, Object> attributes = new HashMap<>(oAuth2User.getAttributes());
+        String accessToken = userRequest.getAccessToken().getTokenValue();
+        attributes.put("access_token", accessToken);
+        System.out.println("-------------------------------accessToken = " + accessToken);
+
+
+        return (OAuth2User) new PrincipalDetails(user, attributes);
     }
 }

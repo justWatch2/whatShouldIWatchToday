@@ -31,9 +31,11 @@ public class    OAuth2SuccessHandler implements AuthenticationSuccessHandler {
                                         Authentication authentication) throws IOException {
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
+        String username = principalDetails.getUsername();
+
         String jwtToken = JWT.create()
-                .withSubject(principalDetails.getUsername())
-                .withClaim("memberId", principalDetails.getUsername())
+                .withSubject(username)
+                .withClaim("memberId", username)
                 .withExpiresAt(new Date(System.currentTimeMillis() + jwtProperties.getExpirationTime()))
                 .sign(Algorithm.HMAC512(jwtProperties.getSecret()));
 
@@ -42,7 +44,7 @@ public class    OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String refreshToken = JWT.create()
                 .withExpiresAt(new Date(System.currentTimeMillis() + (1000L * 60 * 60 * 24 * 14)))  //14일
 //                .withExpiresAt(new Date(System.currentTimeMillis() + (jwtProperties.getExpirationTime() * 5L)))  //5분
-                .withClaim("memberId", principalDetails.getUsername())
+                .withClaim("memberId", username)
                 .sign(Algorithm.HMAC512(jwtProperties.getSecret()));
 
         // refresh Token 쿠키로 보내는 부분
@@ -61,11 +63,19 @@ public class    OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         //3 .httpOnly(true)면 JavaScript에서는 못 읽지만, 브라우저가 자동으로 쿠키를 전송함
 
         // refresh Token redis에 저장
-        stringRedisTemplate.opsForValue().set(principalDetails.getUsername(), refreshToken, 14, TimeUnit.DAYS);
+        stringRedisTemplate.opsForValue().set(username, refreshToken, 14, TimeUnit.DAYS);
 
         //Key:   username
         //Value: abcd1234...  (실제 JWT 리프레시 토큰)
         //TTL:   14일 (1209600초)    TimeUnit.DAYs -> 일 의미함!
+
+
+        // ✅ accessToken이 있으면 저장 (카카오 only)
+        if (principalDetails.getAttributes().get("access_token") != null) {
+            String kakaoAccessToken = (String) principalDetails.getAttributes().get("access_token");
+            // 일반적으로 카카오 accessToken은 6시간 유효
+            stringRedisTemplate.opsForValue().set(username + ":kakaoAccessToken", kakaoAccessToken, 6, TimeUnit.HOURS);
+        }
 
         System.out.println("cookie.toString() = " + cookie.toString());
         // 응답 헤더에 넣기 클라이언트도 가지고 있어야 되기 때문임

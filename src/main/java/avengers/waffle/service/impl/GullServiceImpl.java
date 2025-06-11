@@ -2,11 +2,19 @@ package avengers.waffle.service.impl;
 
 import avengers.waffle.VO.PageVO;
 import avengers.waffle.VO.PostVO;
+<<<<<<< HEAD
 import avengers.waffle.entity.MovieMember;
 import avengers.waffle.entity.Post;
 import avengers.waffle.entity.PostAttach;
 import avengers.waffle.repository.PostAttachRepository;
 import avengers.waffle.repository.PostJpaRepository;
+=======
+import avengers.waffle.VO.ReplyVO;
+import avengers.waffle.entity.Post;
+import avengers.waffle.entity.Reply;
+import avengers.waffle.repository.PostRepository;
+import avengers.waffle.repository.ReplyRepository;
+>>>>>>> 717ac2530a1f92c433767ce7361f6046b03b8ead
 import avengers.waffle.service.If_GullService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,13 +27,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class GullServiceImpl implements If_GullService {
+<<<<<<< HEAD
     private final PostJpaRepository postRepository;
     private final PostAttachRepository postAttachRepository;
     private PageVO pageVO = new PageVO();
+=======
+    private final PostRepository postRepository;
+    private final ReplyRepository replyRepository;
+>>>>>>> 717ac2530a1f92c433767ce7361f6046b03b8ead
 
 
 
@@ -61,6 +75,7 @@ public class GullServiceImpl implements If_GullService {
         return pageVO;
     }
 
+<<<<<<< HEAD
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Override
     public void addPost(PostVO postVO, String[] fileUrl) throws IOException {
@@ -71,6 +86,34 @@ public class GullServiceImpl implements If_GullService {
                 .movieMember(MovieMember.builder().memberId(postVO.getMemberId()).build())
                 .build();
         postRepository.save(post);
+=======
+    @Override
+    public Post getPost(int no) {
+        Optional<Post> optional = postRepository.findByNo(no);
+        if (optional.isPresent()) {
+            return optional.get();
+        }
+        return null;
+    }
+
+    @Override
+    public List<ReplyVO> getReplyList(int no) {
+        List<ReplyVO> replyVOs = new ArrayList<>();
+        List<Reply> replies = replyRepository.findAllByPost_No(no);
+        for (Reply reply : replies) {
+            ReplyVO replyVO = ReplyVO.builder()
+                    .no((int) reply.getReplyNum())
+                    .memberId(reply.getMovieMember().getMemberId())
+                    .content(reply.getContents())
+                    .time(String.valueOf(reply.getIndate()))
+                    .likeCount(reply.getLikeCount())
+                    .build();
+            replyVOs.add(replyVO);
+        }
+        return replyVOs;
+    }
+
+>>>>>>> 717ac2530a1f92c433767ce7361f6046b03b8ead
 
         for (String fileUrl1 : fileUrl) {
             postAttachRepository.save(new PostAttach(post,fileUrl1));

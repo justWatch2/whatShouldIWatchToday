@@ -69,4 +69,11 @@ public class MovieMember implements Serializable {
         }
         return new ArrayList<>();
     }
+
+    public List<String> getFriendList() {
+        if (this.friendList == null) {
+            this.friendList = new ArrayList<>();
+        }
+        return this.friendList;
+    }
 }

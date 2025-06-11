@@ -4,6 +4,7 @@ import avengers.waffle.VO.MemberVO;
 import avengers.waffle.configuration.security.oauth2.JwtProperties;
 import avengers.waffle.entity.MovieMember;
 import avengers.waffle.repository.MovieMemberRepository;
+import avengers.waffle.utils.GetMemberId;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -34,6 +35,7 @@ public class RefreshTokenController {
     private final StringRedisTemplate stringRedisTemplate;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final MovieMemberRepository movieMemberRepository;
+    private final GetMemberId getMemberId;
 
 
     @GetMapping("/api/protected/test")
@@ -152,23 +154,13 @@ public class RefreshTokenController {
 
         System.out.println("로그아웃을 위해서 authorizationHeader = " + authorizationHeader);
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Authorization header missing or invalid");
-        }
+        String memberId = getMemberId.getMemberId(authorizationHeader);
 
-        String token = authorizationHeader.substring(7); // "Bearer " 이후의 토큰 부분
-
-        String memberId;
-        try {
-            DecodedJWT jwt = JWT.require(Algorithm.HMAC512(jwtProperties.getSecret()))
-                    .build()
-                    .verify(token);
-
-            memberId = jwt.getClaim("memberId").asString();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token");
-        }
         stringRedisTemplate.delete(memberId);
+
+        //카카오톡 서버에서 받아온 자체 accessToken 도 삭제
+        String kakaoAccessToken = memberId + ":kakaoAccessToken";
+        stringRedisTemplate.delete(kakaoAccessToken);
 
         //기존 쿠키들도 삭제한다
         // 3-2.1: 기존 refreshToken 쿠키를 만료시킴

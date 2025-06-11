@@ -27,8 +27,6 @@ dependencies {
 
     implementation 'com.vladmihalcea:hibernate-types-60:2.21.1' // Hibernate 6.x
 
-    implementation 'mysql:mysql-connector-java:8.0.33'
-
 
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -60,6 +58,13 @@ dependencies {
 
     //redis설정을 위해서
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    //mariadb를 위해서
+//    implementation 'org.mariadb.jdbc:mariadb-java-client' // MariaDB JDBC 드라이버
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.4'  // 2025년 최신 버전 기준
+
+    //for mybatis
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
 
     //refreshToken 파싱을 위해서 사용할려고 했지만 토큰 만들떄 auth를 통해 만들었기때문에 통일을 위해서 사용하지 않음
     // 또한 현업에서는 auth라이브러리 많이 사용함.
