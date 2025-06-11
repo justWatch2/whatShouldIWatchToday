@@ -69,11 +69,12 @@ public class GullServiceImpl implements If_GullService {
             Post post = optional.get();
             PostVO pvo = PostVO.builder()
                     .title(post.getTitle())
-                    .name(post.getMember().getMemberName())
+                    .name(post.getMember().getMemberId())
                     .indate(post.getIndate())
                     .count(post.getCount())
                     .likeCount(post.getLikeCount())
                     .fileUrl(attachments)
+                    .contents(post.getContents())
                     .build();
             return pvo;
         }

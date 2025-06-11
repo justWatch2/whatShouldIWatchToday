@@ -57,7 +57,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
 
         // JwtAuthenticationFilter 설정
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, stringRedisTemplate,jwtProperties);
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, stringRedisTemplate, jwtProperties);
         jwtAuthenticationFilter.setFilterProcessesUrl("/api/login"); // <- 이거 안 하면 필터가 동작 안 함 +  클라이언트 쪽에서
         jwtAuthenticationFilter.setAuthenticationFailureHandler(customAuthenticationFailureHandler);
         //로그인을 할려고 /api/login으로 요청으로 보내면 필터가 작동할수 있도록 하는 메서드이다.
@@ -67,7 +67,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilter(jwtAuthenticationFilter)  // 이부분이 처음 로그인할때만 동작한다.
-                .addFilter(new JwtAuthorizationFilter(authenticationManager, movieMemberRepository , jwtProperties))
+                .addFilter(new JwtAuthorizationFilter(authenticationManager, movieMemberRepository, jwtProperties))
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint) // 401 예외처리부분 로그인 실패시
                 )
@@ -77,10 +77,10 @@ public class SecurityConfig {
                                 .requestMatchers("/manager/**").hasAnyRole("MANAGER", "ADMIN")  // 여러 권한중 하나만 있어도 허용
                                 .requestMatchers("/admin/**").hasRole("ADMIN")  //  특정 하나의 권한만 허용
 
-                                .requestMatchers("/api/auth/refresh", "/css/**", "/js/**", "/images/**", "/join", "/api/join","/friend/**","/recommend/**").permitAll() // 로그인 페이지, 정적 파일은 모두 허용
+                                .requestMatchers("/api/auth/refresh", "/css/**", "/js/**", "/images/**", "/join", "/api/join", "/friend/**", "/recommend/**").permitAll() // 로그인 페이지, 정적 파일은 모두 허용
                                 .requestMatchers("/").permitAll() // 기본 홈 페이지도 허용
-                                .anyRequest().authenticated() // 나머지 요청은 인증이 필요
-                        //             .anyRequest().permitAll()  이건 가장마지막에 위치해야된다.
+//                                .anyRequest().authenticated() // 나머지 요청은 인증이 필요
+                                .anyRequest().permitAll() // 이건 가장마지막에 위치해야된다.
                 )
                 .oauth2Login(oauth2 -> oauth2
                                 .userInfoEndpoint(userInfo -> userInfo

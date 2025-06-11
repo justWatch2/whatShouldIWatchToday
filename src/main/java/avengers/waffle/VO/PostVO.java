@@ -18,5 +18,6 @@ public class PostVO {
     private int count;
     private List<String> fileUrl;
     private int likeCount;
+    private String contents;
 
 }
