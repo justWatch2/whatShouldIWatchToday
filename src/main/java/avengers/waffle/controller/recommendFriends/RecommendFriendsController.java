@@ -35,6 +35,10 @@ public class RecommendFriendsController {
         String userId = "aa";
         List<RecommendFriendsInfoDTO> recommendFriendsInfoDTOList = recommendFriendsService.getFriendsInfo(userId);
 
+        // 잘들어갔는지 체크
+        recommendFriendsInfoDTOList.stream().forEach((recommendMoviesInfoDTO) -> {
+            System.out.println("recommendMoviesInfoDTO = " + recommendMoviesInfoDTO.getIcon());
+        });
         return  ResponseEntity.ok(recommendFriendsInfoDTOList);
     }
 
@@ -62,9 +66,12 @@ public class RecommendFriendsController {
         //드마가 아니라면 영화!
         List<RecommendMoviesInfoDTO> recommendMoviesInfoDTOList = recommendFriendsService.getMoviesInfo(userId, recommendRequestDTO);
 
+        //bfs로 영화 추천 로직
+        List<RecommendMoviesInfoDTO> result = recommendFriendsService.bfsRecommend(recommendMoviesInfoDTOList, 2, 50, 3);  // 영화 리스트, 깊이, 추천결과 개수
+
         //만약에 recommendMoviesInfoDTOList가 null 이라면 처리를 따로 장르로 다시 추천을 돌리던가 처리를 해줘야된다. 우선 대기
 
-        return ResponseEntity.ok(recommendMoviesInfoDTOList);
+        return ResponseEntity.ok(result);
     }
 
 
