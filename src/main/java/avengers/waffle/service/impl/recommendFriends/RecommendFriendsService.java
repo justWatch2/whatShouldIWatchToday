@@ -1,10 +1,10 @@
-package avengers.waffle.service.recommendFriends;
+package avengers.waffle.service.impl.recommendFriends;
 
 import avengers.waffle.VO.recommendFriends.RecommendFriendsInfoDTO;
 import avengers.waffle.VO.recommendFriends.RecommendMoviesInfoDTO;
 import avengers.waffle.VO.recommendFriends.RecommendRequestDTO;
 import avengers.waffle.mapper.FriendMapper;
-import avengers.waffle.repository.FriendsRepository;
+import avengers.waffle.repository.friends.FriendsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

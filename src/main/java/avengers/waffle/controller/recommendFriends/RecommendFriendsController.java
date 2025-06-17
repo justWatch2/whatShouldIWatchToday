@@ -3,10 +3,10 @@ package avengers.waffle.controller.recommendFriends;
 import avengers.waffle.VO.recommendFriends.RecommendFriendsInfoDTO;
 import avengers.waffle.VO.recommendFriends.RecommendMoviesInfoDTO;
 import avengers.waffle.VO.recommendFriends.RecommendRequestDTO;
+
 import avengers.waffle.service.IF.recommendFriends.IF_RecommendFriendsService;
 import avengers.waffle.utils.GetMemberId;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
