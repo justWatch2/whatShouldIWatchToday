@@ -21,7 +21,7 @@ public class MovieWishList implements Serializable {
     private int no;
 
     @ManyToOne
-    @JoinColumn(name="movie_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name="movies_id", referencedColumnName = "id", nullable = false)
     private Movies movies;
 
     @ManyToOne

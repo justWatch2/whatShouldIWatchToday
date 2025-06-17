@@ -81,8 +81,19 @@ public class    OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         // 응답 헤더에 넣기 클라이언트도 가지고 있어야 되기 때문임
         response.addHeader("Set-Cookie", cookie.toString());
 
+
+
+
+//        // 프론트엔드로 리다이렉트하면서 토큰 전달  그리고 3000으로해놨음 리엑트 서버떄문에
+//        String redirectUrl = "http://localhost:3000/?token=" + "Bearer " + jwtToken;
+
+
+        //Bearer 뒤에 한칸뛰어야 한다
+        response.addHeader("Authorization", "Bearer " + jwtToken);
+
+
         // 프론트엔드로 리다이렉트하면서 토큰 전달  그리고 3000으로해놨음 리엑트 서버떄문에
-        String redirectUrl = "http://localhost:3000/?token=" + "Bearer " + jwtToken;
+        String redirectUrl = "http://localhost:3000/";
 
         response.sendRedirect(redirectUrl);
     }
