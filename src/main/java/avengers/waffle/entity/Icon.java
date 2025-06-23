@@ -17,10 +17,10 @@ import java.io.Serializable;
 public class Icon implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "no", length = 10)
+    @Column(name = "icon_num", length = 10)
     private int iconNo;
 
-    @Column(name = "img_url", length = 70)
+    @Column(name = "img_url", length = 200)
     private String imgUrl;
 
     @OneToOne
