@@ -82,7 +82,7 @@ public class    OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         response.addHeader("Set-Cookie", cookie.toString());
 
         // 프론트엔드로 리다이렉트하면서 토큰 전달  그리고 3000으로해놨음 리엑트 서버떄문에
-        String redirectUrl = "http://localhost:3000/?token=" + "Bearer " + jwtToken;
+        String redirectUrl = "http://localhost:5173/?token=" + "Bearer " + jwtToken;
 
         response.sendRedirect(redirectUrl);
     }

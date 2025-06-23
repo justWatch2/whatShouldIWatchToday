@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 public abstract class BaseEntity {
 
-    @LastModifiedDate
+//    @LastModifiedDate
     @CreatedDate
     private LocalDateTime indate;
 

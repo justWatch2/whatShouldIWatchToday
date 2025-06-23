@@ -10,4 +10,10 @@ import java.util.List;
 @Repository
 public interface PostAttachRepository extends JpaRepository<PostAttach, Long> {
     List<attachMapping> findAllByPost_no(long no);
+
+    void deleteByPost_no(long postNo);
+
+    boolean existsByFileUrl(String existingFileUrl1);
+
+    void deleteByFileUrl(String existFile);
 }

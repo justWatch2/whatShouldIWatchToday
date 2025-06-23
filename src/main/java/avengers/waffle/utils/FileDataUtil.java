@@ -2,6 +2,8 @@ package avengers.waffle.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -30,14 +32,14 @@ public class FileDataUtil {
     };     //<-- 현재 코드는 활용하지는 않는다.. 얘는 선언이지 기능이 동작하지는 않는다. 절대 미리 예측 금지..
 
     //첨부파일 업로드 경로 변수값으로 가져옴 servlet-context.xml
-    private String uploadPath="/tmp";
+    private Path uploadPath = Paths.get("C:/Users/jooho/Desktop/upload");
 
-    public String getUploadPath() {
+    public Path getUploadPath() {
         return uploadPath;
     }
 
     public void setUploadPath(String uploadPath) {
-        this.uploadPath = uploadPath;
+        this.uploadPath = Path.of(uploadPath);
     }
 
     /**
@@ -61,6 +63,7 @@ public class FileDataUtil {
         String path = System.getProperty("user.dir");
         System.out.println("현재 작업 경로: " + path);
         String[] files = new String[file.length];
+        System.out.println(files.length);
         for(int i=0; i < file.length; i++) {
             if(file[i].getOriginalFilename()!="") {  // 실제 file객체가 존재한다면
                 String originalName = file[i].getOriginalFilename();//확장자가져오기 위해서 전체파일명을 가져옴.
@@ -70,7 +73,7 @@ public class FileDataUtil {
 //			String[] files = new String[] {saveName}; //형변환  files[0] 파일명이 들어 간다..
                 byte[] fileData = file[i].getBytes();
 
-                File target = new File(uploadPath, saveName);
+                File target = new File(String.valueOf(uploadPath), saveName);
                 FileCopyUtils.copy(fileData, target);
                 files[i]=saveName;
             }

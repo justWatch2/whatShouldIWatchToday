@@ -3,6 +3,8 @@ package avengers.waffle.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -15,6 +17,7 @@ import java.time.LocalDateTime;
 @Setter
 @Table(name = "post")
 @Builder
+@DynamicUpdate
 @AllArgsConstructor
 public class Post extends BaseEntity implements Serializable { // 게시글
     @Id
@@ -25,7 +28,7 @@ public class Post extends BaseEntity implements Serializable { // 게시글
     @Column(name="category", nullable = false, length = 10)
     private String category;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", referencedColumnName = "member_id", nullable = false) // 작성자 아이디
     Member member;
 
@@ -42,5 +45,11 @@ public class Post extends BaseEntity implements Serializable { // 게시글
     @Column(name = "like_count", nullable = false, length = 5) // 좋아요
     @ColumnDefault("0")
     private int likeCount;
+
+    @Column(name = "popularity", nullable = false, length = 5)
+    @ColumnDefault("0")
+    private int popularity;
+
+
 
 }

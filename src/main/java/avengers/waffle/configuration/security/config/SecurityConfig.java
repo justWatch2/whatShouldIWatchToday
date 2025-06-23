@@ -8,7 +8,8 @@ import avengers.waffle.configuration.security.jwt.JwtAuthenticationFilter;
 import avengers.waffle.configuration.security.jwt.JwtAuthorizationFilter;
 import avengers.waffle.configuration.security.oauth2.CustomOAuth2UserService;
 import avengers.waffle.configuration.security.oauth2.JwtProperties;
-import avengers.waffle.repository.MovieMemberRepository;
+
+import avengers.waffle.repository.posts.MovieMemberRepository;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -97,7 +98,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedOrigin("http://localhost:5173");
         //.allowedOriginPatterns("*")  // ✅ Spring Boot 2.4 이상에서 지원
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");

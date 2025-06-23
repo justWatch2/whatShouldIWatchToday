@@ -2,6 +2,8 @@ package avengers.waffle.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.io.Serializable;
 
@@ -22,6 +24,7 @@ public class Icon implements Serializable {
     private String imgUrl;
 
     @OneToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name="member_id", referencedColumnName = "member_id", nullable = false)
     private Member member;
 }
