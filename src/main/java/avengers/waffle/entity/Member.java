@@ -40,7 +40,7 @@ public class Member implements Serializable{
     private String roles;
 
     @OneToOne
-    @JoinColumn(name="icon_num" , referencedColumnName = "no")
+    @JoinColumn(name="icon_num" , referencedColumnName = "icon_num")
     private Icon icon;
 
     @Type(JsonType.class)
