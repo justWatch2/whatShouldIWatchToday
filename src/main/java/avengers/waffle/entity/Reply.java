@@ -3,6 +3,8 @@ package avengers.waffle.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -15,12 +17,13 @@ import java.time.LocalDateTime;
 @Setter
 @Table(name="reply")
 @Builder
+@DynamicUpdate
 @AllArgsConstructor
 public class Reply extends BaseEntity implements Serializable {
     @Id
-    @Column(name = "reply_num", length = 10)
+    @Column(name = "no", length = 10)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long replyNum;
+    private Integer no;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_no", referencedColumnName = "no", nullable = false)

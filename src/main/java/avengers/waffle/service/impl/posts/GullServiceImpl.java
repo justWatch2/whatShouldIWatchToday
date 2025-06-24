@@ -91,12 +91,12 @@ public class GullServiceImpl implements IF_GullService {
         List<Reply> replies = replyRepository.findAllByPost_No(no);
         for (Reply reply : replies) {
             ReplyVO replyVO = ReplyVO.builder()
-                    .num((int) reply.getReplyNum())
+                    .num((int) reply.getNo())
                     .name(reply.getMember().getMemberId())
                     .contents(reply.getContents())
                     .time(String.valueOf(reply.getIndate()))
                     .likeCount(reply.getLikeCount())
-                    .liked(getLikeReply((int) reply.getReplyNum(),reply.getMember().getMemberId()))
+                    .liked(getLikeReply((int) reply.getNo(),reply.getMember().getMemberId()))
                     .build();
             replyVOs.add(replyVO);
         }
@@ -210,13 +210,13 @@ public class GullServiceImpl implements IF_GullService {
         boolean memberExist = getLikeReply(replyLikeDTO.getReplyNo(), replyLikeDTO.getMemberId());
         if (!memberExist & param) {
             replyLikeListRepository.save(ReplyLikeList.builder()
-                    .reply(Reply.builder().replyNum(replyLikeDTO.getReplyNo()).build())
+                    .reply(Reply.builder().no(replyLikeDTO.getReplyNo()).build())
                     .member(Member.builder().memberId(replyLikeDTO.getMemberId()).build())
                     .build());
             return true;
         }else{
             if (!param) {
-                replyLikeListRepository.deleteByReply_replyNumAndMember_memberId(replyLikeDTO.getReplyNo(),replyLikeDTO.getMemberId());
+                replyLikeListRepository.deleteByReply_noAndMember_memberId(replyLikeDTO.getReplyNo(),replyLikeDTO.getMemberId());
                 return true;
             }
 
@@ -225,7 +225,7 @@ public class GullServiceImpl implements IF_GullService {
     }
 
     private boolean getLikeReply(int no, String id) {
-        return replyLikeListRepository.existsByReply_replyNumAndMember_memberId(no, id);
+        return replyLikeListRepository.existsByReply_noAndMember_memberId(no, id);
     }
 
     @Override

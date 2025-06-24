@@ -20,6 +20,6 @@ public class ReplyLikeList {
     @JoinColumn(name="member_id", referencedColumnName = "member_id")
     private Member member;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="reply_no", referencedColumnName = "reply_num")
+    @JoinColumn(name="reply_no", referencedColumnName = "no")
     private Reply reply;
 }

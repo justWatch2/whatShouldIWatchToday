@@ -18,7 +18,7 @@ import java.io.Serializable;
 public class MovieWishList implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int no;
+    private Integer no;
 
     @ManyToOne
     @JoinColumn(name="movies_id", referencedColumnName = "id", nullable = false)

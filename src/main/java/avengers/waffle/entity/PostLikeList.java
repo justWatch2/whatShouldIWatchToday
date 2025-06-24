@@ -15,7 +15,7 @@ import org.hibernate.annotations.DynamicUpdate;
 public class PostLikeList {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int no;
+    private Integer no;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="member_id", referencedColumnName = "member_id")
     private Member member;

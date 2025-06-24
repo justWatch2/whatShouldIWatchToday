@@ -23,7 +23,7 @@ public class Post extends BaseEntity implements Serializable { // 게시글
     @Id
     @Column(name = "no")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long no;
+    private Integer no;
 
     @Column(name="category", nullable = false, length = 10)
     private String category;
