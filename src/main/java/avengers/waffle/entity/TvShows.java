@@ -38,8 +38,8 @@ public class TvShows {
     @Column(name = "overview", columnDefinition = "TEXT") // TEXT
     private String overview;
 
-    @Column(name = "adult") // TINYINT(1)
-    private Boolean adult;
+    @Column(name = "adult") // INT(1)
+    private int adult;
 
     @Column(name = "backdrop_path") // VARCHAR(255)
     private String backdropPath;

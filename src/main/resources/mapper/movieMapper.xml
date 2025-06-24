@@ -2,10 +2,22 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="avengers.waffle.mapper.MovieMapper">
-    <select id="search" parameterType="avengers.waffle.VO.search.MovieSearchVO" resultType="avengers.waffle.VO.search.MovieSearchResultVO">
-        select id,poster_path,imdb_id,overview,korean_title,title
-        from movies
+<mapper namespace="avengers.waffle.mapper.SearchMapper">
+    <select id="searchMovie" parameterType="avengers.waffle.VO.search.SearchVO" resultType="avengers.waffle.VO.search.SearchResultVO">
+        <bind name="processedTitle" value="'+' + title.trim().replaceAll('\\s+', '+')" />
+        select id,poster_path,overview,korean_title,title,numVotes,averagerating,
+        <choose>
+            <when test="korean">
+                MATCH(korean_title) AGAINST(#{processedTitle} IN BOOLEAN MODE) AS relevance
+            </when>
+            <otherwise>
+                MATCH(title) AGAINST(#{processedTitle} IN BOOLEAN MODE) AS relevance
+            </otherwise>
+        </choose>
+        FROM
+            (select id,title,korean_title,poster_path,original_language,imdb_id,overview,release_date
+            from movies) m
+        left JOIN ratings r ON r.tconst=imdb_id
         WHERE
         <if test="korea">
             original_language='ko' and
@@ -18,24 +30,167 @@
                 MATCH(title) AGAINST(#{title} IN BOOLEAN MODE)
             </otherwise>
         </choose>
-            <if test="genres!=null and genres!=''">
-                and MATCH(genres) AGAINST(#{genres} IN BOOLEAN MODE)
-            </if>
-        and
-        <foreach item="year" collection="years" separator="or" open="(" close=")">
-            <choose>
-                <when test="year=='future'">
-                    release_date <![CDATA[>]]> 2030
-                </when>
-                <when test="year=='1990'">
-                    release_date <![CDATA[<]]> 2000
-                </when>
-                <otherwise>
-                    YEAR(release_date) BETWEEN ${year} AND ${year}+10
-                </otherwise>
-            </choose>
-        </foreach>
-        order by release_date desc
-        limit 20;
+        <if test="!adult">
+            and imdb_id IN (SELECT tconst FROM titles_adult WHERE is_adult=0)
+        </if>
+        <if test="genres!=null and genres.length != 19">
+            AND id IN (SELECT movies_id FROM movie_genres WHERE genres_id in
+            <foreach item="genre" collection="genres" separator="," open="(" close="))">
+                ${genre}
+            </foreach>
+        </if>
+        <if test="years!=null and years.length != 5">
+            <foreach item="year" collection="years" separator="or" open="and (" close=")">
+                <choose>
+                    <when test="year=='future'">
+                        YEAR(release_date) <![CDATA[>]]> 2030
+                    </when>
+                    <when test="year=='1990'">
+                        YEAR(release_date) <![CDATA[<]]> 2000
+                    </when>
+                    <otherwise>
+                        YEAR(release_date) BETWEEN ${year} AND ${year}+10
+                    </otherwise>
+                </choose>
+            </foreach>
+        </if>
+        ORDER BY relevance desc ,numVotes DESC ,averagerating DESC
+        limit 20 offset ${(page-1)*20};
+    </select>
+
+    <select id="getPage" parameterType="avengers.waffle.VO.search.SearchVO">
+        select count(*)
+        FROM
+        (select id,title,korean_title,original_language,imdb_id,release_date
+        from movies) m
+        WHERE
+        <if test="korea">
+            original_language='ko' and
+        </if>
+        <choose>
+            <when test="korean">
+                MATCH(korean_title) AGAINST(#{title} IN BOOLEAN MODE)
+            </when>
+            <otherwise>
+                MATCH(title) AGAINST(#{title} IN BOOLEAN MODE)
+            </otherwise>
+        </choose>
+        <if test="!adult">
+            and imdb_id IN (SELECT tconst FROM titles_adult WHERE is_adult=0)
+        </if>
+        <if test="genres!=null and genres.length != 19">
+            AND id IN (SELECT movies_id FROM movie_genres WHERE genres_id in
+            <foreach item="genre" collection="genres" separator="," open="(" close="))">
+                ${genre}
+            </foreach>
+        </if>
+        <if test="years!=null and years.length != 5">
+            <foreach item="year" collection="years" separator="or" open="and (" close=")">
+                <choose>
+                    <when test="year=='future'">
+                        YEAR(release_date) <![CDATA[>]]> 2030
+                    </when>
+                    <when test="year=='1990'">
+                        YEAR(release_date) <![CDATA[<]]> 2000
+                    </when>
+                    <otherwise>
+                        YEAR(release_date) BETWEEN ${year} AND ${year}+10
+                    </otherwise>
+                </choose>
+            </foreach>
+        </if>
+    </select>
+
+    <select id="searchTV" parameterType="avengers.waffle.VO.search.SearchVO" resultType="avengers.waffle.VO.search.SearchResultVO">
+        <bind name="processedTitle" value="'+' + title.trim().replaceAll('\\s+', '+')" />
+        select id,poster_path,overview,korean_name,name,vote_average,
+        <choose>
+            <when test="korean">
+                MATCH(korean_name) AGAINST(#{processedTitle} IN BOOLEAN MODE) AS relevance
+            </when>
+            <otherwise>
+                MATCH(name) AGAINST(#{processedTitle} IN BOOLEAN MODE) AS relevance
+            </otherwise>
+        </choose>
+        FROM tvshows
+        WHERE
+        <if test="korea">
+            original_language='ko' and
+        </if>
+        <choose>
+            <when test="korean">
+                MATCH(korean_name) AGAINST(#{title} IN BOOLEAN MODE)
+            </when>
+            <otherwise>
+                MATCH(name) AGAINST(#{title} IN BOOLEAN MODE)
+            </otherwise>
+        </choose>
+        <if test="!adult">
+            and adult=0
+        </if>
+        <if test="genres!=null and genres.length != 19">
+            AND id IN (SELECT tv_shows_id FROM tv_genres WHERE genres_id in
+            <foreach item="genre" collection="genres" separator="," open="(" close="))">
+                ${genre}
+            </foreach>
+        </if>
+        <if test="years!=null and years.length != 5">
+            <foreach item="year" collection="years" separator="or" open="and (" close=")">
+                <choose>
+                    <when test="year=='future'">
+                        YEAR(first_air_date) <![CDATA[>]]> 2030
+                    </when>
+                    <when test="year=='1990'">
+                        YEAR(first_air_date) <![CDATA[<]]> 2000
+                    </when>
+                    <otherwise>
+                        YEAR(first_air_date) BETWEEN ${year} AND ${year}+10
+                    </otherwise>
+                </choose>
+            </foreach>
+        </if>
+        ORDER BY relevance desc ,vote_count DESC ,vote_average DESC
+        limit 20 offset ${(page-1)*20};
+    </select>
+
+    <select id="getPageTV" parameterType="avengers.waffle.VO.search.SearchVO">
+        select count(*)
+        FROM tvshows
+        WHERE
+        <if test="korea">
+            original_language='ko' and
+        </if>
+        <choose>
+            <when test="korean">
+                MATCH(korean_name) AGAINST(#{title} IN BOOLEAN MODE)
+            </when>
+            <otherwise>
+                MATCH(name) AGAINST(#{title} IN BOOLEAN MODE)
+            </otherwise>
+        </choose>
+        <if test="!adult">
+            and adult=0
+        </if>
+        <if test="genres!=null and genres.length != 19">
+            AND id IN (SELECT tv_shows_id FROM tv_genres WHERE genres_id in
+            <foreach item="genre" collection="genres" separator="," open="(" close="))">
+                ${genre}
+            </foreach>
+        </if>
+        <if test="years!=null and years.length != 5">
+            <foreach item="year" collection="years" separator="or" open="and (" close=")">
+                <choose>
+                    <when test="year=='future'">
+                        YEAR(first_air_date) <![CDATA[>]]> 2030
+                    </when>
+                    <when test="year=='1990'">
+                        YEAR(first_air_date) <![CDATA[<]]> 2000
+                    </when>
+                    <otherwise>
+                        YEAR(first_air_date) BETWEEN ${year} AND ${year}+10
+                    </otherwise>
+                </choose>
+            </foreach>
+        </if>
     </select>
 </mapper>

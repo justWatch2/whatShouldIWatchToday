@@ -1,4 +1,4 @@
-package avengers.waffle.controller.util;
+package avengers.waffle.utils;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

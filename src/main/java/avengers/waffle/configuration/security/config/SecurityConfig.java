@@ -10,6 +10,7 @@ import avengers.waffle.configuration.security.oauth2.CustomOAuth2UserService;
 import avengers.waffle.configuration.security.oauth2.JwtProperties;
 import avengers.waffle.repository.posts.MovieMemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -32,9 +33,11 @@ public class SecurityConfig {
     private final MovieMemberRepository movieMemberRepository;
     private final JwtProperties jwtProperties;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final StringRedisTemplate stringRedisTemplate;
+    //private final StringRedisTemplate stringRedisTemplate;
     private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
+    @Qualifier("tokenRedisTemplate")
+    private final StringRedisTemplate stringRedisTemplate;
     //Spring Boot 3.x 이상에서는 AuthenticationManager를 직접 빌드해서 넣어줘야 필터에서 사용할 수 있음.
     //@Bean으로 분리해 두면 다른 클래스에서도 재사용 가능해서 더 좋다.
     @Bean
@@ -99,6 +102,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedOrigin("http://localhost:5173");
         //.allowedOriginPatterns("*")  // ✅ Spring Boot 2.4 이상에서 지원
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");

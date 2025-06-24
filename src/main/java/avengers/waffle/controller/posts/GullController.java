@@ -3,7 +3,7 @@ package avengers.waffle.controller.posts;
 import avengers.waffle.VO.util.PageVO;
 import avengers.waffle.VO.posts.PostVO;
 import avengers.waffle.VO.posts.ReplyVO;
-import avengers.waffle.controller.util.FileDataUtil;
+import avengers.waffle.utils.FileDataUtil;
 import avengers.waffle.service.IF.posts.IF_GullService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

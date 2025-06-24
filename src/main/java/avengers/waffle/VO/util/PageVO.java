@@ -4,9 +4,11 @@ package avengers.waffle.VO.util;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
-public class PageVO {
+public class PageVO implements Serializable {
     private int startNo;
     private int endNo;
     private int perPageNum=20;
