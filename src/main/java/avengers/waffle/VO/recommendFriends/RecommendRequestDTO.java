@@ -13,6 +13,7 @@ public class RecommendRequestDTO {
     private List<String> memberIds;
     private String recommendOption;
 
+
     @Builder
     public RecommendRequestDTO(String category, List<String> memberIds, String recommendOption) {
         this.category = category;

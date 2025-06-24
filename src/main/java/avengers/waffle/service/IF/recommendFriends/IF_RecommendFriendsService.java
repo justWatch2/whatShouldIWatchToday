@@ -19,4 +19,6 @@ public interface IF_RecommendFriendsService {
     public List<RecommendFriendsInfoDTO> getFriendsInfo(String memberId);
     //영화 추천 기본 파트
     public List<RecommendMoviesInfoDTO> getMoviesInfo(String userId, RecommendRequestDTO recommendRequestDTO);
+    // bfs추천
+    public List<RecommendMoviesInfoDTO> bfsRecommend(List<RecommendMoviesInfoDTO> candidates, int maxDepth, int recommendSize, int topNStartMovies);
 }
