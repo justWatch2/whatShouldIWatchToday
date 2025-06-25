@@ -80,8 +80,8 @@ public class SecurityConfig {
                                 .requestMatchers("/").permitAll() // 기본 홈 페이지도 허용
                                 .requestMatchers("*").permitAll()
                                 .requestMatchers("/*").permitAll()
-                                .anyRequest().authenticated() // 나머지 요청은 인증이 필요
-//                                .anyRequest().permitAll()
+//                                .anyRequest().authenticated() // 나머지 요청은 인증이 필요
+                                .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
                                 .userInfoEndpoint(userInfo -> userInfo
