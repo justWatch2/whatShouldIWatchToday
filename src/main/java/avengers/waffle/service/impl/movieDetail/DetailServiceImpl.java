@@ -16,6 +16,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class DetailServiceImpl implements IF_DetailService {
     private final MovieWishListRepository movieWishListRepository;
     private final MovieViewListRepository movieViewListRepository;
@@ -29,22 +30,25 @@ public class DetailServiceImpl implements IF_DetailService {
         boolean result;
         if(category.equals("movie")){
             result=movieWishListRepository.existsByMovies_IdAndMember_MemberId(id,memberId);
+            detailMapper.addKcm(id,memberId,1);
         }else{
             result=tvShowWishListRepository.existsByTvshows_IdAndMember_MemberId(id,memberId);
+            detailMapper.addKct(id,memberId,1);
         }
         return result;
     }
 
     @Override
-    @Transactional
     public void delWish(String memberId, String category, Integer id) {
         if(category.equals("movie")){
             movieWishListRepository.deleteAllByMovies_IdAndMember_MemberId(id,memberId);
+            detailMapper.deleteKcm(id,memberId);
         }else{
             tvShowWishListRepository.deleteAllByTvshows_IdAndMember_MemberId(id,memberId);
+            detailMapper.deleteKct(id,memberId);
         }
     }
-    @Transactional
+
     @Override
     public void addWish(String memberId, String category, Integer id) {
         if(category.equals("movie")){
@@ -71,7 +75,7 @@ public class DetailServiceImpl implements IF_DetailService {
         }
         return result;
     }
-    @Transactional
+
     @Override
     public void delView(String memberId, String category, Integer id) {
         if(category.equals("movie")){
@@ -80,7 +84,7 @@ public class DetailServiceImpl implements IF_DetailService {
             tvShowViewListRepository.deleteAllByTvshows_IdAndMember_MemberId(id,memberId);
         }
     }
-    @Transactional
+
     @Override
     public void addView(String memberId, String category, Integer id) {
         if(category.equals("movie")){

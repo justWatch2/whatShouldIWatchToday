@@ -15,4 +15,80 @@
         ORDER BY RAND()
             LIMIT 3;
     </select>
+
+    <insert id="addKcm">
+        INSERT INTO keyword_count_movie (member_id, keywords_id, keyword_count)
+        SELECT
+        #{memberId} AS member_id,
+        mk.keywords_id,
+        1 AS added_count
+        FROM movie_keywords mk
+        WHERE mk.movies_id = $#{id}
+        ON DUPLICATE KEY UPDATE
+        keyword_count = keyword_count + VALUES(added_count),
+        <choose>
+            <when test="recommendType == 1">
+                wish_keyword_count = wish_keyword_count + VALUES(added_count)
+            </when>
+            <when test="recommendType == 2">
+                view_keyword_count = view_keyword_count + VALUES(added_count)
+            </when>
+        </choose>
+    </insert>
+
+    <insert id="addKct">
+        INSERT INTO keyword_count_tv (member_id, keywords_id, keyword_count)
+        SELECT
+        #{memberId} AS member_id,
+        mk.keywords_id,
+        1 AS added_count
+        FROM tv_keywords mk
+        WHERE mk.tvshows_id = #{id}
+        ON DUPLICATE KEY UPDATE
+        keyword_count = keyword_count + VALUES(added_count),
+        <choose>
+            <when test="recommendType == 1">
+                wish_keyword_count = wish_keyword_count + VALUES(added_count)
+            </when>
+            <when test="recommendType == 2">
+                view_keyword_count = view_keyword_count + VALUES(added_count)
+            </when>
+        </choose>
+    </insert>
+
+    <update id="updateKcm">
+        UPDATE keyword_count_movie kcm
+            JOIN movie_keywords mk ON kcm.keywords_id = mk.keywords_id
+        SET
+            kcm.keyword_count = kcm.keyword_count - 1
+        WHERE kcm.member_id = #{memberId}
+          AND mk.movies_id = #{id}
+    </update>
+
+    <update id="updateKct">
+        UPDATE keyword_count_tv kcm
+            JOIN tv_keywords mk ON kcm.keywords_id = mk.keywords_id
+        SET
+            kcm.keyword_count = kcm.keyword_count - 1
+        WHERE kcm.member_id = #{memberId}
+          AND mk.tvshows_id = #{id}
+    </update>
+
+    <delete id="deleteKcm">
+        DELETE FROM keyword_count_movie
+        WHERE member_id = #{memberId}
+        AND keywords_id IN (
+        SELECT keywords_id FROM movie_keywords WHERE movies_id = #{id}
+        )
+        AND keyword_count <![CDATA[<=]]> 0;
+    </delete>
+
+    <delete id="deleteKct">
+        DELETE FROM keyword_count_tv
+        WHERE member_id = #{memberId}
+          AND keywords_id IN (
+            SELECT keywords_id FROM tv_keywords WHERE tvshows_id = #{id}
+        )
+          AND keyword_count <![CDATA[<=]]> 0;
+    </delete>
 </mapper>

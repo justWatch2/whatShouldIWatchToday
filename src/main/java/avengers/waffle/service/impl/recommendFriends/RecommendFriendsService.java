@@ -5,17 +5,17 @@ import avengers.waffle.VO.recommendFriends.RecommendMoviesInfoDTO;
 import avengers.waffle.VO.recommendFriends.RecommendRequestDTO;
 import avengers.waffle.mapper.FriendMapper;
 import avengers.waffle.repository.friends.FriendsRepository;
+import avengers.waffle.service.IF.recommendFriends.IF_RecommendFriendsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class RecommendFriendsService {
+public class RecommendFriendsService implements IF_RecommendFriendsService {
     private final FriendMapper friendMapper;
     private final FriendsRepository friendsRepository;
 
