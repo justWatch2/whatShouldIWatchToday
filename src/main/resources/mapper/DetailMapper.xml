@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="avengers.waffle.mapper.DetailMapper">
+    <select id="postLoad" resultType="avengers.waffle.VO.movieDetail.PostResultVO">
+        SELECT NO, title, contents
+        FROM (
+            SELECT NO, title, contents, MATCH(title, contents) AGAINST(#{title} IN BOOLEAN MODE) AS score
+            FROM post
+            WHERE MATCH(title, contents) AGAINST(#{title} IN BOOLEAN MODE) AND category='영화'
+            ORDER BY score DESC
+            LIMIT 20
+            ) AS subquery
+        ORDER BY RAND()
+            LIMIT 3;
+    </select>
+</mapper>
