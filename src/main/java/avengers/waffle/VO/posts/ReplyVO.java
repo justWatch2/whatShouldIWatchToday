@@ -8,9 +8,11 @@ import lombok.Getter;
 @Builder
 @AllArgsConstructor
 public class ReplyVO{
-    private int no;
-    private String memberId;
-    private String content;
+    private Integer num;
+    private String postNo;
+    private String name;
+    private String contents;
     private String time;
-    private int likeCount;
+    private Integer likeCount;
+    private Boolean liked;
 }

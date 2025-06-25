@@ -18,7 +18,7 @@ public class TvShowViewList implements Serializable {
     @Id
     @Column(name = "no")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int no;
+    private Integer no;
 
     @ManyToOne
     @JoinColumn(name="tvshow_id", referencedColumnName = "id", nullable = false)

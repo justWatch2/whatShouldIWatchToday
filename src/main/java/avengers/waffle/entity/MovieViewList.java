@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import java.io.Serializable;
 
@@ -18,10 +20,10 @@ public class MovieViewList implements Serializable {
     @Id
     @Column(name = "no")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int no;
+    private Integer no;
 
     @ManyToOne
-    @JoinColumn(name="movies_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name="movie_id", referencedColumnName = "id", nullable = false)
     private Movies movies;
 
     @ManyToOne
