@@ -19,7 +19,7 @@ public class MovieController {
     private final IF_MovieService movieService;
     private final IF_GullService GullService;
 
-    @GetMapping("api/search/movie/")
+    @GetMapping("api/movie/search")
     public List<Movies> viewlist(@ModelAttribute MovieSearchVO movie) {
         System.out.println(movie.getTitle());
         System.out.println(movie.getGenres());
