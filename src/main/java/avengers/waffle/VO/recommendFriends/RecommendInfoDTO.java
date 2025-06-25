@@ -8,7 +8,7 @@
 //
 //@Getter
 //@NoArgsConstructor
-//public class RecommendMoviesInfoDTO {
+//public class RecommendInfoDTO {
 //    private int movieId;
 //    private String title;
 //    private String poster;
@@ -20,7 +20,7 @@
 //    private String keywordsRaw;
 //
 //    @Builder
-//    public RecommendMoviesInfoDTO(int movieId, String title, String poster, Long rating, String description,
+//    public RecommendInfoDTO(int movieId, String title, String poster, Long rating, String description,
 //                                  String keywordsRaw, int keywordsRanking) {
 //        this.movieId = movieId;
 //        this.title = title;
@@ -44,7 +44,6 @@ package avengers.waffle.VO.recommendFriends;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -52,12 +51,14 @@ import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor
-public class RecommendMoviesInfoDTO {
+public class RecommendInfoDTO {
     private int movieId;
+    private int tvShowId;
     private String title;
     private String poster;
     private Long rating;
     private String description;
+    private String backdropPath;
     private List<String> keywords;  // 변환된 리스트
     private int keywordsRanking;
 
@@ -66,7 +67,7 @@ public class RecommendMoviesInfoDTO {
 
     public void setKeywordsRaw(String keywordsRaw) {
         this.keywordsRaw = keywordsRaw;
-//        System.out.println("DEBUG >>> keywordsRaw = " + keywordsRaw);
+        System.out.println("DEBUG >>> keywordsRaw = " + keywordsRaw);
         if (keywordsRaw == null || keywordsRaw.isEmpty()) {
             this.keywords = List.of();
         } else {

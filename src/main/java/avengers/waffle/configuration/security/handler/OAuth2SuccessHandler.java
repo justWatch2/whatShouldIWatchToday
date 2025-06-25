@@ -77,25 +77,35 @@ public class    OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             stringRedisTemplate.opsForValue().set(username + ":kakaoAccessToken", kakaoAccessToken, 6, TimeUnit.HOURS);
         }
 
-        System.out.println("cookie.toString() = " + cookie.toString());
-        // 응답 헤더에 넣기 클라이언트도 가지고 있어야 되기 때문임
+        //팝업창으로 안하고 일반적으로 하는 방법!!
+//        System.out.println("cookie.toString() = " + cookie.toString());
+//        // 응답 헤더에 넣기 클라이언트도 가지고 있어야 되기 때문임
+//        response.addHeader("Set-Cookie", cookie.toString());
+//
+////        // 프론트엔드로 리다이렉트하면서 토큰 전달  그리고 3000으로해놨음 리엑트 서버떄문에
+////        String redirectUrl = "http://localhost:3000/?token=" + "Bearer " + jwtToken;
+//
+//        //Bearer 뒤에 한칸뛰어야 한다
+//        response.addHeader("Authorization", "Bearer " + jwtToken);
+//
+//        // 프론트엔드로 리다이렉트하면서 토큰 전달  그리고 3000으로해놨음 리엑트 서버떄문에
+//        String redirectUrl = "http://localhost:3000/";
+//        response.sendRedirect(redirectUrl);
+        response.setContentType("text/html;charset=UTF-8");
         response.addHeader("Set-Cookie", cookie.toString());
 
+        // **팝업에서 부모창에 메시지 보내고 팝업 닫기 스크립트**
+        String script = "<script>" +
+                "window.opener.postMessage({" +
+                "token: 'Bearer " + jwtToken + "'" +
+                "}, '*');" +
+                "window.close();" +
+                "</script>";
+
+        response.getWriter().write(script);
+        response.getWriter().flush();
 
 
-
-//        // 프론트엔드로 리다이렉트하면서 토큰 전달  그리고 3000으로해놨음 리엑트 서버떄문에
-//        String redirectUrl = "http://localhost:3000/?token=" + "Bearer " + jwtToken;
-
-
-        //Bearer 뒤에 한칸뛰어야 한다
-        response.addHeader("Authorization", "Bearer " + jwtToken);
-
-
-        // 프론트엔드로 리다이렉트하면서 토큰 전달  그리고 3000으로해놨음 리엑트 서버떄문에
-        String redirectUrl = "http://localhost:3000/";
-
-        response.sendRedirect(redirectUrl);
     }
 }
 
