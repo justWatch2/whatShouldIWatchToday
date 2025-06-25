@@ -1,5 +1,6 @@
 package avengers.waffle.service.IF.posts;
 
+import avengers.waffle.VO.login.MemberDTO;
 import avengers.waffle.VO.posts.*;
 //import avengers.waffle.VO.util.PageVO;
 import avengers.waffle.entity.Post;
@@ -36,4 +37,6 @@ public interface IF_GullService {
     boolean updateLikeList4Reply(ReplyLikeDTO replyLikeDTO, boolean param);
 
     void updateLikeCount4Reply(int replyNo, boolean param);
+
+    void saveMember(MemberDTO memberDTO, String s);
 }
