@@ -39,29 +39,17 @@ public class Member implements Serializable{
     @Column(name = "roles", length = 15)
     private String roles;
 
-    @OneToOne
-    @JoinColumn(name="icon_num" , referencedColumnName = "icon_num")
-    private Icon icon;
+    @Column(name="img_url" , length = 70)
+    private String imgUrl;
 
-    @Type(JsonType.class)
-    @Column(name = "friend_list" , columnDefinition = "JSON")
-    private List<String> friendList;
+    @Column(name = "friend_list" , columnDefinition = "Text")
+    private String friendList;
 
-    @Type(JsonType.class)
-    @Column(name = "OTT_list" , columnDefinition = "JSON")
-    private List<String> OTTList;
-
-    public List<String> getRoleList(){           //role이 여러개 있을 경우 이런식으로 만들어 둔다. 하나만 있으면 안만들어도 된다.
+    public List<String> getRoleList(){  //role이 여러개 있을 경우 이런식으로 만들어 둔다. 하나만 있으면 안만들어도 된다.
         if (!this.roles.isEmpty()){
             return Arrays.asList(this.roles.split(","));
         }
         return new ArrayList<>();
     }
 
-    public List<String> getFriendList() {
-        if (this.friendList == null) {
-            this.friendList = new ArrayList<>();
-        }
-        return this.friendList;
-    }
 }

@@ -20,7 +20,7 @@ public class MemberSearchList extends BaseEntity implements Serializable {
     @Id
     @Column(name="no")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int no;
+    private Integer no;
     @ManyToOne
     @JoinColumn(name="member_id", referencedColumnName = "member_id", nullable = false)
     Member member;
