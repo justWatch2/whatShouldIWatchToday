@@ -1,9 +1,11 @@
 package avengers.waffle.service.impl.posts;
 
+import avengers.waffle.VO.login.MemberDTO;
 import avengers.waffle.VO.posts.*;
 //import avengers.waffle.VO.util.PageVO;
 import avengers.waffle.entity.*;
 import avengers.waffle.mapper.PostMapper;
+import avengers.waffle.repository.login.MemberRepository;
 import avengers.waffle.repository.posts.*;
 import avengers.waffle.repository.mapping.attachMapping;
 import avengers.waffle.service.IF.posts.IF_GullService;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -31,6 +34,8 @@ public class GullServiceImpl implements IF_GullService {
     private final ReplyLikeListRepository replyLikeListRepository;
     private final PostMapper postMapper;
     private final EntityManager em;
+    private final MemberRepository memberRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
 
     @Override
@@ -96,7 +101,7 @@ public class GullServiceImpl implements IF_GullService {
                     .contents(reply.getContents())
                     .time(String.valueOf(reply.getIndate()))
                     .likeCount(reply.getLikeCount())
-                    .liked(getLikeReply((int) reply.getNo(),reply.getMember().getMemberId()))
+                    .liked(getLikeReply((int) reply.getNo(), reply.getMember().getMemberId()))
                     .build();
             replyVOs.add(replyVO);
         }
@@ -214,9 +219,9 @@ public class GullServiceImpl implements IF_GullService {
                     .member(Member.builder().memberId(replyLikeDTO.getMemberId()).build())
                     .build());
             return true;
-        }else{
+        } else {
             if (!param) {
-                replyLikeListRepository.deleteByReply_noAndMember_memberId(replyLikeDTO.getReplyNo(),replyLikeDTO.getMemberId());
+                replyLikeListRepository.deleteByReply_noAndMember_memberId(replyLikeDTO.getReplyNo(), replyLikeDTO.getMemberId());
                 return true;
             }
 
@@ -232,6 +237,15 @@ public class GullServiceImpl implements IF_GullService {
     public void updateLikeCount4Reply(int replyNo, boolean param) {
         Reply reply = em.find(Reply.class, replyNo);
         reply.setLikeCount(param ? reply.getLikeCount() + 1 : reply.getLikeCount() - 1);
+    }
+
+    @Override
+    public void saveMember(MemberDTO memberDTO, String s) {
+        memberRepository.save(Member.builder()
+                .memberId(memberDTO.getId())
+                .memberPw(passwordEncoder.encode(memberDTO.getPass()))
+                .imgUrl(s)
+                .build());
     }
 }
 
