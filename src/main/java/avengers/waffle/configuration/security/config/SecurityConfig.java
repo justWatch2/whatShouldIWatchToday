@@ -98,7 +98,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.addAllowedOrigin("http://localhost:5173");
+        configuration.addAllowedOrigin("http://localhost:3000");
         //.allowedOriginPatterns("*")  // ✅ Spring Boot 2.4 이상에서 지원
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");
