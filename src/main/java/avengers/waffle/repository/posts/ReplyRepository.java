@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface ReplyRepository extends JpaRepository<Reply, Integer> {
-    List<Reply> findAllByPost_No(long no);
+    List<Reply> findAllByPost_No(int no);
 }

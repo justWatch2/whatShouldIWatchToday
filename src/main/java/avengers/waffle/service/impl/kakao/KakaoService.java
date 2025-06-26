@@ -72,21 +72,21 @@ public class KakaoService implements IF_KakaoService {
 
 
         // 친구로 되어있는지 체크해야된다.  초대한사람 친구 목록에 초대받은 사람이 있는지 체크!
-        List<String> friendList = inviter.getFriendList();
-        if (friendList != null && friendList.contains(memberId)){
-            System.out.println("이미 친구 입니다.");
-            stringRedisTemplate.delete(redisKey);
-            return null;
-        }
+//        List<String> friendList = inviter.getFriendList();
+//        if (friendList != null && friendList.contains(memberId)){
+//            System.out.println("이미 친구 입니다.");
+//            stringRedisTemplate.delete(redisKey);
+//            return null;
+//        }
 
         // 4. 친구 추가하기
         //초대한 친구 목록에 추가
-        inviter.getFriendList().add(memberId);
-        movieMemberRepository.save(inviter);
-        //초대받은 친구 목록에 추가
-        Member member = movieMemberRepository.findByMemberId(memberId);
-        member.getFriendList().add(inviterId);
-        movieMemberRepository.save(member);
+//        inviter.getFriendList().add(memberId);
+//        movieMemberRepository.save(inviter);
+//        //초대받은 친구 목록에 추가
+//        Member member = movieMemberRepository.findByMemberId(memberId);
+//        member.getFriendList().add(inviterId);
+//        movieMemberRepository.save(member);
 
         // 2. redis에 있는 uuid 지우기 ( 어차피 어떤경우든 간에 지운다)
         stringRedisTemplate.delete(redisKey);

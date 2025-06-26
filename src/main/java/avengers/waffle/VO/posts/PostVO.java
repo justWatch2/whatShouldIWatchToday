@@ -1,25 +1,26 @@
 package avengers.waffle.VO.posts;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import avengers.waffle.entity.Post;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
+@Setter
 @Builder(toBuilder = true)
 @AllArgsConstructor
+@NoArgsConstructor
 public class PostVO {
-    private Long no;
-    private String category;
-    private String name;
-    private String memberId;
+    private long no;
     private String title;
+    private String name;
+    private String writer;
+    private String category;
     private LocalDateTime indate;
+    private int count;
+    private int likeCount;
     private String contents;
-    private Integer count;
-    private Integer likeCount;
-    private List<String> fileUrl;
+    private List<String> fileUrllist;
 
 }

@@ -6,24 +6,14 @@
 
 
 <mapper namespace="avengers.waffle.mapper.FriendMapper">
-    <sql id="keywordLimit">
-        20
-    </sql>
-
-    <sql id="numIncludeKeywords">
-        2
-    </sql>
-
     <select id="getFriendsInfoByMemberId" resultType="avengers.waffle.VO.recommendFriends.RecommendFriendsInfoDTO">
         SELECT
         mm.member_name AS name,
         COUNT(DISTINCT mw.movies_id) AS numWish,
-        COUNT(DISTINCT mv.movies_id) AS numViewedMovie,
-        icon.img_url AS icon
+        COUNT(DISTINCT mv.movies_id) AS numViewedMovie
         FROM member mm
         left JOIN movie_wishlist mw ON mw.member_id = mm.member_id
         left JOIN movie_viewlist mv ON mv.member_id = mm.member_id
-        left JOIN icon on mm.icon_num = icon.icon_num
         WHERE mm.member_id IN
         <foreach item="id" collection="list" open="(" separator="," close=")">
             #{id}
@@ -32,805 +22,173 @@
         ORDER BY numWish DESC, numViewedMovie DESC
     </select>
 
-    <!-- 친구 선택 안했을떄 로그인된 유저 기준으로 추천-->
-    <select id="getRecommendMovieByUserId" resultType="avengers.waffle.VO.recommendFriends.RecommendMoviesInfoDTO">
-        WITH combined_keywords AS (
-            SELECT mk.keywords_id
-            FROM movie_wishlist mw
-                JOIN movie_keywords mk ON mw.movies_id = mk.movies_id
-            WHERE mw.member_id = #{userId}
-            UNION ALL
-            SELECT mk.keywords_id
-            FROM movie_viewlist mv
-                JOIN movie_keywords mk ON mv.movies_id = mk.movies_id
-            WHERE mv.member_id = #{userId}
+    <sql id="keywordLimit">
+        50
+    </sql>
+
+    <sql id="numIncludeKeywords">
+        2
+    </sql>
+
+    <sql id="recommendTypeForMovie">
+        <choose>
+            <when test="recommendType == 1">
+                SELECT member_id, keywords_id, keyword_count
+                FROM keyword_count_movie
+                WHERE member_id IN
+                <foreach item="id" collection="memberIds" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </when>
+            <when test="recommendType == 2">
+                SELECT member_id, keywords_id, keyword_count
+                FROM keyword_count_movie kcm
+                WHERE member_id IN
+                <foreach item="id" collection="memberIds" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+                    and kcm.view_keyword_count IS NULL
+            </when>
+            <otherwise>
+                SELECT member_id, keywords_id, keyword_count
+                FROM keyword_count_movie kcm
+                WHERE member_id IN
+                <foreach item="id" collection="memberIds" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+                    and kcm.wish_keyword_count IS NULL
+            </otherwise>
+        </choose>
+    </sql>
+
+    <!--영화  추천 (개인추천 + 친구추가 추천)  -->
+    <select id="getRecommendMovieByMemberIds" resultType="avengers.waffle.VO.recommendFriends.RecommendInfoDTO">
+
+        WITH combined AS (
+            <include refid="recommendTypeForMovie"/>
         ),
-             keyword_counts AS (
-                 SELECT keywords_id,
-                        COUNT(*) AS cnt
-                 FROM combined_keywords
-                 GROUP BY keywords_id
-             ),
-             top_keywords AS (
-                 SELECT keywords_id
-                 FROM keyword_counts
-                 ORDER BY cnt DESC
-                 LIMIT <include refid="keywordLimit"/>
-            ),
-            movies_with_keywords AS (
-        SELECT mk.movies_id AS movie_id,
-            COUNT(DISTINCT mk.keywords_id) AS match_count
+
+        top_keywords AS (
+        SELECT member_id, keywords_id, total_count
+        FROM (SELECT member_id, keywords_id, SUM(keyword_count) AS total_count,
+            ROW_NUMBER () OVER (PARTITION BY member_id ORDER BY SUM(keyword_count) DESC ) AS rn
+        FROM combined
+        GROUP BY member_id, keywords_id) as dd
+        WHERE rn &lt;= <include refid="keywordLimit"/>
+        ),
+
+        movies_with_keywords AS (
+        -- 이 키워드들을 2개 이상 포함한 영화만 추출
+        SELECT  mk.movies_id AS movie_id, COUNT(mk.keywords_id) AS match_count
         FROM movie_keywords mk
-            JOIN top_keywords tk ON mk.keywords_id = tk.keywords_id
+        JOIN top_keywords tk ON mk.keywords_id = tk.keywords_id
         GROUP BY mk.movies_id
-        HAVING COUNT(DISTINCT mk.keywords_id) >= <include refid="numIncludeKeywords"/>  -- 두 키워드 모두 포함한 영화만
+        HAVING COUNT( mk.keywords_id) >= <include refid="numIncludeKeywords"/>
         )
 
         SELECT DISTINCT m.id AS movieId,
-                        m.title,
-                        m.poster_path AS poster,
-                        r.averageRating AS rating,
-                        m.overview AS description,
-                        m.keywords AS keywordsRaw,      -- bfs때문에 넣음 keywordsRaw 문자열로 우선 받고나서 dto에서 split처리!
-                        mwk.match_count AS keywordsRanking
+        m.title,
+        m.poster_path AS poster,
+        r.averageRating AS rating,
+        m.overview AS description,
+        m.keywords AS keywordsRaw,
+        mwk.match_count AS keywordsRanking
         FROM movies_with_keywords mwk
             JOIN movies m ON mwk.movie_id = m.id
             JOIN ratings r ON r.tconst = m.imdb_id
-            JOIN titles_adult ta on m.imdb_id = ta.tconst
-        WHERE m.id NOT IN (
+            JOIN titles_adult ta ON m.imdb_id = ta.tconst
+        WHERE  m.id NOT IN (
             SELECT movies_id
             FROM movie_viewlist
-            WHERE member_id = #{userId}
-        ) and ta.is_adult = 0 and m.poster_path != '' and m.overview != ''
-
-
+            WHERE member_id IN
+            <foreach item="id" collection="memberIds" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        )
+        and ta.is_adult = 0 AND m.poster_path != '' AND m.overview != ''
+        order by mwk.match_count DESC
+        limit 500;
 
     </select>
 
-    <!--찜목록과 유사한 작품 추천 userId 기준으로!!-->
-    <select id="getRecommendMovieByUserIdFromMovieWish" resultType="avengers.waffle.VO.recommendFriends.RecommendMoviesInfoDTO">
-        WITH combined_keywords AS (
-            SELECT mk.keywords_id
-            FROM movie_wishlist mw
-                     JOIN movie_keywords mk ON mw.movies_id = mk.movies_id
-            WHERE mw.member_id = #{userId}
-        ),
-             keyword_counts AS (
-                 SELECT keywords_id,
-                        COUNT(*) AS cnt
-                 FROM combined_keywords
-                 GROUP BY keywords_id
-             ),
-             top_keywords AS (
-                 SELECT keywords_id
-                 FROM keyword_counts
-                 ORDER BY cnt DESC
-            LIMIT <include refid="keywordLimit"/>
-            ),
-            movies_with_keywords AS (
-        SELECT mk.movies_id AS movie_id,
-            COUNT(DISTINCT mk.keywords_id) AS match_count
-        FROM movie_keywords mk
-            JOIN top_keywords tk ON mk.keywords_id = tk.keywords_id
-        GROUP BY mk.movies_id
-        HAVING COUNT(DISTINCT mk.keywords_id) >= <include refid="numIncludeKeywords"/>  -- 두 키워드 모두 포함한 영화만
-            )
+    <!-- TVshow 추천 타입 세팅-->
+    <sql id="recommendTypeForTvShow">
+        <choose>
+            <when test="recommendType == 1">
+                SELECT member_id, keywords_id, keyword_count
+                FROM keyword_count_tv
+                WHERE member_id IN
+                <foreach item="id" collection="memberIds" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </when>
+            <when test="recommendType == 2">
+                SELECT member_id, keywords_id, keyword_count
+                FROM keyword_count_tv kct
+                WHERE member_id IN
+                <foreach item="id" collection="memberIds" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+                and kct.view_keyword_count IS NULL
+            </when>
+            <otherwise>
+                SELECT member_id, keywords_id, keyword_count
+                FROM keyword_count_t kct
+                WHERE member_id IN
+                <foreach item="id" collection="memberIds" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+                and kct.wish_keyword_count IS NULL
+            </otherwise>
+        </choose>
+    </sql>
 
-        SELECT DISTINCT m.id AS movieId,
-                        m.title,
-                        m.poster_path AS poster,
-                        r.averageRating AS rating,
-                        m.overview AS description,
-                        m.keywords AS keywordsRaw,      -- bfs때문에 넣음 keywordsRaw 문자열로 우선 받고나서 dto에서 split처리!
-                        mwk.match_count AS keywordsRanking
-        FROM movies_with_keywords mwk
-                 JOIN movies m ON mwk.movie_id = m.id
-                 JOIN ratings r ON r.tconst = m.imdb_id
-                 JOIN titles_adult ta on m.imdb_id = ta.tconst
-        WHERE m.id NOT IN (
+    <!-- tvshow  추천   -->
+    <select id="getRecommendTvShowByMemberIds" resultType="avengers.waffle.VO.recommendFriends.RecommendInfoDTO">
+
+        WITH combined AS (
+            <include refid="recommendTypeForTvShow"/>
+        ),
+
+        top_keywords AS (
+        SELECT member_id, keywords_id, total_count
+        FROM (SELECT member_id, keywords_id, SUM(keyword_count) AS total_count,
+        ROW_NUMBER () OVER (PARTITION BY member_id ORDER BY SUM(keyword_count) DESC ) AS rn
+        FROM combined
+        GROUP BY member_id, keywords_id) as dd
+        WHERE rn &lt;= <include refid="keywordLimit"/>
+        ),
+
+        tvshows_with_keywords AS (
+        -- 이 키워드들을 2개 이상 포함한 드라만 추출
+        SELECT  tk.movies_id AS tvShow_id, COUNT(tk.keywords_id) AS match_count
+        FROM tv_keywords tk
+        JOIN top_keywords topk ON tk.keywords_id = topk.keywords_id
+        GROUP BY tk.movies_id
+        HAVING COUNT( tk.keywords_id) >= <include refid="numIncludeKeywords"/>
+        )
+
+        SELECT DISTINCT tv.id AS tvShowId,
+        tv.name AS title,
+        tv.poster_path AS poster,
+        tv.vote_average AS rating,
+        tv.overview AS description,
+        tv.keywords AS keywordsRaw,
+        twk.match_count AS keywordsRanking
+        FROM tvshows_with_keywords twk
+            JOIN tvshows tv ON twk.tvShow_id = tv.id
+        WHERE  m.id NOT IN (
             SELECT movies_id
-            FROM movie_viewlist
-            WHERE member_id = #{userId}
-        ) and ta.is_adult = 0 and m.poster_path != '' and m.overview != ''
-
-    </select>
-
-
-    <!--시청한 목록과 유사한 작품 추천 userId 기준으로!!-->
-    <select id="getRecommendMovieByUserIdFromMemberViewlist" resultType="avengers.waffle.VO.recommendFriends.RecommendMoviesInfoDTO">
-        WITH combined_keywords AS (
-            SELECT mk.keywords_id
-            FROM movie_viewlist mv
-                     JOIN movie_keywords mk ON mv.movies_id = mk.movies_id
-            WHERE mv.member_id = #{userId}
-        ),
-             keyword_counts AS (
-                 SELECT keywords_id,
-                        COUNT(*) AS cnt
-                 FROM combined_keywords
-                 GROUP BY keywords_id
-             ),
-             top_keywords AS (
-                 SELECT keywords_id
-                 FROM keyword_counts
-                 ORDER BY cnt DESC
-            LIMIT <include refid="keywordLimit"/>
-            ),
-            movies_with_keywords AS (
-        SELECT mk.movies_id AS movie_id,
-            COUNT(DISTINCT mk.keywords_id) AS match_count
-        FROM movie_keywords mk
-            JOIN top_keywords tk ON mk.keywords_id = tk.keywords_id
-        GROUP BY mk.movies_id
-        HAVING COUNT(DISTINCT mk.keywords_id) >= <include refid="numIncludeKeywords"/>  -- 두 키워드 모두 포함한 영화만
-            )
-
-        SELECT DISTINCT m.id AS movieId,
-                        m.title,
-                        m.poster_path AS poster,
-                        r.averageRating AS rating,
-                        m.overview AS description,
-                        m.keywords AS keywordsRaw,      -- bfs때문에 넣음 keywordsRaw 문자열로 우선 받고나서 dto에서 split처리!
-                        mwk.match_count AS keywordsRanking
-        FROM movies_with_keywords mwk
-                 JOIN movies m ON mwk.movie_id = m.id
-                 JOIN ratings r ON r.tconst = m.imdb_id
-                 JOIN titles_adult ta on m.imdb_id = ta.tconst
-        WHERE ta.is_adult = 0 and m.poster_path != '' and m.overview != ''
-
-    </select>
-
-    <!--친구가 추가될 경우!! + 기본 추천   -->
-    <select id="getRecommendMovieByMemberIds" resultType="avengers.waffle.VO.recommendFriends.RecommendMoviesInfoDTO">
-
-<!--        WITH combined_keywords AS (-->
-<!--        SELECT mk.keywords_id, mw.member_id-->
-<!--        FROM movie_wishlist mw-->
-<!--        JOIN movie_keywords mk ON mw.movies_id = mk.movies_id-->
-<!--        WHERE mw.member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-
-<!--        UNION ALL-->
-
-<!--        SELECT mk.keywords_id, mv.member_id-->
-<!--        FROM movie_viewlist mv-->
-<!--        JOIN movie_keywords mk ON mv.movies_id = mk.movies_id-->
-<!--        WHERE mv.member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-<!--        ),-->
-
-<!--&#45;&#45;         keyword_count as (-->
-<!--&#45;&#45;         SELECT member_id, keywords_id, COUNT (*) AS cnt-->
-<!--&#45;&#45;         FROM combined_keywords-->
-<!--&#45;&#45;         GROUP BY member_id, keywords_id-->
-<!--&#45;&#45;         HAVING COUNT (*) >= 5-->
-<!--&#45;&#45;         ),-->
-<!--&#45;&#45;         top_keywords AS (-->
-<!--&#45;&#45;         select member_id, keywords_id, max(cnt)-->
-<!--&#45;&#45;         from keyword_count-->
-<!--&#45;&#45;         group by member_id-->
-<!--&#45;&#45;         ),-->
-<!--&#45;&#45;-->
-<!--&#45;&#45;         movies_with_keywords AS (-->
-<!--&#45;&#45;         SELECT mk.movies_id AS movie_id,-->
-<!--&#45;&#45;         COUNT(DISTINCT mk.keywords_id) AS match_count-->
-<!--&#45;&#45;         FROM movie_keywords mk-->
-<!--&#45;&#45;         JOIN top_keywords tk ON mk.keywords_id = tk.keywords_id-->
-<!--&#45;&#45;         GROUP BY mk.movies_id-->
-<!--&#45;&#45;         HAVING COUNT(DISTINCT mk.keywords_id) = 2  &#45;&#45; 두 키워드 모두 포함한 영화만-->
-<!--&#45;&#45;         )-->
-<!--        ranked_keywords AS (-->
-<!--        SELECT member_id, keywords_id, COUNT(*) AS cnt,-->
-<!--        RANK() OVER (PARTITION BY member_id ORDER BY COUNT(*) DESC) AS rnk-->
-<!--        FROM combined_keywords-->
-<!--        GROUP BY member_id, keywords_id-->
-<!--        ),-->
-<!--        top_keywords AS (-->
-<!--        SELECT member_id, keywords_id-->
-<!--        FROM ranked_keywords-->
-<!--        WHERE rnk = 1-->
-<!--        ),-->
-<!--        movies_with_keywords AS (-->
-<!--        SELECT DISTINCT mk.movies_id AS movie_id-->
-<!--        FROM movie_keywords mk-->
-<!--        JOIN top_keywords tk ON mk.keywords_id = tk.keywords_id-->
-<!--        )-->
-
-<!--        SELECT DISTINCT m.id AS movie_id,-->
-<!--                        m.title,-->
-<!--                        m.poster_path AS poster,-->
-<!--                        r.averageRating AS rating,-->
-<!--                        m.overview AS description-->
-<!--        FROM movies_with_keywords mwk-->
-<!--            JOIN movies m ON mwk.movie_id = m.id-->
-<!--            LEFT JOIN ratings r ON r.tconst = m.imdb_id-->
-<!--            LEFT JOIN titles_adult ta on m.imdb_id = ta.tconst-->
-<!--        WHERE  ta.is_adult = 0 and m.poster_path != '' and m.overview != ''-->
-<!--        ORDER BY r.numVotes DESC, r.averageRating DESC-->
-<!--        LIMIT 20;-->
-
-<!--        WITH combined_keywords AS (-->
-<!--        SELECT mk.keywords_id, mw.member_id-->
-<!--        FROM movie_wishlist mw-->
-<!--        JOIN movie_keywords mk ON mw.movies_id = mk.movies_id-->
-<!--        WHERE mw.member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-
-<!--        UNION ALL-->
-
-<!--        SELECT mk.keywords_id, mv.member_id-->
-<!--        FROM movie_viewlist mv-->
-<!--        JOIN movie_keywords mk ON mv.movies_id = mk.movies_id-->
-<!--        WHERE mv.member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-<!--        ),-->
-
-<!--        top_keywords_per_member AS (-->
-<!--        SELECT member_id, keywords_id-->
-<!--        FROM (-->
-<!--        SELECT member_id, keywords_id, COUNT(*) AS cnt,-->
-<!--        ROW_NUMBER() OVER (PARTITION BY member_id ORDER BY COUNT(*) DESC) AS rnk-->
-<!--        FROM combined_keywords-->
-<!--        GROUP BY member_id, keywords_id-->
-<!--        ) sub-->
-<!--        WHERE rnk = 1-->
-<!--        ),-->
-
-<!--        movie_match_keywords AS (-->
-<!--        SELECT mk.movies_id AS movie_id,-->
-<!--        COUNT(DISTINCT mk.keywords_id) AS matched_keyword_count-->
-<!--        FROM movie_keywords mk-->
-<!--        JOIN top_keywords_per_member tk ON mk.keywords_id = tk.keywords_id-->
-<!--        GROUP BY mk.movies_id-->
-<!--        HAVING COUNT(DISTINCT mk.keywords_id) >= 1-->
-<!--        )-->
-
-<!--        SELECT DISTINCT m.id AS movie_id,-->
-<!--        m.title,-->
-<!--        m.poster_path AS poster,-->
-<!--        r.averageRating AS rating,-->
-<!--        m.overview AS description-->
-<!--        FROM movie_match_keywords mmk-->
-<!--        JOIN movies m ON mmk.movie_id = m.id-->
-<!--        LEFT JOIN ratings r ON r.tconst = m.imdb_id-->
-<!--        LEFT JOIN titles_adult ta ON m.imdb_id = ta.tconst-->
-<!--        WHERE ta.is_adult = 0-->
-<!--        AND m.poster_path != ''-->
-<!--        AND m.overview != ''-->
-<!--        AND m.id NOT IN (-->
-<!--        SELECT movies_id-->
-<!--        FROM movie_viewlist-->
-<!--        WHERE member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-<!--        )-->
-<!--        ORDER BY mmk.matched_keyword_count DESC-->
-<!--        LIMIT 100;-->
-
-<!--        WITH combined_keywords AS (-->
-<!--        SELECT mk.keywords_id-->
-<!--        FROM movie_wishlist mw-->
-<!--        JOIN movie_keywords mk ON mw.movies_id = mk.movies_id-->
-<!--        WHERE mw.member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-<!--        UNION ALL-->
-<!--        SELECT mk.keywords_id-->
-<!--        FROM movie_viewlist mv-->
-<!--        JOIN movie_keywords mk ON mv.movies_id = mk.movies_id-->
-<!--        WHERE mv.member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-<!--        ),-->
-<!--        keyword_counts AS (-->
-<!--        SELECT keywords_id,-->
-<!--        COUNT(*) AS cnt-->
-<!--        FROM combined_keywords-->
-<!--        GROUP BY keywords_id-->
-<!--        ),-->
-<!--        top_keywords AS (-->
-<!--        SELECT keywords_id-->
-<!--        FROM keyword_counts-->
-<!--        ORDER BY cnt DESC-->
-<!--        LIMIT 10-->
-<!--        ),-->
-<!--        movies_with_keywords AS (-->
-<!--        SELECT mk.movies_id AS movie_id,-->
-<!--        COUNT(DISTINCT mk.keywords_id) AS match_count-->
-<!--        FROM movie_keywords mk-->
-<!--        JOIN top_keywords tk ON mk.keywords_id = tk.keywords_id-->
-<!--        GROUP BY mk.movies_id-->
-<!--        HAVING COUNT(DISTINCT mk.keywords_id) >= 2  &#45;&#45; 두 키워드 모두 포함한 영화만-->
-<!--        )-->
-
-<!--        SELECT DISTINCT m.id AS movieId,-->
-<!--        m.title,-->
-<!--        m.poster_path AS poster,-->
-<!--        r.averageRating AS rating,-->
-<!--        m.overview AS description,-->
-<!--        m.keywords AS keywordsRaw,      &#45;&#45; bfs때문에 넣음 keywordsRaw 문자열로 우선 받고나서 dto에서 split처리!-->
-<!--        mwk.match_count AS keywordsRanking-->
-<!--        FROM movies_with_keywords mwk-->
-<!--        JOIN movies m ON mwk.movie_id = m.id-->
-<!--        JOIN ratings r ON r.tconst = m.imdb_id-->
-<!--        JOIN titles_adult ta on m.imdb_id = ta.tconst-->
-<!--        WHERE m.id NOT IN (-->
-<!--        SELECT movies_id-->
-<!--        FROM movie_viewlist-->
-<!--        WHERE member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-<!--        ) and ta.is_adult = 0 and m.poster_path != '' and m.overview != ''-->
-<!--ㄴㅁㅇㄹㅁㄴㅇㄹㅁㄴㅇㄹㅁㄴㅇㄹㅁㄴㅇㄹㄴㅁㅇㄹㅁㄴㅇㄹㅁㄴㅇㄹㄴㅁㅇㄹㅁㄴㅇㄹㅁㄴㅇㄹㄴㅁㅇㄹㅁㄴㅇㄹㅁㄴㅇㄹㄴㅁㅇㄹㄴㅁㅇㄹㅁㄴㅇㄹㄴㅁㅇㄹㄴㅁㅇㄹㅁㄴㅇㄹㄴㅁㅇㄹㄴㅁㅇㄹ-->
-        WITH individual_keywords AS (
-        SELECT mw.member_id, mk.keywords_id
-        FROM movie_wishlist mw
-        JOIN movie_keywords mk ON mw.movies_id = mk.movies_id
-        WHERE mw.member_id IN
-        <foreach item="id" collection="list" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-        UNION ALL
-        SELECT mv.member_id, mk.keywords_id
-        FROM movie_viewlist mv
-        JOIN movie_keywords mk ON mv.movies_id = mk.movies_id
-        WHERE mv.member_id IN
-        <foreach item="id" collection="list" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-        ),
-        ranked_keywords AS (
-        -- 각 유저별 키워드 사용량 랭킹
-        SELECT member_id, keywords_id, COUNT(*) AS cnt,
-        ROW_NUMBER() OVER (PARTITION BY member_id ORDER BY COUNT(*) DESC) AS rn
-        FROM individual_keywords
-        GROUP BY member_id, keywords_id
-        ),
-        user_top_keywords AS (
-        -- 유저당 상위 5개 키워드 선택
-        SELECT keywords_id
-        FROM ranked_keywords
-        WHERE rn &lt;= <include refid="keywordLimit"/>
-        ),
-        combined_top_keywords AS (
-        -- 전체 유저에서 고른 top 키워드들을 중복 제거
-        SELECT DISTINCT keywords_id
-        FROM user_top_keywords
-        ),
-        movies_with_keywords AS (
-        -- 이 키워드들을 2개 이상 포함한 영화만 추출
-        SELECT mk.movies_id AS movie_id,
-        COUNT(DISTINCT mk.keywords_id) AS match_count
-        FROM movie_keywords mk
-        JOIN combined_top_keywords tk ON mk.keywords_id = tk.keywords_id
-        GROUP BY mk.movies_id
-        HAVING COUNT(DISTINCT mk.keywords_id) >= <include refid="numIncludeKeywords"/>
+            FROM tvshow_viewlist
+            WHERE member_id IN
+            <foreach item="id" collection="memberIds" open="(" separator="," close=")">
+             #{id}
+            </foreach>
         )
+        AND tv.poster_path != ''
+        order by twk.match_count DESC
+        limit 500;
 
-        SELECT DISTINCT m.id AS movieId,
-        m.title,
-        m.poster_path AS poster,
-        r.averageRating AS rating,
-        m.overview AS description,
-        m.keywords AS keywordsRaw,
-        mwk.match_count AS keywordsRanking
-        FROM movies_with_keywords mwk
-        JOIN movies m ON mwk.movie_id = m.id
-        JOIN ratings r ON r.tconst = m.imdb_id
-        JOIN titles_adult ta ON m.imdb_id = ta.tconst
-        WHERE m.id NOT IN (
-        SELECT movies_id
-        FROM movie_viewlist
-        WHERE member_id IN
-        <foreach item="id" collection="list" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-        )
-        AND ta.is_adult = 0
-        AND m.poster_path != ''
-        AND m.overview != '';
-
-
-
-<!--        WITH individual_keywords AS (-->
-<!--        SELECT mw.member_id, mk.keywords_id-->
-<!--        FROM movie_wishlist mw-->
-<!--        JOIN movie_keywords mk ON mw.movies_id = mk.movies_id-->
-<!--        WHERE mw.member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-<!--        UNION ALL-->
-<!--        SELECT mv.member_id, mk.keywords_id-->
-<!--        FROM movie_viewlist mv-->
-<!--        JOIN movie_keywords mk ON mv.movies_id = mk.movies_id-->
-<!--        WHERE mv.member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-<!--        ),-->
-<!--        keyword_counts AS (-->
-<!--        SELECT member_id, keywords_id, COUNT(*) AS cnt-->
-<!--        FROM individual_keywords-->
-<!--        GROUP BY member_id, keywords_id-->
-<!--        ),-->
-<!--        user_total_keywords AS (-->
-<!--        SELECT member_id, SUM(cnt) AS total-->
-<!--        FROM keyword_counts-->
-<!--        GROUP BY member_id-->
-<!--        ),-->
-<!--        normalized_keywords AS (-->
-<!--        SELECT kc.member_id, kc.keywords_id,-->
-<!--        kc.cnt * 1.0 / utk.total AS score-->
-<!--        FROM keyword_counts kc-->
-<!--        JOIN user_total_keywords utk ON kc.member_id = utk.member_id-->
-<!--        ),-->
-<!--        ranked_keywords AS (-->
-<!--        SELECT member_id, keywords_id, score,-->
-<!--        ROW_NUMBER() OVER (PARTITION BY member_id ORDER BY score DESC) AS rn-->
-<!--        FROM normalized_keywords-->
-<!--        ),-->
-<!--        user_top_keywords AS (-->
-<!--        SELECT keywords_id-->
-<!--        FROM ranked_keywords-->
-<!--        WHERE rn &lt;= <include refid="keywordLimit"/>-->
-<!--        ),-->
-<!--        combined_top_keywords AS (-->
-<!--        SELECT DISTINCT keywords_id-->
-<!--        FROM user_top_keywords-->
-<!--        ),-->
-<!--        movies_with_keywords AS (-->
-<!--        SELECT mk.movies_id AS movie_id,-->
-<!--        COUNT(DISTINCT mk.keywords_id) AS match_count-->
-<!--        FROM movie_keywords mk-->
-<!--        JOIN combined_top_keywords tk ON mk.keywords_id = tk.keywords_id-->
-<!--        GROUP BY mk.movies_id-->
-<!--        HAVING COUNT(DISTINCT mk.keywords_id) >= <include refid="numIncludeKeywords"/>-->
-<!--        )-->
-
-<!--        SELECT DISTINCT m.id AS movieId,-->
-<!--        m.title,-->
-<!--        m.poster_path AS poster,-->
-<!--        r.averageRating AS rating,-->
-<!--        m.overview AS description,-->
-<!--        m.keywords AS keywordsRaw,-->
-<!--        mwk.match_count AS keywordsRanking,-->
-
-<!--        FROM movies_with_keywords mwk-->
-<!--        JOIN movies m ON mwk.movie_id = m.id-->
-<!--        JOIN ratings r ON r.tconst = m.imdb_id-->
-<!--        JOIN titles_adult ta ON m.imdb_id = ta.tconst-->
-<!--        WHERE m.id NOT IN (-->
-<!--        SELECT movies_id-->
-<!--        FROM movie_viewlist-->
-<!--        WHERE member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-<!--        )-->
-<!--        AND ta.is_adult = 0-->
-<!--        AND m.poster_path != ''-->
-<!--        AND m.overview != '';-->
-
-<!--        WITH individual_keywords AS (-->
-<!--        SELECT mw.member_id, mk.keywords_id-->
-<!--        FROM movie_wishlist mw-->
-<!--        JOIN movie_keywords mk ON mw.movies_id = mk.movies_id-->
-<!--        WHERE mw.member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-<!--        UNION ALL-->
-<!--        SELECT mv.member_id, mk.keywords_id-->
-<!--        FROM movie_viewlist mv-->
-<!--        JOIN movie_keywords mk ON mv.movies_id = mk.movies_id-->
-<!--        WHERE mv.member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-<!--        ),-->
-<!--        keyword_counts AS (-->
-<!--        SELECT member_id, keywords_id, COUNT(*) AS cnt-->
-<!--        FROM individual_keywords-->
-<!--        GROUP BY member_id, keywords_id-->
-<!--        ),-->
-<!--        user_total_keywords AS (-->
-<!--        SELECT member_id, SUM(cnt) AS total-->
-<!--        FROM keyword_counts-->
-<!--        GROUP BY member_id-->
-<!--        ),-->
-<!--        normalized_keywords AS (-->
-<!--        SELECT kc.member_id, kc.keywords_id,-->
-<!--        kc.cnt * 1.0 / utk.total AS score-->
-<!--        FROM keyword_counts kc-->
-<!--        JOIN user_total_keywords utk ON kc.member_id = utk.member_id-->
-<!--        ),-->
-<!--        ranked_keywords AS (-->
-<!--        SELECT member_id, keywords_id, score,-->
-<!--        ROW_NUMBER() OVER (PARTITION BY member_id ORDER BY score DESC) AS rn-->
-<!--        FROM normalized_keywords-->
-<!--        ),-->
-<!--        user_top_keywords AS (-->
-<!--        SELECT member_id, keywords_id, score-->
-<!--        FROM ranked_keywords-->
-<!--        WHERE rn &lt;= <include refid="keywordLimit"/>-->
-<!--        ),-->
-<!--        &#45;&#45; 모든 사용자의 상위 키워드와 score 합산-->
-<!--        combined_top_keywords AS (-->
-<!--        SELECT keywords_id, SUM(score) AS score-->
-<!--        FROM user_top_keywords-->
-<!--        GROUP BY keywords_id-->
-<!--        ),-->
-<!--        movies_with_keywords AS (-->
-<!--        SELECT mk.movies_id AS movie_id,-->
-<!--        SUM(ctk.score) AS score-->
-<!--        FROM movie_keywords mk-->
-<!--        JOIN combined_top_keywords ctk ON mk.keywords_id = ctk.keywords_id-->
-<!--        GROUP BY mk.movies_id-->
-<!--&lt;!&ndash;        HAVING SUM(ctk.score) >= <include refid="numIncludeKeywords"/>&ndash;&gt;-->
-<!--        HAVING SUM(ctk.score) >= 1-->
-<!--        )-->
-
-<!--        SELECT DISTINCT m.id AS movieId,-->
-<!--        m.title,-->
-<!--        m.poster_path AS poster,-->
-<!--        r.averageRating AS rating,-->
-<!--        m.overview AS description,-->
-<!--        m.keywords AS keywordsRaw,-->
-<!--        mwk.score AS keywordsRanking-->
-<!--        FROM movies_with_keywords mwk-->
-<!--        JOIN movies m ON mwk.movie_id = m.id-->
-<!--        JOIN ratings r ON r.tconst = m.imdb_id-->
-<!--        JOIN titles_adult ta ON m.imdb_id = ta.tconst-->
-<!--        WHERE m.id NOT IN (-->
-<!--        SELECT movies_id-->
-<!--        FROM movie_viewlist-->
-<!--        WHERE member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-<!--        )-->
-<!--        AND ta.is_adult = 0-->
-<!--        AND m.poster_path != ''-->
-<!--        AND m.overview != '';-->
-
-
-
-
-
-
-    </select>
-
-
-    <!--친구 추가 + 찜목록 기준-->
-    <select id="getRecommendMovieByMemberIdsFromWish" resultType="avengers.waffle.VO.recommendFriends.RecommendMoviesInfoDTO">
-<!--        WITH combined_keywords AS (-->
-<!--        SELECT mk.keywords_id-->
-<!--        FROM movie_wishlist mw-->
-<!--        JOIN movie_keywords mk ON mw.movies_id = mk.movies_id-->
-<!--        WHERE mw.member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-<!--        ),-->
-<!--        keyword_counts AS (-->
-<!--        SELECT keywords_id,-->
-<!--        COUNT(*) AS cnt-->
-<!--        FROM combined_keywords-->
-<!--        GROUP BY keywords_id-->
-<!--        HAVING COUNT(*) >= 1-->
-<!--        ),-->
-<!--        top_keywords AS (-->
-<!--        SELECT keywords_id-->
-<!--        FROM keyword_counts-->
-<!--        ORDER BY cnt DESC-->
-<!--        LIMIT 2-->
-<!--        ),-->
-<!--        movies_with_keywords AS (-->
-<!--        SELECT mk.movies_id AS movie_id,-->
-<!--        COUNT(DISTINCT mk.keywords_id) AS match_count-->
-<!--        FROM movie_keywords mk-->
-<!--        JOIN top_keywords tk ON mk.keywords_id = tk.keywords_id-->
-<!--        GROUP BY mk.movies_id-->
-<!--        HAVING COUNT(DISTINCT mk.keywords_id) = 2-->
-<!--        )-->
-<!--        SELECT DISTINCT m.id AS movie_id,-->
-<!--        m.title,-->
-<!--        m.poster_path AS poster,-->
-<!--        r.averageRating AS rating,-->
-<!--        m.overview AS description-->
-<!--        FROM movies_with_keywords mwk-->
-<!--        JOIN movies m ON mwk.movie_id = m.id-->
-<!--        LEFT JOIN ratings r ON r.tconst = CONCAT('tt', LPAD(m.id, 7, '0'))-->
-<!--        WHERE m.id NOT IN (-->
-<!--        SELECT id-->
-<!--        FROM movie_viewlist-->
-<!--        WHERE member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-<!--        )-->
-<!--        ORDER BY r.numVotes DESC , r.averageRating DESC-->
-<!--        LIMIT 20;-->
-
-        WITH individual_keywords AS (
-        -- 각 유저별로 시청 또는 찜한 영화의 키워드 추출
-        SELECT mw.member_id, mk.keywords_id
-        FROM movie_wishlist mw
-        JOIN movie_keywords mk ON mw.movies_id = mk.movies_id
-        WHERE mw.member_id IN
-        <foreach item="id" collection="list" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-        ),
-        ranked_keywords AS (
-        -- 각 유저별 키워드 사용량 랭킹
-        SELECT member_id, keywords_id, COUNT(*) AS cnt,
-        ROW_NUMBER() OVER (PARTITION BY member_id ORDER BY COUNT(*) DESC) AS rn
-        FROM individual_keywords
-        GROUP BY member_id, keywords_id
-        ),
-        user_top_keywords AS (
-        -- 유저당 상위 5개 키워드 선택
-        SELECT keywords_id
-        FROM ranked_keywords
-        WHERE rn &lt;= <include refid="keywordLimit"/>
-        ),
-        combined_top_keywords AS (
-        -- 전체 유저에서 고른 top 키워드들을 중복 제거
-        SELECT DISTINCT keywords_id
-        FROM user_top_keywords
-        ),
-        movies_with_keywords AS (
-        -- 이 키워드들을 2개 이상 포함한 영화만 추출
-        SELECT mk.movies_id AS movie_id,
-        COUNT(DISTINCT mk.keywords_id) AS match_count
-        FROM movie_keywords mk
-        JOIN combined_top_keywords tk ON mk.keywords_id = tk.keywords_id
-        GROUP BY mk.movies_id
-        HAVING COUNT(DISTINCT mk.keywords_id) >= <include refid="numIncludeKeywords"/>
-        )
-
-        SELECT DISTINCT m.id AS movieId,
-        m.title,
-        m.poster_path AS poster,
-        r.averageRating AS rating,
-        m.overview AS description,
-        m.keywords AS keywordsRaw,
-        mwk.match_count AS keywordsRanking
-        FROM movies_with_keywords mwk
-        JOIN movies m ON mwk.movie_id = m.id
-        JOIN ratings r ON r.tconst = m.imdb_id
-        JOIN titles_adult ta ON m.imdb_id = ta.tconst
-        WHERE m.id NOT IN (
-        SELECT movies_id
-        FROM movie_viewlist
-        WHERE member_id IN
-        <foreach item="id" collection="list" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-        )
-        AND ta.is_adult = 0
-        AND m.poster_path != ''
-        AND m.overview != '';
-    </select>
-
-    <!--친구 추가 + 시청한 목록 기준-->
-    <select id="getRecommendMovieByMemberIdsFromViewlist" resultType="avengers.waffle.VO.recommendFriends.RecommendMoviesInfoDTO">
-<!--        WITH combined_keywords AS (-->
-<!--        SELECT mk.keywords_id-->
-<!--        FROM movie_viewlist mv-->
-<!--        JOIN movie_keywords mk ON mv.movies_id = mk.movies_id-->
-<!--        WHERE mv.member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-<!--        ),-->
-<!--        keyword_counts AS (-->
-<!--        SELECT keywords_id,-->
-<!--        COUNT(*) AS cnt-->
-<!--        FROM combined_keywords-->
-<!--        GROUP BY keywords_id-->
-<!--        HAVING COUNT(*) >= 1-->
-<!--        ),-->
-<!--        top_keywords AS (-->
-<!--        SELECT keywords_id-->
-<!--        FROM keyword_counts-->
-<!--        ORDER BY cnt DESC-->
-<!--        LIMIT 2-->
-<!--        ),-->
-<!--        movies_with_keywords AS (-->
-<!--        SELECT mk.movies_id AS movie_id,-->
-<!--        COUNT(DISTINCT mk.keywords_id) AS match_count-->
-<!--        FROM movie_keywords mk-->
-<!--        JOIN top_keywords tk ON mk.keywords_id = tk.keywords_id-->
-<!--        GROUP BY mk.movies_id-->
-<!--        HAVING COUNT(DISTINCT mk.keywords_id) = 2-->
-<!--        )-->
-<!--        SELECT DISTINCT m.id AS movieId,-->
-<!--        m.title,-->
-<!--        m.poster_path AS poster,-->
-<!--        r.averageRating AS rating,-->
-<!--        m.overview AS description-->
-<!--        FROM movies_with_keywords mwk-->
-<!--        JOIN movies m ON mwk.movie_id = m.id-->
-<!--        LEFT JOIN ratings r ON r.tconst = CONCAT('tt', LPAD(m.id, 7, '0'))-->
-<!--        WHERE m.id NOT IN (-->
-<!--        SELECT id-->
-<!--        FROM movie_viewlist-->
-<!--        WHERE member_id IN-->
-<!--        <foreach item="id" collection="list" open="(" separator="," close=")">-->
-<!--            #{id}-->
-<!--        </foreach>-->
-<!--        )-->
-<!--        ORDER BY r.numVotes DESC , r.averageRating DESC-->
-<!--        LIMIT 20;-->
-        WITH individual_keywords AS (
-        -- 각 유저별로 시청 또는 찜한 영화의 키워드 추출
-
-        SELECT mv.member_id, mk.keywords_id
-        FROM movie_viewlist mv
-        JOIN movie_keywords mk ON mv.movies_id = mk.movies_id
-        WHERE mv.member_id IN
-        <foreach item="id" collection="list" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-        ),
-        ranked_keywords AS (
-        -- 각 유저별 키워드 사용량 랭킹
-        SELECT member_id, keywords_id, COUNT(*) AS cnt,
-        ROW_NUMBER() OVER (PARTITION BY member_id ORDER BY COUNT(*) DESC) AS rn
-        FROM individual_keywords
-        GROUP BY member_id, keywords_id
-        ),
-        user_top_keywords AS (
-        -- 유저당 상위 5개 키워드 선택
-        SELECT keywords_id
-        FROM ranked_keywords
-        WHERE rn &lt;= <include refid="keywordLimit"/>
-        ),
-        combined_top_keywords AS (
-        -- 전체 유저에서 고른 top 키워드들을 중복 제거
-        SELECT DISTINCT keywords_id
-        FROM user_top_keywords
-        ),
-        movies_with_keywords AS (
-        -- 이 키워드들을 2개 이상 포함한 영화만 추출
-        SELECT mk.movies_id AS movie_id,
-        COUNT(DISTINCT mk.keywords_id) AS match_count
-        FROM movie_keywords mk
-        JOIN combined_top_keywords tk ON mk.keywords_id = tk.keywords_id
-        GROUP BY mk.movies_id
-        HAVING COUNT(DISTINCT mk.keywords_id) >= <include refid="numIncludeKeywords"/>
-        )
-
-        SELECT DISTINCT m.id AS movieId,
-        m.title,
-        m.poster_path AS poster,
-        r.averageRating AS rating,
-        m.overview AS description,
-        m.keywords AS keywordsRaw,
-        mwk.match_count AS keywordsRanking
-        FROM movies_with_keywords mwk
-        JOIN movies m ON mwk.movie_id = m.id
-        JOIN ratings r ON r.tconst = m.imdb_id
-        JOIN titles_adult ta ON m.imdb_id = ta.tconst
-        WHERE
-        ta.is_adult = 0
-        AND m.poster_path != ''
-        AND m.overview != '';
     </select>
 
 

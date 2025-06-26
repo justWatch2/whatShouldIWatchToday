@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="avengers.waffle.mapper.PostMapper">
+
+    <select id="top5Ranking" parameterType="string" resultType="avengers.waffle.VO.posts.Post4ListDTO">
+        SELECT no as no, title as title, member_id as name, indate as indate, count as count
+        FROM (SELECT no, title, member_id, indate, count, like_count, popularity
+              FROM post
+              WHERE indate >= DATE_FORMAT(NOW() - INTERVAL 7 DAY, '%Y%m%d') AND category = #{category}) ps
+        WHERE count > 100
+          AND like_count > 10
+        ORDER BY popularity DESC
+        LIMIT 5
+
+    </select>
+
+</mapper>

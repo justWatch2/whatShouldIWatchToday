@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
 
@@ -12,13 +13,14 @@ import java.io.Serializable;
 @NoArgsConstructor
 @Getter
 @Table(name="post_attach")
+@DynamicUpdate
 @Builder
 @AllArgsConstructor
 public class PostAttach implements Serializable {
     @Id
-    @Column(name = "attach_no")
+    @Column(name = "no")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long attachNo;
+    private Integer no;
 
     @ManyToOne
     @JoinColumn(name = "post_no", referencedColumnName = "no", nullable = false)

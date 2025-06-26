@@ -20,20 +20,17 @@ public class Movies {
     @Column(name = "id", nullable = false)
     private Integer id;
 
+    @Column(name = "imdb_id", length = 50)
+    private String imdbId;
+
     @Column(name = "title", length = 255)
     private String title;
-
-    @Column(name = "release_date")
-    private LocalDate releaseDate;
 
     @Column(name = "runtime")
     private Integer runtime;
 
     @Column(name = "backdrop_path", columnDefinition = "TEXT")
     private String backdropPath;
-
-    @Column(name = "imdb_id", length = 50)
-    private String imdbId;
 
     @Column(name = "original_language", length = 10)
     private String originalLanguage;
@@ -50,12 +47,16 @@ public class Movies {
     @Column(name = "tagline", columnDefinition = "TEXT")
     private String tagline;
 
+    @Column(name = "release_date")
+    private LocalDate releaseDate;
+
+    @Column(name = "korean_title", length = 255)
+    private String koreanTitle;
+
     @Column(name = "genres", columnDefinition = "TEXT")
     private String genres;
 
     @Column(name = "keywords", columnDefinition = "TEXT")
     private String keywords;
 
-    @Column(name = "korean_title", length = 255)
-    private String koreanTitle;
 }
