@@ -10,12 +10,10 @@
         SELECT
         mm.member_name AS name,
         COUNT(DISTINCT mw.movies_id) AS numWish,
-        COUNT(DISTINCT mv.movies_id) AS numViewedMovie,
-        icon.img_url AS icon
+        COUNT(DISTINCT mv.movies_id) AS numViewedMovie
         FROM member mm
         left JOIN movie_wishlist mw ON mw.member_id = mm.member_id
         left JOIN movie_viewlist mv ON mv.member_id = mm.member_id
-        left JOIN icon on mm.icon_num = icon.icon_num
         WHERE mm.member_id IN
         <foreach item="id" collection="list" open="(" separator="," close=")">
             #{id}
