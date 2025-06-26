@@ -30,10 +30,10 @@ public class DetailServiceImpl implements IF_DetailService {
         boolean result;
         if(category.equals("movie")){
             result=movieWishListRepository.existsByMovies_IdAndMember_MemberId(id,memberId);
-            detailMapper.addKcm(id,memberId,1);
+
         }else{
             result=tvShowWishListRepository.existsByTvshows_IdAndMember_MemberId(id,memberId);
-            detailMapper.addKct(id,memberId,1);
+
         }
         return result;
     }
@@ -42,9 +42,11 @@ public class DetailServiceImpl implements IF_DetailService {
     public void delWish(String memberId, String category, Integer id) {
         if(category.equals("movie")){
             movieWishListRepository.deleteAllByMovies_IdAndMember_MemberId(id,memberId);
+            detailMapper.updateKcm(id,memberId);
             detailMapper.deleteKcm(id,memberId);
         }else{
             tvShowWishListRepository.deleteAllByTvshows_IdAndMember_MemberId(id,memberId);
+            detailMapper.updateKct(id,memberId);
             detailMapper.deleteKct(id,memberId);
         }
     }
@@ -56,11 +58,13 @@ public class DetailServiceImpl implements IF_DetailService {
                     .member(Member.builder().memberId(memberId).build())
                     .movies(Movies.builder().id(id).build())
                     .build());
+            detailMapper.addKcm(id,memberId,1);
         }else{
             tvShowWishListRepository.save(TvShowWishList.builder()
                     .member(Member.builder().memberId(memberId).build())
                     .tvshows(TvShows.builder().id(id).build())
                     .build());
+            detailMapper.addKct(id,memberId,1);
         }
     }
 
@@ -80,8 +84,12 @@ public class DetailServiceImpl implements IF_DetailService {
     public void delView(String memberId, String category, Integer id) {
         if(category.equals("movie")){
             movieViewListRepository.deleteAllByMovies_IdAndMember_MemberId(id,memberId);
+            detailMapper.updateKcm(id,memberId);
+            detailMapper.deleteKcm(id,memberId);
         }else{
             tvShowViewListRepository.deleteAllByTvshows_IdAndMember_MemberId(id,memberId);
+            detailMapper.updateKct(id,memberId);
+            detailMapper.deleteKct(id,memberId);
         }
     }
 
@@ -92,11 +100,13 @@ public class DetailServiceImpl implements IF_DetailService {
                     .member(Member.builder().memberId(memberId).build())
                     .movies(Movies.builder().id(id).build())
                     .build());
+            detailMapper.addKcm(id,memberId,2);
         }else{
             tvShowViewListRepository.save(TvShowViewList.builder()
                     .member(Member.builder().memberId(memberId).build())
                     .tvshows(TvShows.builder().id(id).build())
                     .build());
+            detailMapper.addKct(id,memberId,2);
         }
     }
 
