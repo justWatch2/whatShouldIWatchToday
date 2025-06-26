@@ -19,6 +19,7 @@ import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class GullController {
 
     private final IF_GullService GullService;
@@ -136,6 +137,8 @@ public class GullController {
         }
         return "fail";
     }
+
+
 
 
 }

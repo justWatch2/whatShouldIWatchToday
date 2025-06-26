@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MovieMemberRepository extends JpaRepository<Member, String> {
     Member findByMemberId(String memberId);
+    boolean existsByMemberId(String id);
 }

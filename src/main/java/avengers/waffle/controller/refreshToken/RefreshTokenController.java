@@ -12,6 +12,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -32,7 +33,10 @@ import java.util.Date;
 public class RefreshTokenController {
 
     private final JwtProperties jwtProperties;
+
+    @Qualifier("tokenRedisTemplate")
     private final StringRedisTemplate stringRedisTemplate;
+
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final MovieMemberRepository movieMemberRepository;
     private final GetMemberId getMemberId;

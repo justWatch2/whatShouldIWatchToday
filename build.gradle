@@ -7,6 +7,10 @@ plugins {
 group = 'org.example'
 version = '0.0.1-SNAPSHOT'
 
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-parameters"
+}
+
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
@@ -41,7 +45,7 @@ dependencies {
 
     implementation 'org.mariadb.jdbc:mariadb-java-client:3.3.2' // 최신 버전으로 업데이트
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-
+//    implementation 'org.springframework.boot:spring-boot-starter-cache'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     annotationProcessor 'org.projectlombok:lombok'

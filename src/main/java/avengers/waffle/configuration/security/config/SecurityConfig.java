@@ -8,10 +8,9 @@ import avengers.waffle.configuration.security.jwt.JwtAuthenticationFilter;
 import avengers.waffle.configuration.security.jwt.JwtAuthorizationFilter;
 import avengers.waffle.configuration.security.oauth2.CustomOAuth2UserService;
 import avengers.waffle.configuration.security.oauth2.JwtProperties;
-
 import avengers.waffle.repository.posts.MovieMemberRepository;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -34,9 +33,11 @@ public class SecurityConfig {
     private final MovieMemberRepository movieMemberRepository;
     private final JwtProperties jwtProperties;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final StringRedisTemplate stringRedisTemplate;
+    //private final StringRedisTemplate stringRedisTemplate;
     private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
 
+    @Qualifier("tokenRedisTemplate")
+    private final StringRedisTemplate stringRedisTemplate;
     //Spring Boot 3.x 이상에서는 AuthenticationManager를 직접 빌드해서 넣어줘야 필터에서 사용할 수 있음.
     //@Bean으로 분리해 두면 다른 클래스에서도 재사용 가능해서 더 좋다.
     @Bean
@@ -58,7 +59,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {
 
         // JwtAuthenticationFilter 설정
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, stringRedisTemplate, jwtProperties);
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(authenticationManager, stringRedisTemplate,jwtProperties);
         jwtAuthenticationFilter.setFilterProcessesUrl("/api/login"); // <- 이거 안 하면 필터가 동작 안 함 +  클라이언트 쪽에서
         jwtAuthenticationFilter.setAuthenticationFailureHandler(customAuthenticationFailureHandler);
         //로그인을 할려고 /api/login으로 요청으로 보내면 필터가 작동할수 있도록 하는 메서드이다.
@@ -68,7 +69,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilter(jwtAuthenticationFilter)  // 이부분이 처음 로그인할때만 동작한다.
-                .addFilter(new JwtAuthorizationFilter(authenticationManager, movieMemberRepository, jwtProperties))
+                .addFilter(new JwtAuthorizationFilter(authenticationManager, movieMemberRepository , jwtProperties))
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint) // 401 예외처리부분 로그인 실패시
                 )
@@ -78,10 +79,12 @@ public class SecurityConfig {
                                 .requestMatchers("/manager/**").hasAnyRole("MANAGER", "ADMIN")  // 여러 권한중 하나만 있어도 허용
                                 .requestMatchers("/admin/**").hasRole("ADMIN")  //  특정 하나의 권한만 허용
 
-                                .requestMatchers("/api/auth/refresh", "/css/**", "/js/**", "/images/**", "/join", "/api/join", "/friend/**", "/recommend/**").permitAll() // 로그인 페이지, 정적 파일은 모두 허용
+                                .requestMatchers("/api/auth/refresh", "/css/**", "/js/**", "/images/**", "/join", "/api/join","/friend/**","/recommend/**").permitAll() // 로그인 페이지, 정적 파일은 모두 허용
                                 .requestMatchers("/").permitAll() // 기본 홈 페이지도 허용
-//                                .anyRequest().authenticated() // 나머지 요청은 인증이 필요
-                                .anyRequest().permitAll() // 이건 가장마지막에 위치해야된다.
+                                .requestMatchers("*").permitAll()
+                                .requestMatchers("/*").permitAll()
+                                .anyRequest().authenticated() // 나머지 요청은 인증이 필요
+//                                .anyRequest().permitAll()
                 )
                 .oauth2Login(oauth2 -> oauth2
                                 .userInfoEndpoint(userInfo -> userInfo
@@ -98,6 +101,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
+        configuration.addAllowedOrigin("http://localhost:3000");
         configuration.addAllowedOrigin("http://localhost:5173");
         //.allowedOriginPatterns("*")  // ✅ Spring Boot 2.4 이상에서 지원
         configuration.addAllowedHeader("*");

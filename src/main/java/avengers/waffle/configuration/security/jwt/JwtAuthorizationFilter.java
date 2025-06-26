@@ -51,6 +51,10 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             chain.doFilter(request, response);
             return;
         }
+        if (uri.equals("/api/**")) {
+            chain.doFilter(request, response);
+            return;
+        }
 
         //header가 있는지 확인
         if (jwtHeader == null || !jwtHeader.startsWith("Bearer ")) {
