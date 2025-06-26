@@ -16,6 +16,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class DetailServiceImpl implements IF_DetailService {
     private final MovieWishListRepository movieWishListRepository;
     private final MovieViewListRepository movieViewListRepository;
@@ -29,22 +30,27 @@ public class DetailServiceImpl implements IF_DetailService {
         boolean result;
         if(category.equals("movie")){
             result=movieWishListRepository.existsByMovies_IdAndMember_MemberId(id,memberId);
+
         }else{
             result=tvShowWishListRepository.existsByTvshows_IdAndMember_MemberId(id,memberId);
+
         }
         return result;
     }
 
     @Override
-    @Transactional
     public void delWish(String memberId, String category, Integer id) {
         if(category.equals("movie")){
             movieWishListRepository.deleteAllByMovies_IdAndMember_MemberId(id,memberId);
+            detailMapper.updateKcm(id,memberId);
+            detailMapper.deleteKcm(id,memberId);
         }else{
             tvShowWishListRepository.deleteAllByTvshows_IdAndMember_MemberId(id,memberId);
+            detailMapper.updateKct(id,memberId);
+            detailMapper.deleteKct(id,memberId);
         }
     }
-    @Transactional
+
     @Override
     public void addWish(String memberId, String category, Integer id) {
         if(category.equals("movie")){
@@ -52,11 +58,13 @@ public class DetailServiceImpl implements IF_DetailService {
                     .member(Member.builder().memberId(memberId).build())
                     .movies(Movies.builder().id(id).build())
                     .build());
+            detailMapper.addKcm(id,memberId,1);
         }else{
             tvShowWishListRepository.save(TvShowWishList.builder()
                     .member(Member.builder().memberId(memberId).build())
                     .tvshows(TvShows.builder().id(id).build())
                     .build());
+            detailMapper.addKct(id,memberId,1);
         }
     }
 
@@ -71,16 +79,20 @@ public class DetailServiceImpl implements IF_DetailService {
         }
         return result;
     }
-    @Transactional
+
     @Override
     public void delView(String memberId, String category, Integer id) {
         if(category.equals("movie")){
             movieViewListRepository.deleteAllByMovies_IdAndMember_MemberId(id,memberId);
+            detailMapper.updateKcm(id,memberId);
+            detailMapper.deleteKcm(id,memberId);
         }else{
             tvShowViewListRepository.deleteAllByTvshows_IdAndMember_MemberId(id,memberId);
+            detailMapper.updateKct(id,memberId);
+            detailMapper.deleteKct(id,memberId);
         }
     }
-    @Transactional
+
     @Override
     public void addView(String memberId, String category, Integer id) {
         if(category.equals("movie")){
@@ -88,11 +100,13 @@ public class DetailServiceImpl implements IF_DetailService {
                     .member(Member.builder().memberId(memberId).build())
                     .movies(Movies.builder().id(id).build())
                     .build());
+            detailMapper.addKcm(id,memberId,2);
         }else{
             tvShowViewListRepository.save(TvShowViewList.builder()
                     .member(Member.builder().memberId(memberId).build())
                     .tvshows(TvShows.builder().id(id).build())
                     .build());
+            detailMapper.addKct(id,memberId,2);
         }
     }
 
