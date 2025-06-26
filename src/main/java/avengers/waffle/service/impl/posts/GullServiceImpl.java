@@ -5,7 +5,7 @@ import avengers.waffle.VO.posts.*;
 //import avengers.waffle.VO.util.PageVO;
 import avengers.waffle.entity.*;
 import avengers.waffle.mapper.PostMapper;
-import avengers.waffle.repository.login.MemberRepository;
+
 import avengers.waffle.repository.posts.*;
 import avengers.waffle.repository.mapping.attachMapping;
 import avengers.waffle.service.IF.posts.IF_GullService;
@@ -34,7 +34,7 @@ public class GullServiceImpl implements IF_GullService {
     private final ReplyLikeListRepository replyLikeListRepository;
     private final PostMapper postMapper;
     private final EntityManager em;
-    private final MemberRepository memberRepository;
+
     private final BCryptPasswordEncoder passwordEncoder;
 
 
@@ -239,14 +239,7 @@ public class GullServiceImpl implements IF_GullService {
         reply.setLikeCount(param ? reply.getLikeCount() + 1 : reply.getLikeCount() - 1);
     }
 
-    @Override
-    public void saveMember(MemberDTO memberDTO, String s) {
-        memberRepository.save(Member.builder()
-                .memberId(memberDTO.getId())
-                .memberPw(passwordEncoder.encode(memberDTO.getPass()))
-                .imgUrl(s)
-                .build());
-    }
+    
 }
 
 

@@ -30,7 +30,7 @@ public class FileDataUtil {
 	};     //<-- 현재 코드는 활용하지는 않는다.. 얘는 선언이지 기능이 동작하지는 않는다. 절대 미리 예측 금지..
 	
 	//첨부파일 업로드 경로 변수값으로 가져옴 servlet-context.xml
-	private String uploadPath="/tmp";
+	private String uploadPath="C:/Users/jooho/Desktop/upload";
 	
 	public String getUploadPath() {
 		return uploadPath;
