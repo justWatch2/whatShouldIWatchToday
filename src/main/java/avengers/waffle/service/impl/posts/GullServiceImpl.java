@@ -190,14 +190,18 @@ public class GullServiceImpl implements IF_GullService {
         Post post = updatePost(postVO);
         List<attachMapping> attachs = postAttachRepository.findAllByPost_no(post.getNo());
         List<String> existFiles = new ArrayList<>();
-        for (attachMapping mapping : attachs) {
-            existFiles.add(mapping.getFileUrl());
-        }
-        for (String url : existingFileUrl) {
-            existFiles.remove(url);
-        }
-        for (String existFile : existFiles) {
-            postAttachRepository.deleteByFileUrl(existFile);
+        if (attachs != null) {
+            for (attachMapping mapping : attachs) {
+                existFiles.add(mapping.getFileUrl());
+            }
+            if (existingFileUrl != null) {
+                for (String url : existingFileUrl) {
+                    existFiles.remove(url);
+                }
+                for (String existFile : existFiles) {
+                    postAttachRepository.deleteByFileUrl(existFile);
+                }
+            }
         }
 //            postAttachRepository.deleteByPost_no(postVO.getNo());
         if (fileUrl != null) {

@@ -6,6 +6,10 @@ import avengers.waffle.VO.posts.*;
 
 import avengers.waffle.service.IF.posts.IF_GullService;
 import avengers.waffle.utils.FileDataUtil;
+import avengers.waffle.utils.GetMemberId;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -25,10 +29,10 @@ public class GullController {
 
     private final IF_GullService GullService;
     private final FileDataUtil fileDataUtil;
+    private final GetMemberId getMemberId;
 
 
-
-    @GetMapping("/getPosts")
+    @GetMapping("/non-member/getPosts")
     @ResponseBody
     public Map<String, Object> posts(@RequestParam int page, @RequestParam String category) {
         Page<Post4ListDTO> list = GullService.getPostList(page, category);
@@ -45,27 +49,49 @@ public class GullController {
         return map;
     }
 
-    @GetMapping("/getTopPosts")
+    @GetMapping("/non-member/getTopPosts")
     @ResponseBody
     public List<Post4ListDTO> topPosts(@RequestParam String category) {
         return GullService.getTopPosts(category);
     }
 
-
-    @GetMapping("/getPost")
+    @GetMapping("/non-member/getMemberId")
     @ResponseBody
-    public Map<String, Object> GullDetail(@RequestParam int no, @RequestParam String id) {
+    public Map<String, Object> getMemberId(HttpServletRequest request, HttpServletResponse response) {
+        String id = getMemberId.getMemberId2(request.getHeader("Authorization"));
+        if (id == null) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return null;
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", id);
+        return map;
+    }
+
+    @GetMapping("/non-member/getPost")
+    @ResponseBody
+    public Map<String, Object> GullDetail(@RequestParam int no, HttpServletRequest request, HttpServletResponse response) {
+        String id = getMemberId.getMemberId2(request.getHeader("Authorization"));
+        System.out.println("id = " + id);
+        if(id == null){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return null;
+        }
         PostVO post = GullService.getPost(no);
-        boolean likePost = GullService.getLikePost(no, id);
+        boolean likePost = false;
+        if(!id.equals("none")) {
+            likePost = GullService.getLikePost(no, id);
+        }
         List<ReplyVO> replyList = GullService.getReplyList(no);
         Map<String, Object> map = new HashMap<>();
         map.put("post", post);
         map.put("replys", replyList);
         map.put("likePost", likePost);
+        map.put("id",id);
         return map;
     }
 
-    @GetMapping("/getPost2")
+    @GetMapping("/non-member/getPost2")
     @ResponseBody
     public Map<String, Object> GullDetail2(@RequestParam int no) {
         PostVO post = GullService.getPost(no);
@@ -87,7 +113,7 @@ public class GullController {
         return "success";
     }
 
-    @PostMapping("/updatePost")
+    @PutMapping("/updatePost")
     @ResponseBody
     public String updatePost(@ModelAttribute PostVO post, MultipartFile[] fileUrl, String[] existingFileUrl) throws IOException {
         System.out.println("수정 도착");
@@ -102,7 +128,7 @@ public class GullController {
         return "success";
     }
 
-    @GetMapping(value = "/getReplys")
+    @GetMapping(value = "/non-member/getReplys")
     @ResponseBody
     public List<ReplyVO> getReplys(@RequestParam int no) {
         List<ReplyVO> replyList = GullService.getReplyList(no);
