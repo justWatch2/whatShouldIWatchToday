@@ -28,6 +28,7 @@ public class GetMemberId {
 
             memberId = jwt.getClaim("memberId").asString();
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
         return memberId;

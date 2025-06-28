@@ -27,28 +27,9 @@ public class GullController {
     private final FileDataUtil fileDataUtil;
     private final MemberRepository memberRepository;
 
-    @GetMapping("/checkId")
-    @ResponseBody
-    public String checkId(@RequestParam String id) {
-        System.out.println(id);
-        boolean check = memberRepository.existsByMemberId(id);
-        if (!check) {
-            return "success";
-        }
-        return "fail";
-    }
 
-    @PostMapping("/signUp")
-    @ResponseBody
-    public String signUp(@ModelAttribute MemberDTO memberDTO, MultipartFile[] img) throws IOException {
-        if (img != null && img[0] != null) {
-            String[] url = fileDataUtil.fileUpload(img);
-            GullService.saveMember(memberDTO, url[0]);
-            return "success";
-        }
-        GullService.saveMember(memberDTO, null);
-        return "success";
-    }
+
+
 
     @GetMapping("/getPosts")
     @ResponseBody

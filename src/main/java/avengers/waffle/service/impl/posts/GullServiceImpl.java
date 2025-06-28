@@ -239,14 +239,7 @@ public class GullServiceImpl implements IF_GullService {
         reply.setLikeCount(param ? reply.getLikeCount() + 1 : reply.getLikeCount() - 1);
     }
 
-    @Override
-    public void saveMember(MemberDTO memberDTO, String s) {
-        memberRepository.save(Member.builder()
-                .memberId(memberDTO.getId())
-                .memberPw(passwordEncoder.encode(memberDTO.getPass()))
-                .imgUrl(s)
-                .build());
-    }
+
 }
 
 
