@@ -7,6 +7,7 @@ import avengers.waffle.repository.posts.MovieMemberRepository;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -73,9 +74,19 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         String memberId = null;
         try {
             memberId = JWT.require(Algorithm.HMAC512(jwtProperties.getSecret())).build().verify(jwtToken).getClaim("memberId").asString();
+        }  catch (TokenExpiredException e) {
+            // 토큰 만료시 401 에러 + 에러 메시지
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"code\":\"EXPIRED_ACCESS_TOKEN\", \"message\":\"AccessToken has expired.\"}");
+            response.getWriter().flush();
+            return;
         } catch (Exception e) {
-            // JWT 검증 실패 시 그냥 다음 필터로 넘김
-            chain.doFilter(request, response);
+            // 토큰 변조 또는 기타 오류 → 403
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"code\":\"INVALID_TOKEN\", \"message\":\"Invalid or tampered token.\"}");
+            response.getWriter().flush();
             return;
         }
 
