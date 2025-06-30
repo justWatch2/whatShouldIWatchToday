@@ -5,7 +5,7 @@ import avengers.waffle.VO.posts.*;
 //import avengers.waffle.VO.util.PageVO;
 import avengers.waffle.entity.*;
 import avengers.waffle.mapper.PostMapper;
-import avengers.waffle.repository.login.MemberRepository;
+
 import avengers.waffle.repository.posts.*;
 import avengers.waffle.repository.mapping.attachMapping;
 import avengers.waffle.service.IF.posts.IF_GullService;
@@ -34,7 +34,7 @@ public class GullServiceImpl implements IF_GullService {
     private final ReplyLikeListRepository replyLikeListRepository;
     private final PostMapper postMapper;
     private final EntityManager em;
-    private final MemberRepository memberRepository;
+
     private final BCryptPasswordEncoder passwordEncoder;
 
 
@@ -190,14 +190,18 @@ public class GullServiceImpl implements IF_GullService {
         Post post = updatePost(postVO);
         List<attachMapping> attachs = postAttachRepository.findAllByPost_no(post.getNo());
         List<String> existFiles = new ArrayList<>();
-        for (attachMapping mapping : attachs) {
-            existFiles.add(mapping.getFileUrl());
-        }
-        for (String url : existingFileUrl) {
-            existFiles.remove(url);
-        }
-        for (String existFile : existFiles) {
-            postAttachRepository.deleteByFileUrl(existFile);
+        if (attachs != null) {
+            for (attachMapping mapping : attachs) {
+                existFiles.add(mapping.getFileUrl());
+            }
+            if (existingFileUrl != null) {
+                for (String url : existingFileUrl) {
+                    existFiles.remove(url);
+                }
+                for (String existFile : existFiles) {
+                    postAttachRepository.deleteByFileUrl(existFile);
+                }
+            }
         }
 //            postAttachRepository.deleteByPost_no(postVO.getNo());
         if (fileUrl != null) {
@@ -239,7 +243,7 @@ public class GullServiceImpl implements IF_GullService {
         reply.setLikeCount(param ? reply.getLikeCount() + 1 : reply.getLikeCount() - 1);
     }
 
-
+    
 }
 
 

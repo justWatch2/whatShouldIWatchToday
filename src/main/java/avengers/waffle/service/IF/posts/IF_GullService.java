@@ -38,4 +38,5 @@ public interface IF_GullService {
 
     void updateLikeCount4Reply(int replyNo, boolean param);
 
+
 }

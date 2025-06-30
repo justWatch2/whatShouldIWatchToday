@@ -52,10 +52,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             chain.doFilter(request, response);
             return;
         }
-//        if (uri.equals("/api/**")) {
-//            chain.doFilter(request, response);
-//            return;
-//        }
 
         //header가 있는지 확인
         if (jwtHeader == null || !jwtHeader.startsWith("Bearer ")) {
@@ -73,8 +69,11 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         String jwtToken = jwtHeader.replace("Bearer ", "");
         String memberId = null;
         try {
-            memberId = JWT.require(Algorithm.HMAC512(jwtProperties.getSecret())).build().verify(jwtToken).getClaim("memberId").asString();
-        }  catch (TokenExpiredException e) {
+            memberId = JWT.require(Algorithm.HMAC512(jwtProperties.getSecret()))
+                    .build()
+                    .verify(jwtToken)
+                    .getClaim("memberId").asString();
+        } catch (TokenExpiredException e) {
             // 토큰 만료시 401 에러 + 에러 메시지
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json;charset=UTF-8");
@@ -89,8 +88,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             response.getWriter().flush();
             return;
         }
-
-
         //서명이 정상적으로 된경우
         if (memberId != null) {
             System.out.println(" 인가쪽 제대로 시행된다는거지");
