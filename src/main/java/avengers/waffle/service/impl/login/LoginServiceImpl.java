@@ -1,6 +1,6 @@
 package avengers.waffle.service.impl.login;
 
-import avengers.waffle.VO.posts.MemberDTO;
+import avengers.waffle.VO.login.MemberDTO;
 import avengers.waffle.entity.Member;
 import avengers.waffle.repository.posts.MovieMemberRepository;
 import avengers.waffle.service.IF.login.IF_LoginService;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class loginServiceImpl implements IF_LoginService {
+public class LoginServiceImpl implements IF_LoginService {
     private final MovieMemberRepository movieMemberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
@@ -18,8 +18,17 @@ public class loginServiceImpl implements IF_LoginService {
     public void saveMember(MemberDTO memberDTO, String s) {
         movieMemberRepository.save(Member.builder()
                 .memberId(memberDTO.getId())
-                .memberPw(passwordEncoder.encode(memberDTO.getPw()))
+                .roles("ROLE_USER")
+                .memberPw(passwordEncoder.encode(memberDTO.getPass()))
                 .imgUrl(s)
                 .build());
+    }
+
+    @Override
+    public String getImgUrl(String id) {
+        String ImgUrl = movieMemberRepository.findByMemberId(id).getImgUrl();
+        System.out.println("ImgUrl: " + ImgUrl);
+
+        return ImgUrl;
     }
 }

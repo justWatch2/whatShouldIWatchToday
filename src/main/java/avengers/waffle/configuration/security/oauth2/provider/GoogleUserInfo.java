@@ -2,7 +2,7 @@ package avengers.waffle.configuration.security.oauth2.provider;
 
 import java.util.Map;
 
-public  class GoogleUserInfo implements OAuth2UserInfo {
+public class GoogleUserInfo implements OAuth2UserInfo {
 
     private Map<String, Object> attributes;    //oauth2User.getAttributes() 여기 나오는 리턴값을 받기 위해
 
@@ -28,5 +28,10 @@ public  class GoogleUserInfo implements OAuth2UserInfo {
     @Override
     public String getName() {
         return (String) attributes.get("name");
+    }
+
+    @Override
+    public String getProfile_image() {
+        return attributes.get("picture").toString();
     }
 }
