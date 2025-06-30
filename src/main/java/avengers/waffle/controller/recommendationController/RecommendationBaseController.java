@@ -34,6 +34,7 @@ public class RecommendationBaseController {
     }
     @PostMapping("/time")
     public ResponseEntity<ResponseDTO> recommendByTime(@RequestBody TimeRequestDTO request) {
+        System.out.println("asdadw하하하하하하하하ㅏ핳");
         return baseRecommend(request.getGenresMovies(), request.getGenresTV());
     }
 
