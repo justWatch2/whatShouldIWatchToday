@@ -1,20 +1,28 @@
 plugins {
     id 'java'
+    // 최신 버전인 3.4.5로 통일
     id 'org.springframework.boot' version '3.4.5'
     id 'io.spring.dependency-management' version '1.1.7'
 }
 
-group = 'org.example'
-version = '0.0.1-SNAPSHOT'
-
-tasks.withType(JavaCompile) {
-    options.compilerArgs << "-parameters"
+// 두 번째 파일에서 가져온 QueryDSL 버전 설정
+ext {
+    queryDslVersion = '5.0.0'
 }
+
+// 두 번째 파일의 group id 사용
+group = 'whatShouldWatchToday'
+version = '0.0.1-SNAPSHOT'
 
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
     }
+}
+
+// 첫 번째 파일에서 가져온 컴파일러 옵션
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-parameters"
 }
 
 configurations {
@@ -28,50 +36,61 @@ repositories {
 }
 
 dependencies {
-
-    implementation 'com.vladmihalcea:hibernate-types-60:2.21.1' // Hibernate 6.x
-
-
-    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    // --- Spring Boot Starters (통합 및 추가) ---
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-authorization-server'
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-web-services'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
-    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
-
-    implementation 'org.mariadb.jdbc:mariadb-java-client:3.3.2' // 최신 버전으로 업데이트
+    implementation 'org.springframework.boot:spring-boot-starter-security'          // from file 1
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'        // from file 1
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-authorization-server' // from file 1
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-//    implementation 'org.springframework.boot:spring-boot-starter-cache'
-    compileOnly 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'            // from file 1
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'          // from file 1
+    implementation 'org.springframework.boot:spring-boot-starter-web-services'      // from file 1
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'            // from file 1
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'             // from file 1
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'io.projectreactor:reactor-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    //jwt토큰 생성을 위해서
+    // --- Database & Persistence (통합 및 버전 통일) ---
+    // MariaDB 클라이언트 버전을 3.4.1로 통일
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.4.1'
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    implementation 'com.vladmihalcea:hibernate-types-60:2.21.1'                     // from file 1
+
+    // --- QueryDSL (두 번째 파일에서 추가) ---
+    implementation "com.querydsl:querydsl-sql:${queryDslVersion}"
+    implementation "com.querydsl:querydsl-sql-spring:${queryDslVersion}"
+    implementation "com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta"
+    annotationProcessor(
+            "com.querydsl:querydsl-apt:${queryDslVersion}:jakarta",
+            "jakarta.persistence:jakarta.persistence-api",
+            "jakarta.annotation:jakarta.annotation-api"
+    )
+
+    // --- Lombok (통합 및 버전 통일) ---
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+    // --- JWT (첫 번째 파일에서 추가) ---
     implementation 'com.auth0:java-jwt:4.4.0'
 
-    //redis설정을 위해서
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    // --- 유틸리티 (두 번째 파일에서 추가) ---
+    implementation 'net.coobird:thumbnailator:0.4.19'
 
-    //mariadb를 위해서
-//    implementation 'org.mariadb.jdbc:mariadb-java-client' // MariaDB JDBC 드라이버
-    implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.4'  // 2025년 최신 버전 기준
+    // --- Test Dependencies (통합 및 추가) ---
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'            // from file 1
+    testImplementation 'io.projectreactor:reactor-test'                           // from file 1
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    //for mybatis
-    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    // TestContainers (from file 2)
+    testImplementation 'org.testcontainers:mariadb:1.20.2'
+    testImplementation 'org.testcontainers:junit-jupiter:1.20.2'
 
-    //refreshToken 파싱을 위해서 사용할려고 했지만 토큰 만들떄 auth를 통해 만들었기때문에 통일을 위해서 사용하지 않음
-    // 또한 현업에서는 auth라이브러리 많이 사용함.
-//    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-//    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-//    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // JSON 파싱용 Jackson
+    // MyBatis Test (from file 2)
+    testImplementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter-test:3.0.3'
+
+    // Test Lombok
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
 }
 
 tasks.named('test') {
