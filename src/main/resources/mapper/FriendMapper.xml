@@ -11,7 +11,7 @@
         mm.img_url AS icon
         FROM member mm
             left JOIN movie_viewlist mv ON mv.member_id = mm.member_id
-        WHERE mm.member_id IN
+        WHERE mm.member_name IN
         <foreach item="id" collection="list" open="(" separator="," close=")">
             #{id}
         </foreach>
@@ -24,7 +24,7 @@
             mm.img_url AS icon
             FROM member mm
                 left JOIN movie_wishlist mw ON mw.member_id = mm.member_id
-            WHERE mm.member_id IN
+            WHERE mm.member_name IN
             <foreach item="id" collection="list" open="(" separator="," close=")">
                 #{id}
             </foreach>
@@ -48,7 +48,7 @@
             mm.img_url AS icon
             FROM member mm
                 left JOIN tvshow_viewlist tv ON tv.member_id = mm.member_id
-            WHERE mm.member_id IN
+            WHERE mm.member_name IN
             <foreach item="id" collection="list" open="(" separator="," close=")">
                 #{id}
             </foreach>
@@ -61,7 +61,7 @@
             mm.img_url AS icon
             FROM member mm
                 left JOIN tvshow_wishlist tw ON tw.member_id = mm.member_id
-            WHERE mm.member_id IN
+            WHERE mm.member_name IN
             <foreach item="id" collection="list" open="(" separator="," close=")">
                 #{id}
             </foreach>

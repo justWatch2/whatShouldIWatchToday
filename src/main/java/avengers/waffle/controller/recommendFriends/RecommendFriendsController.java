@@ -36,7 +36,9 @@ public class RecommendFriendsController {
 
         System.out.println("memberId = " + memberId);
         List<RecommendFriendsInfoDTO> recommendFriendsInfoDTOList = recommendFriendsService.getFriendsInfoFromMovies(memberId);
-
+        for(RecommendFriendsInfoDTO recommendFriendsInfoDTO : recommendFriendsInfoDTOList) {
+            System.out.println("recommendFriendsInfoDTO = " + recommendFriendsInfoDTO.getName());
+        }
         return  ResponseEntity.ok(recommendFriendsInfoDTOList);
     }
 
