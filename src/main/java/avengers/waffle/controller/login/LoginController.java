@@ -13,24 +13,12 @@ import java.io.IOException;
 
 @Controller
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class LoginController {
 
     private final IF_LoginService loginService;
     private final FileDataUtil fileDataUtil;
     private final MovieMemberRepository memberRepository;
-
-
-    @GetMapping("/checkId")
-    @ResponseBody
-    public String checkId(@RequestParam String id) {
-        System.out.println(id);
-        boolean check = memberRepository.existsByMemberId(id);
-        if (!check) {
-            return "success";
-        }
-        return "fail";
-    }
-
 
     @PostMapping("/signUp")
     @ResponseBody
@@ -44,5 +32,16 @@ public class LoginController {
         String imgRrl = "/static/images/logo.png";
         loginService.saveMember(memberDTO, imgRrl);
         return "success";
+    }
+
+    @GetMapping("/checkId")
+    @ResponseBody
+    public String checkId(@RequestParam String id) {
+        System.out.println(id);
+        boolean check = memberRepository.existsByMemberId(id);
+        if (!check) {
+            return "success";
+        }
+        return "fail";
     }
 }

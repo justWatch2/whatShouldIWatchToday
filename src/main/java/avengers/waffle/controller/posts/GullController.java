@@ -1,9 +1,9 @@
 package avengers.waffle.controller.posts;
 
+import avengers.waffle.VO.login.MemberDTO;
 import avengers.waffle.VO.posts.*;
 //import avengers.waffle.VO.util.PageVO;
-import avengers.waffle.entity.PostLikeList;
-import avengers.waffle.repository.posts.MovieMemberRepository;
+
 import avengers.waffle.service.IF.posts.IF_GullService;
 import avengers.waffle.utils.FileDataUtil;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +25,6 @@ public class GullController {
 
     private final IF_GullService GullService;
     private final FileDataUtil fileDataUtil;
-
 
 
 
@@ -65,6 +64,7 @@ public class GullController {
         map.put("likePost", likePost);
         return map;
     }
+
     @GetMapping("/getPost2")
     @ResponseBody
     public Map<String, Object> GullDetail2(@RequestParam int no) {
@@ -94,10 +94,10 @@ public class GullController {
         System.out.println(Arrays.toString(existingFileUrl));
         if (fileUrl != null && fileUrl.length > 0) {
             String[] fileName = fileDataUtil.fileUpload(fileUrl);
-            GullService.updatePostAndFile(post, fileName,existingFileUrl);
+            GullService.updatePostAndFile(post, fileName, existingFileUrl);
 
         } else {
-            GullService.updatePostAndFile(post, null,existingFileUrl);
+            GullService.updatePostAndFile(post, null, existingFileUrl);
         }
         return "success";
     }
@@ -131,11 +131,11 @@ public class GullController {
         return "fail";
     }
 
-    @PutMapping(value="/likeReply")
+    @PutMapping(value = "/likeReply")
     @ResponseBody
     public String likeReply(@ModelAttribute ReplyLikeDTO replyLikeDTO, @RequestParam boolean param) {
-        System.out.println("likeReply: "+param);
-        if(GullService.updateLikeList4Reply(replyLikeDTO, param)){
+        System.out.println("likeReply: " + param);
+        if (GullService.updateLikeList4Reply(replyLikeDTO, param)) {
             GullService.updateLikeCount4Reply(replyLikeDTO.getReplyNo(), param);
             return "success";
         }

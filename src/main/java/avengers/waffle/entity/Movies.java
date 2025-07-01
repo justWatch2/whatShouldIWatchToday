@@ -20,7 +20,7 @@ public class Movies {
     @Column(name = "id", nullable = false)
     private Integer id;
 
-    @Column(name = "imdb_id", length = 20)
+    @Column(name = "imdb_id", length = 50)
     private String imdbId;
 
     @Column(name = "title", length = 255)

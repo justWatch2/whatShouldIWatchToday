@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class loginService implements IF_LoginService {
+public class loginServiceImpl implements IF_LoginService {
     private final MovieMemberRepository movieMemberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
