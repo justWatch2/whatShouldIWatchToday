@@ -14,6 +14,7 @@ import java.util.List;
 public class PostVO {
     private long no;
     private String title;
+    private String id;
     private String name;
     private String writer;
     private String category;

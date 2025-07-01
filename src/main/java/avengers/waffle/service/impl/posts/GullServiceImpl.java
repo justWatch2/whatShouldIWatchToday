@@ -6,6 +6,7 @@ import avengers.waffle.VO.posts.*;
 import avengers.waffle.entity.*;
 import avengers.waffle.mapper.PostMapper;
 
+import avengers.waffle.repository.mapping.MemberMapping;
 import avengers.waffle.repository.posts.*;
 import avengers.waffle.repository.posts.mapping.attachMapping;
 import avengers.waffle.service.IF.posts.IF_GullService;
@@ -36,6 +37,7 @@ public class GullServiceImpl implements IF_GullService {
     private final EntityManager em;
 
     private final BCryptPasswordEncoder passwordEncoder;
+    private final MovieMemberRepository movieMemberRepository;
 
 
     @Override
@@ -48,10 +50,12 @@ public class GullServiceImpl implements IF_GullService {
 
         List<Post4ListDTO> post4ListDTOs = new ArrayList<>();
         for (Post post : posts) {
+            System.out.println(post.getMember().getMemberName());
             post4ListDTOs.add(Post4ListDTO.builder()
                     .no(post.getNo())
                     .title(post.getTitle())
-                    .name(post.getMember().getMemberId())
+                    .id(post.getMember().getMemberId())
+                    .name(post.getMember().getMemberName())
                     .indate(post.getIndate())
                     .count(post.getCount())
                     .build()
@@ -72,7 +76,8 @@ public class GullServiceImpl implements IF_GullService {
         PostVO postVO = PostVO.builder()
                 .title(post.getTitle())
                 .category(post.getCategory())
-                .name(post.getMember().getMemberId())
+                .id(post.getMember().getMemberId())
+                .name(post.getMember().getMemberName())
                 .indate(post.getIndate())
                 .count(post.getCount())
                 .likeCount(post.getLikeCount())
@@ -90,6 +95,7 @@ public class GullServiceImpl implements IF_GullService {
         return post;
     }
 
+
     @Override
     public List<ReplyVO> getReplyList(int no) {
         List<ReplyVO> replyVOs = new ArrayList<>();
@@ -97,7 +103,8 @@ public class GullServiceImpl implements IF_GullService {
         for (Reply reply : replies) {
             ReplyVO replyVO = ReplyVO.builder()
                     .num((int) reply.getNo())
-                    .name(reply.getMember().getMemberId())
+                    .id(reply.getMember().getMemberId())
+                    .name(reply.getMember().getMemberName())
                     .contents(reply.getContents())
                     .time(String.valueOf(reply.getIndate()))
                     .likeCount(reply.getLikeCount())
@@ -114,7 +121,7 @@ public class GullServiceImpl implements IF_GullService {
                 .title(postVO.getTitle())
                 .category(postVO.getCategory())
                 .contents(postVO.getContents())
-                .member(Member.builder().memberId(postVO.getName()).build())
+                .member(Member.builder().memberId(postVO.getId()).build())
                 .build();
         postRepository.save(post);
         if (fileUrl != null) {
@@ -138,7 +145,7 @@ public class GullServiceImpl implements IF_GullService {
     public void addReply(ReplyVO replyVO) {
         Reply reply = Reply.builder()
                 .post(Post.builder().no(Integer.parseInt(replyVO.getPostNo())).build())
-                .member(Member.builder().memberId(replyVO.getName()).build())
+                .member(Member.builder().memberId(replyVO.getId()).build())
                 .contents(replyVO.getContents())
                 .build();
         replyRepository.save(reply);
@@ -190,14 +197,18 @@ public class GullServiceImpl implements IF_GullService {
         Post post = updatePost(postVO);
         List<attachMapping> attachs = postAttachRepository.findAllByPost_no(post.getNo());
         List<String> existFiles = new ArrayList<>();
-        for (attachMapping mapping : attachs) {
-            existFiles.add(mapping.getFileUrl());
-        }
-        for (String url : existingFileUrl) {
-            existFiles.remove(url);
-        }
-        for (String existFile : existFiles) {
-            postAttachRepository.deleteByFileUrl(existFile);
+        if (attachs != null) {
+            for (attachMapping mapping : attachs) {
+                existFiles.add(mapping.getFileUrl());
+            }
+            if (existingFileUrl != null) {
+                for (String url : existingFileUrl) {
+                    existFiles.remove(url);
+                }
+                for (String existFile : existFiles) {
+                    postAttachRepository.deleteByFileUrl(existFile);
+                }
+            }
         }
 //            postAttachRepository.deleteByPost_no(postVO.getNo());
         if (fileUrl != null) {
@@ -229,6 +240,16 @@ public class GullServiceImpl implements IF_GullService {
         return false;
     }
 
+    @Override
+    public String getMemberNameById(String id) {
+        if(id.equals("none")){
+            return "noName";
+        }
+        MemberMapping name = movieMemberRepository.findMemberNameByMemberId(id);
+        System.out.println(name.getMemberName());
+        return name.getMemberName();
+    }
+
     private boolean getLikeReply(int no, String id) {
         return replyLikeListRepository.existsByReply_noAndMember_memberId(no, id);
     }
@@ -239,7 +260,7 @@ public class GullServiceImpl implements IF_GullService {
         reply.setLikeCount(param ? reply.getLikeCount() + 1 : reply.getLikeCount() - 1);
     }
 
-    
+
 }
 
 

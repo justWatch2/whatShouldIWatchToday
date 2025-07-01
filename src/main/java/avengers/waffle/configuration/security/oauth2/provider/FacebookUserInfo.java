@@ -1,5 +1,9 @@
 package avengers.waffle.configuration.security.oauth2.provider;
 
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+
+import java.util.List;
 import java.util.Map;
 
 public  class FacebookUserInfo implements OAuth2UserInfo {
@@ -28,5 +32,14 @@ public  class FacebookUserInfo implements OAuth2UserInfo {
     @Override
     public String getName() {
         return (String) attributes.get("name");
+    }
+
+    @Override
+    public String getProfile_image() {
+        Map<String, Object> profile = (Map<String, Object>) attributes.get("picture");
+        Map<String, Object> data = (Map<String, Object>) profile.get("data");
+        String url = (String) data.get("url");
+        System.out.println("Facebook profile image: " + url);
+        return url;
     }
 }
