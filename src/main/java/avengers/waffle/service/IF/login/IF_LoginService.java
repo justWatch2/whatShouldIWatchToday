@@ -6,4 +6,6 @@ public interface IF_LoginService {
     void saveMember(MemberDTO memberDTO, String s);
 
     String getImgUrl(String id);
+
+
 }

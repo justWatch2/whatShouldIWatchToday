@@ -52,6 +52,15 @@ public class Member implements Serializable{
         return new ArrayList<>();
     }
 
+
+    public void updateProfile(String newMemberName, String newPassword, String newImgUrl) {
+
+        this.memberName = newMemberName;
+        this.memberPw = newPassword;
+        this.imgUrl = newImgUrl;
+    }
+
+
     public List<String> getFriendList() {
         if (!this.friendList.isEmpty()) {
             return new ArrayList<>(Arrays.asList(this.friendList.split(","))); //  수정 가능 리스트
@@ -66,4 +75,5 @@ public class Member implements Serializable{
             this.friendList = String.join(",", list);
         }
     }
+
 }
