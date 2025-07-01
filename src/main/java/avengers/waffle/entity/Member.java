@@ -52,4 +52,18 @@ public class Member implements Serializable{
         return new ArrayList<>();
     }
 
+    public List<String> getFriendList() {
+        if (!this.friendList.isEmpty()) {
+            return new ArrayList<>(Arrays.asList(this.friendList.split(","))); //  수정 가능 리스트
+        }
+        return new ArrayList<>();
+    }
+
+    public void addFriendList(String friendList){
+        List<String> list =  getFriendList();
+        if (!list.contains(friendList)){
+            list.add(friendList);
+            this.friendList = String.join(",", list);
+        }
+    }
 }

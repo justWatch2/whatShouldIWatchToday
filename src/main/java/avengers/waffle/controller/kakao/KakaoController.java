@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -37,6 +39,19 @@ public class KakaoController {
         return (kakaoService.createURL(memberId));
     }
 
+    @PostMapping("/api/friend/nicknameByUuids")
+    public ResponseEntity<Map<String, String>> getNicknamesByUuids(@RequestBody Map<String, List<String>> request) {
+        List<String> uuidList = request.get("uuids");
+
+        uuidList.forEach(uuid -> {
+            System.out.println("토큰 누가 보냈는지 알려고 할때 uuid = " + uuid);
+        });
+
+        Map<String, String> result = kakaoService.getNicknamesByUuids(uuidList);
+        return ResponseEntity.ok(result);
+    }
+
+
     @PostMapping("/api/friend/invite")
     public ResponseEntity<?> checkInviteUrl(@RequestBody UuidDTO uuidDTO, HttpServletRequest request){
         String authorizationHeader = request.getHeader("Authorization");
@@ -45,7 +60,19 @@ public class KakaoController {
         //에러시 not_acceptable로 406에러를 발생시켜 구분시켰다 일부러
         if (result == null) {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
+        }else if ("reject".equals(result)) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE)
+                    .body("reject_uuid");  // 거절된 UUID
         }
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/api/friend/reject")
+    public ResponseEntity<?> rejectInviteUrl(@RequestBody UuidDTO uuidDTO, HttpServletRequest request){
+        String authorizationHeader = request.getHeader("Authorization");
+        String memberId  =  getMemberId.getMemberId(authorizationHeader);
+        kakaoService.rejectUuid(uuidDTO.getUuid(), memberId);
+
         return ResponseEntity.ok().build();
     }
 

@@ -67,7 +67,7 @@ public class RecommendInfoDTO {
 
     public void setKeywordsRaw(String keywordsRaw) {
         this.keywordsRaw = keywordsRaw;
-        System.out.println("DEBUG >>> keywordsRaw = " + keywordsRaw);
+//        System.out.println("DEBUG >>> keywordsRaw = " + keywordsRaw);
         if (keywordsRaw == null || keywordsRaw.isEmpty()) {
             this.keywords = List.of();
         } else {

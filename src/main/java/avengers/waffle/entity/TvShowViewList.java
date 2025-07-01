@@ -21,7 +21,7 @@ public class TvShowViewList implements Serializable {
     private Integer no;
 
     @ManyToOne
-    @JoinColumn(name="tvshows_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name="tv_shows_id", referencedColumnName = "id", nullable = false)
     private TvShows tvshows;
 
     @ManyToOne

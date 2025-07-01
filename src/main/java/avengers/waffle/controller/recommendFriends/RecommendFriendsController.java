@@ -26,40 +26,44 @@ import java.util.List;
 public class RecommendFriendsController {
     private final IF_RecommendFriendsService recommendFriendsService;
     private final GetMemberId getMemberId;
-//    private final ThreadService threadService;
 
 
     @GetMapping("/friend/getList")
-    public ResponseEntity<List<RecommendFriendsInfoDTO>> getFriendList() {
-        //토큰 안에 있는  아이디를 확인해서 친구목록 불러온다.
-//        String authorizationHeader = request.getHeader("Authorization");
-//        String memberId =  getMemberId.getMemberId(authorizationHeader);
+    public ResponseEntity<List<RecommendFriendsInfoDTO>> getFriendListFromMovies(HttpServletRequest request) {
+//        토큰 안에 있는  아이디를 확인해서 친구목록 불러온다.
+        String authorizationHeader = request.getHeader("Authorization");
+        String memberId =  getMemberId.getMemberId(authorizationHeader);
 
-        //임시로 넣어둠
-        String userId = "aa";
-        List<RecommendFriendsInfoDTO> recommendFriendsInfoDTOList = recommendFriendsService.getFriendsInfo(userId);
+        System.out.println("memberId = " + memberId);
+        List<RecommendFriendsInfoDTO> recommendFriendsInfoDTOList = recommendFriendsService.getFriendsInfoFromMovies(memberId);
 
-        // 잘들어갔는지 체크
-        recommendFriendsInfoDTOList.stream().forEach((recommendMoviesInfoDTO) -> {
-            System.out.println("recommendMoviesInfoDTO = " + recommendMoviesInfoDTO.getIcon());
-        });
         return  ResponseEntity.ok(recommendFriendsInfoDTOList);
     }
 
+    @GetMapping("/friend/getDramaList")
+    public ResponseEntity<List<RecommendFriendsInfoDTO>> getFriendListFromTvshow(HttpServletRequest request) {
+//        토큰 안에 있는  아이디를 확인해서 친구목록 불러온다.
+        String authorizationHeader = request.getHeader("Authorization");
+        String memberId =  getMemberId.getMemberId(authorizationHeader);
+
+        System.out.println("memberId = " + memberId);
+        List<RecommendFriendsInfoDTO> recommendFriendsInfoDTOList = recommendFriendsService.getFriendsInfoFromTvshow(memberId);
+
+        return  ResponseEntity.ok(recommendFriendsInfoDTOList);
+    }
+
+
     //영화, 드라마  데이터 추천 부분 상황에따라 실시간으로 처리
     @PostMapping("/recommend/movies")
-    public ResponseEntity<List<RecommendInfoDTO>> recommendMovies(@RequestBody RecommendRequestDTO recommendRequestDTO) {
+    public ResponseEntity<List<RecommendInfoDTO>> recommendMovies(@RequestBody RecommendRequestDTO recommendRequestDTO, HttpServletRequest request) {
         //토큰 안에 있는  아이디를 확인해서 친구목록 불러온다.
-//        String authorizationHeader = request.getHeader("Authorization");
-//        String memberId =  getMemberId.getMemberId(authorizationHeader);
-
-        //임시로 넣어둠
-        String userId = "aa";
+        String authorizationHeader = request.getHeader("Authorization");
+        String memberId =  getMemberId.getMemberId(authorizationHeader);
 
         System.out.println("recommendRequestDTO.getCategory() = " + recommendRequestDTO.getCategory());
         System.out.println("recommendRequestDTO.getRecommendOption() = " + recommendRequestDTO.getRecommendOption());
-        for(String memberId : recommendRequestDTO.getMemberIds()) {
-            System.out.println("memberId = " + memberId);
+        for(String testMemberId : recommendRequestDTO.getMemberIds()) {
+            System.out.println("controller 부분 memberId 체크  = " + testMemberId);
         }
 
         boolean isMovies = true;
@@ -69,27 +73,21 @@ public class RecommendFriendsController {
         }
 
         //기존 방법
-        List<RecommendInfoDTO> recommendInfoDTOList = recommendFriendsService.getMoviesInfo(userId, recommendRequestDTO, isMovies);
-
-        //쓰레드 6개로 병렬 처리
-//        List<RecommendInfoDTO> recommendInfoDTOList = threadService.threadStart(userId, recommendRequestDTO, isMovies);
-
+        List<RecommendInfoDTO> recommendInfoDTOList = recommendFriendsService.getMoviesInfo(memberId, recommendRequestDTO, isMovies);
         List<RecommendInfoDTO> result = null;
 
         //bfs추천 로직
         if(isMovies){
             //bfs로 영화 추천 로직
-            result = recommendFriendsService.bfsRecommendForMovie(recommendInfoDTOList, 2, 50, 3);  // 영화 리스트, 깊이, 시작노드 개수
+            result = recommendFriendsService.bfsRecommendForMovie(recommendInfoDTOList, 2, 30, 3);  // 영화 리스트, 깊이, 시작노드 개수
         }else{
             //bfs로 tv쇼 추천 로직
-            result = recommendFriendsService.bfsRecommendForTvshow(recommendInfoDTOList, 2, 50, 3);  // tvshow 리스트, 깊이, 시작노드 개수
+            result = recommendFriendsService.bfsRecommendForTvshow(recommendInfoDTOList, 2, 30, 3);  // tvshow 리스트, 깊이, 시작노드 개수
         }
 
         result.stream().forEach((recommendInfoDTO) -> {
             System.out.println("recommendInfoDTO.getTitle() = " + recommendInfoDTO.getTitle());
         });
-
-        //만약에 recommendMoviesInfoDTOList가 null 이라면 처리를 따로 장르로 다시 추천을 돌리던가 처리를 해줘야된다. 우선 대기
 
         return ResponseEntity.ok(result);
     }
