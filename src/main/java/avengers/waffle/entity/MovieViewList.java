@@ -23,7 +23,7 @@ public class MovieViewList implements Serializable {
     private Integer no;
 
     @ManyToOne
-    @JoinColumn(name="movie_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name="movies_id", referencedColumnName = "id", nullable = false)
     private Movies movies;
 
     @ManyToOne
