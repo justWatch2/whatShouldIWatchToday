@@ -52,4 +52,11 @@ public class Member implements Serializable{
         return new ArrayList<>();
     }
 
+    public void updateProfile(String newMemberName, String newPassword, String newImgUrl) {
+
+        this.memberName = newMemberName;
+        this.memberPw = newPassword;
+        this.imgUrl = newImgUrl;
+    }
+
 }

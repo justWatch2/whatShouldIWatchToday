@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="avengers.waffle.mapper.FriendListMapper">
+
+
+    <select id="selectFriendList" resultType="string" parameterType="string">
+        SELECT friend_list FROM member WHERE member_id = #{memberId}
+    </select>
+
+    <!-- 친구 목록 조회 (member_id의 friend_list에서 최대 5명 가져오기) -->
+    <select id="selectFriendsByMemberId" resultType="avengers.waffle.dto.userDTO.FriendDTO" parameterType="map">
+        SELECT m.member_id AS memberId, m.member_name AS memberName, m.img_url as imgUrl
+        FROM member m
+        WHERE m.member_id IN
+        <foreach item="friendId" collection="friendIds" open="(" separator="," close=")">
+            #{friendId}
+        </foreach>
+        AND m.member_id != #{memberId}
+    </select>
+
+    <!-- 친구 삭제 -->
+    <update id="deleteFriend" parameterType="map">
+        UPDATE member
+        SET friend_list = JSON_ARRAY(
+        <foreach item="friendId" collection="updatedFriendList" separator="," open="[" close="]">
+            #{friendId}
+        </foreach>
+        )
+        WHERE member_id = #{memberId}
+    </update>
+
+</mapper>
