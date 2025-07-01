@@ -7,6 +7,7 @@ import avengers.waffle.repository.posts.MovieMemberRepository;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -51,10 +52,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             chain.doFilter(request, response);
             return;
         }
-        if (uri.equals("/api/**")) {
-            chain.doFilter(request, response);
-            return;
-        }
 
         //header가 있는지 확인
         if (jwtHeader == null || !jwtHeader.startsWith("Bearer ")) {
@@ -72,14 +69,25 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         String jwtToken = jwtHeader.replace("Bearer ", "");
         String memberId = null;
         try {
-            memberId = JWT.require(Algorithm.HMAC512(jwtProperties.getSecret())).build().verify(jwtToken).getClaim("memberId").asString();
+            memberId = JWT.require(Algorithm.HMAC512(jwtProperties.getSecret()))
+                    .build()
+                    .verify(jwtToken)
+                    .getClaim("memberId").asString();
+        } catch (TokenExpiredException e) {
+            // 토큰 만료시 401 에러 + 에러 메시지
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"code\":\"EXPIRED_ACCESS_TOKEN\", \"message\":\"AccessToken has expired.\"}");
+            response.getWriter().flush(); // ✅ 추가해보세요
+            return;
         } catch (Exception e) {
-            // JWT 검증 실패 시 그냥 다음 필터로 넘김
-            chain.doFilter(request, response);
+            // 토큰 변조 또는 기타 오류 → 403
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"code\":\"INVALID_TOKEN\", \"message\":\"Invalid or tampered token.\"}");
+            response.getWriter().flush(); // ✅ 추가해보세요
             return;
         }
-
-
         //서명이 정상적으로 된경우
         if (memberId != null) {
             System.out.println(" 인가쪽 제대로 시행된다는거지");

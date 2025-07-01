@@ -51,7 +51,7 @@ public class RefreshTokenController {
     @PostMapping("/api/auth/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
 
-        System.out.println("controller 까지는 왔ㄷ다!!");
+        System.out.println("refrsh controller 까지는 왔다!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         //1. 쿠키에서 refresh token 꺼내기
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {

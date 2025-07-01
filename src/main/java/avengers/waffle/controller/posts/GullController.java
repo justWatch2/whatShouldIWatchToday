@@ -3,6 +3,7 @@ package avengers.waffle.controller.posts;
 import avengers.waffle.VO.posts.*;
 //import avengers.waffle.VO.util.PageVO;
 import avengers.waffle.entity.PostLikeList;
+import avengers.waffle.repository.posts.MovieMemberRepository;
 import avengers.waffle.service.IF.posts.IF_GullService;
 import avengers.waffle.utils.FileDataUtil;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,9 @@ public class GullController {
 
     private final IF_GullService GullService;
     private final FileDataUtil fileDataUtil;
+
+
+
 
     @GetMapping("/getPosts")
     @ResponseBody

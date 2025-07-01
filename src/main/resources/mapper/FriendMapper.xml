@@ -3,31 +3,86 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-
-
 <mapper namespace="avengers.waffle.mapper.FriendMapper">
-    <select id="getFriendsInfoByMemberId" resultType="avengers.waffle.VO.recommendFriends.RecommendFriendsInfoDTO">
-        SELECT
+    <select id="getFriendsInfoByMemberIdFromMovies" resultType="avengers.waffle.VO.recommendFriends.RecommendFriendsInfoDTO">
+        with view AS (SELECT
         mm.member_name AS name,
-        COUNT(DISTINCT mw.movies_id) AS numWish,
-        COUNT(DISTINCT mv.movies_id) AS numViewedMovie
+        COUNT(DISTINCT mv.movies_id) AS numViewedMovie,
+        mm.img_url AS icon
         FROM member mm
-        left JOIN movie_wishlist mw ON mw.member_id = mm.member_id
-        left JOIN movie_viewlist mv ON mv.member_id = mm.member_id
+            left JOIN movie_viewlist mv ON mv.member_id = mm.member_id
         WHERE mm.member_id IN
         <foreach item="id" collection="list" open="(" separator="," close=")">
             #{id}
         </foreach>
         GROUP BY mm.member_id
+        ),
+        wish AS(
+            SELECT
+            mm.member_name AS name,
+            COUNT(DISTINCT mw.movies_id) AS numWish,
+            mm.img_url AS icon
+            FROM member mm
+                left JOIN movie_wishlist mw ON mw.member_id = mm.member_id
+            WHERE mm.member_id IN
+            <foreach item="id" collection="list" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            GROUP BY mm.member_id
+        )
+        select wish.name AS name,
+                wish.numWish AS numWish,
+                view.numViewedMovie AS numViewedMovie,
+                wish.icon AS icon
+        from  wish
+            join view on view.name = wish.name
         ORDER BY numWish DESC, numViewedMovie DESC
+
+    </select>
+
+    <select id="getFriendsInfoByMemberIdFromTvshow" resultType="avengers.waffle.VO.recommendFriends.RecommendFriendsInfoDTO">
+        with view AS (
+            SELECT
+            mm.member_name AS name,
+            COUNT(DISTINCT tv.tv_shows_id) AS numViewedMovie,
+            mm.img_url AS icon
+            FROM member mm
+                left JOIN tvshow_viewlist tv ON tv.member_id = mm.member_id
+            WHERE mm.member_id IN
+            <foreach item="id" collection="list" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            GROUP BY mm.member_id
+        ),
+        wish AS(
+            SELECT
+            mm.member_name AS name,
+            COUNT(DISTINCT tw.tv_shows_id) AS numWish,
+            mm.img_url AS icon
+            FROM member mm
+                left JOIN tvshow_wishlist tw ON tw.member_id = mm.member_id
+            WHERE mm.member_id IN
+            <foreach item="id" collection="list" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+            GROUP BY mm.member_id
+        )
+        select wish.name AS name,
+            wish.numWish AS numWish,
+            view.numViewedMovie AS numViewedMovie,
+            wish.icon AS icon
+        from  wish
+            join view on view.name = wish.name
+        ORDER BY numWish DESC, numViewedMovie DESC
+
     </select>
 
     <sql id="keywordLimit">
-        50
+        20
     </sql>
 
     <sql id="numIncludeKeywords">
-        2
+        1
     </sql>
 
     <sql id="recommendTypeForMovie">
@@ -133,7 +188,7 @@
             </when>
             <otherwise>
                 SELECT member_id, keywords_id, keyword_count
-                FROM keyword_count_t kct
+                FROM keyword_count_tv kct
                 WHERE member_id IN
                 <foreach item="id" collection="memberIds" open="(" separator="," close=")">
                     #{id}
@@ -161,10 +216,10 @@
 
         tvshows_with_keywords AS (
         -- 이 키워드들을 2개 이상 포함한 드라만 추출
-        SELECT  tk.movies_id AS tvShow_id, COUNT(tk.keywords_id) AS match_count
+        SELECT  tk.tv_shows_id AS tvShow_id, COUNT(tk.keywords_id) AS match_count
         FROM tv_keywords tk
         JOIN top_keywords topk ON tk.keywords_id = topk.keywords_id
-        GROUP BY tk.movies_id
+        GROUP BY tk.tv_shows_id
         HAVING COUNT( tk.keywords_id) >= <include refid="numIncludeKeywords"/>
         )
 
@@ -177,8 +232,8 @@
         twk.match_count AS keywordsRanking
         FROM tvshows_with_keywords twk
             JOIN tvshows tv ON twk.tvShow_id = tv.id
-        WHERE  m.id NOT IN (
-            SELECT movies_id
+        WHERE  tv.id NOT IN (
+            SELECT tv_shows_id
             FROM tvshow_viewlist
             WHERE member_id IN
             <foreach item="id" collection="memberIds" open="(" separator="," close=")">
