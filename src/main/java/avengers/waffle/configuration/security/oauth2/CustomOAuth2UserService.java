@@ -45,12 +45,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             oAuth2UserInfo = new FacebookUserInfo(oAuth2User.getAttributes());
         } else if (userRequest.getClientRegistration().getRegistrationId().equals("naver")) {
             System.out.println("네이버 로그인 요청");
-            oAuth2UserInfo = new NaverUserInfo((Map) oAuth2User.getAttributes().get("response"));
+            oAuth2UserInfo = new NaverUserInfo((Map<String, Object>) oAuth2User.getAttributes().get("response"));
         } else if (userRequest.getClientRegistration().getRegistrationId().equals("kakao")) {
             System.out.println("카카오 로그인 요청");
             oAuth2UserInfo = new KakaoUserInfo(oAuth2User.getAttributes());
         } else {
-            System.out.println("우리는 구글과 페이스북과 메이버만 지원합니다.");
+            System.out.println("우리는 구글과 페이스북과 네이버만 지원합니다.");
         }
 
 
@@ -58,6 +58,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String provider = oAuth2UserInfo.getProvider();
         String providerId = oAuth2UserInfo.getProviderId();
         String email = oAuth2UserInfo.getEmail();
+        String img_url = oAuth2UserInfo.getProfile_image();
         String memberId = provider + "_" + providerId;
         String role = "ROLE_USER";
 
@@ -71,6 +72,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .roles(role)
                     .provider(provider)
                     .providerId(providerId)
+                    .imgUrl(img_url)
                     .build();
             movieMemberRepository.save(user);
         }

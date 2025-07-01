@@ -10,6 +10,7 @@ import lombok.Getter;
 public class ReplyVO{
     private Integer num;
     private String postNo;
+    private String id;
     private String name;
     private String contents;
     private String time;

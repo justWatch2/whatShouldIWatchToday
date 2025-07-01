@@ -6,10 +6,11 @@
 <mapper namespace="avengers.waffle.mapper.PostMapper">
 
     <select id="top5Ranking" parameterType="string" resultType="avengers.waffle.VO.posts.Post4ListDTO">
-        SELECT no as no, title as title, member_id as name, indate as indate, count as count
+        SELECT no as no, title as title, ps.member_id as id, m.member_name as name, indate as indate, count as count
         FROM (SELECT no, title, member_id, indate, count, like_count, popularity
               FROM post
               WHERE indate >= DATE_FORMAT(NOW() - INTERVAL 7 DAY, '%Y%m%d') AND category = #{category}) ps
+        left join member m on m.member_id = ps.member_id
         WHERE count > 100
           AND like_count > 10
         ORDER BY popularity DESC
