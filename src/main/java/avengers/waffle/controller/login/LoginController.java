@@ -50,6 +50,17 @@ public class LoginController {
         return "fail";
     }
 
+    @GetMapping("/checkName")
+    @ResponseBody
+    public String checkName(@RequestParam String name) {
+        System.out.println(name);
+        boolean check = memberRepository.existsByMemberName(name);
+        if (!check) {
+            return "success";
+        }
+        return "fail";
+    }
+
     @GetMapping("/getProfileImg")
     @ResponseBody
     public String getProfileImg(HttpServletRequest request, HttpServletResponse response) throws IOException {

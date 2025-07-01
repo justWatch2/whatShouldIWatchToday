@@ -20,7 +20,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
 
 
     Optional<Post> findByNo(long no);
-    @Query("SELECT new avengers.waffle.VO.posts.Post4ListDTO(p.no, p.title, p.member.memberId, p.indate, p.count) " +
-            "FROM Post p WHERE p.category = :category ORDER BY p.count DESC LIMIT 5")
-    List<Post4ListDTO> findTop5ByCategoryOrderByCountDesc(@Param("category") String category);
+//    @Query("SELECT new avengers.waffle.VO.posts.Post4ListDTO(p.no, p.title, p.member.memberId, p.indate, p.count) " +
+//            "FROM Post p WHERE p.category = :category ORDER BY p.count DESC LIMIT 5")
+//    List<Post4ListDTO> findTop5ByCategoryOrderByCountDesc(@Param("category") String category);
 }

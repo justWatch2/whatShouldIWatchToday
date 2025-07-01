@@ -1,18 +1,18 @@
 package avengers.waffle.service.impl.movieDetail;
 
 import avengers.waffle.VO.movieDetail.PostResultVO;
+import avengers.waffle.VO.movieDetail.VoteVO;
 import avengers.waffle.entity.*;
 import avengers.waffle.mapper.DetailMapper;
-import avengers.waffle.repository.MovieDetail.MovieViewListRepository;
-import avengers.waffle.repository.MovieDetail.MovieWishListRepository;
-import avengers.waffle.repository.MovieDetail.TvShowViewListRepository;
-import avengers.waffle.repository.MovieDetail.TvShowWishListRepository;
+import avengers.waffle.repository.MovieDetail.*;
 import avengers.waffle.service.IF.movieDetail.IF_DetailService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -25,17 +25,25 @@ public class DetailServiceImpl implements IF_DetailService {
 
     private final DetailMapper detailMapper;
 
+
     @Override
-    public boolean getWish(String memberId, String category, Integer id) {
-        boolean result;
+    public Map<String, Boolean> getDetail(String memberId, String category, Integer id) {
+        Map<String, Boolean> result=new HashMap<>();
         if(category.equals("movie")){
-            result=movieWishListRepository.existsByMovies_IdAndMember_MemberId(id,memberId);
-
+            result.put("wish",movieWishListRepository.existsByMovies_IdAndMember_MemberId(id,memberId));
+            result.put("view",movieViewListRepository.existsByMovies_IdAndMember_MemberId(id,memberId));
         }else{
-            result=tvShowWishListRepository.existsByTvshows_IdAndMember_MemberId(id,memberId);
-
+            result.put("wish",tvShowWishListRepository.existsByTvshows_IdAndMember_MemberId(id,memberId));
+            result.put("view",tvShowViewListRepository.existsByTvshows_IdAndMember_MemberId(id,memberId));
         }
         return result;
+    }
+
+    @Override
+    public VoteVO getVote(String id) {
+        VoteVO vo=detailMapper.getVote(id);
+
+        return vo;
     }
 
     @Override
@@ -66,18 +74,6 @@ public class DetailServiceImpl implements IF_DetailService {
                     .build());
             detailMapper.addKct(id,memberId,1);
         }
-    }
-
-
-    @Override
-    public boolean getView(String memberId, String category, Integer id) {
-        boolean result;
-        if(category.equals("movie")){
-            result=movieViewListRepository.existsByMovies_IdAndMember_MemberId(id,memberId);
-        }else{
-            result=tvShowViewListRepository.existsByTvshows_IdAndMember_MemberId(id,memberId);
-        }
-        return result;
     }
 
     @Override
@@ -116,5 +112,6 @@ public class DetailServiceImpl implements IF_DetailService {
         String find=String.join("* ",title, korean_title+"*");
         return detailMapper.postLoad(find);
     }
+
 
 }

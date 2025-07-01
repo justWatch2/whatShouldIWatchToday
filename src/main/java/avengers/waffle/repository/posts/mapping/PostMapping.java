@@ -1,6 +1,4 @@
-package avengers.waffle.repository.mapping;
-
-import avengers.waffle.utils.GetMemberId;
+package avengers.waffle.repository.posts.mapping;
 
 import java.time.LocalDateTime;
 

@@ -33,7 +33,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         // 구글로그인 버튼 클릭 -> 구글로그인창 -> 로그인 완료 -> code를 리턴(OAuth-Client라이브러리) -> AccessToken요청
         // userRequest 정보 -> loadUser함수 호출 -> 구글로부터 회원프로필 받아준다.
-        System.out.println("getAttributes : " + oAuth2User.getAttributes());
+        System.out.println("getAttributes sdfsafsaffasdfdsa: " + oAuth2User.getAttributes());
 
         //회원가입을 강제로 진행해볼 예정
         OAuth2UserInfo oAuth2UserInfo = null;

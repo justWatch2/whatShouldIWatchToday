@@ -33,6 +33,7 @@ public class    OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         String username = principalDetails.getUsername();
 
+
         String jwtToken = JWT.create()
                 .withSubject(username)
                 .withClaim("memberId", username)

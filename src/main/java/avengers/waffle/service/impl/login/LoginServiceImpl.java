@@ -20,8 +20,10 @@ public class LoginServiceImpl implements IF_LoginService {
                 .memberId(memberDTO.getId())
                 .roles("ROLE_USER")
                 .memberPw(passwordEncoder.encode(memberDTO.getPass()))
+                .memberName(memberDTO.getName())
                 .imgUrl(s)
                 .build());
+
     }
 
     @Override

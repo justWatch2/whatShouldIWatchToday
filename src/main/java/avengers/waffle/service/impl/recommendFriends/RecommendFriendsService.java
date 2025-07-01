@@ -19,8 +19,8 @@ public class RecommendFriendsService implements IF_RecommendFriendsService {
     private final FriendMapper friendMapper;
     private final FriendsRepository friendsRepository;
 
-    //친구 목록 불러오기
-    public List<RecommendFriendsInfoDTO> getFriendsInfo(String memberId) {
+    //친구 목록 && 친구별 영화 찜 수 시청한 작푹수 불러오기
+    public List<RecommendFriendsInfoDTO> getFriendsInfoFromMovies(String memberId) {
         String friends = friendsRepository.getFriendsIdByMemberId(memberId);
         System.out.println("recommendFriends = " + friends);
 
@@ -29,7 +29,24 @@ public class RecommendFriendsService implements IF_RecommendFriendsService {
         for (String friendId : friendIds) {
             System.out.println("리스트로 만든것들!! friendId = " + friendId);
         }
-        return friendMapper.getFriendsInfoByMemberId(friendIds);
+
+        //시간초 떄문에 변경
+        List<RecommendFriendsInfoDTO> result = friendMapper.getFriendsInfoByMemberIdFromMovies(friendIds);
+
+        return result;
+    }
+
+    //친구 목록 && 친구별 tvShow 찜 수 시청한 작푹수 불러오기
+    public List<RecommendFriendsInfoDTO> getFriendsInfoFromTvshow(String memberId) {
+        String friends = friendsRepository.getFriendsIdByMemberId(memberId);
+        System.out.println("recommendFriends = " + friends);
+
+        List<String> friendIds = Arrays.asList(friends.split(","));
+
+        for (String friendId : friendIds) {
+            System.out.println("리스트로 만든것들!! friendId = " + friendId);
+        }
+        return friendMapper.getFriendsInfoByMemberIdFromTvshow(friendIds);
     }
 
     //영화 + 드라마  추천 기본 파트

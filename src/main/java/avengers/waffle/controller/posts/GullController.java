@@ -4,6 +4,7 @@ import avengers.waffle.VO.login.MemberDTO;
 import avengers.waffle.VO.posts.*;
 //import avengers.waffle.VO.util.PageVO;
 
+import avengers.waffle.repository.posts.MovieMemberRepository;
 import avengers.waffle.service.IF.posts.IF_GullService;
 import avengers.waffle.utils.FileDataUtil;
 import avengers.waffle.utils.GetMemberId;
@@ -77,6 +78,7 @@ public class GullController {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
         }
+        String name = GullService.getMemberNameById(id);
         PostVO post = GullService.getPost(no);
         boolean likePost = false;
         if(!id.equals("none")) {
@@ -88,6 +90,7 @@ public class GullController {
         map.put("replys", replyList);
         map.put("likePost", likePost);
         map.put("id",id);
+        map.put("name", name);
         return map;
     }
 
