@@ -8,7 +8,7 @@ import avengers.waffle.mapper.PostMapper;
 
 import avengers.waffle.repository.mapping.MemberMapping;
 import avengers.waffle.repository.posts.*;
-import avengers.waffle.repository.mapping.attachMapping;
+import avengers.waffle.repository.posts.mapping.attachMapping;
 import avengers.waffle.service.IF.posts.IF_GullService;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;

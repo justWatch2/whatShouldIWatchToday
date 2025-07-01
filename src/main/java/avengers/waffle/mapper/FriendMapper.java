@@ -11,8 +11,11 @@ import java.util.List;
 @Mapper
 public interface FriendMapper {
 
-    List<RecommendFriendsInfoDTO> getFriendsInfoByMemberId(List<String> friendIds);
 
+//    List<RecommendFriendsInfoDTO> getFriendsInfoByMemberIdFromMovies(List<String> friendIds);
+    List<RecommendFriendsInfoDTO> getFriendsInfoByMemberIdFromMovies(List<String> friendIds);
+
+    List<RecommendFriendsInfoDTO> getFriendsInfoByMemberIdFromTvshow(List<String> friendIds);
     //친구 포함 ---------------------------------------------------------------------------------------------------------
     //친구 + 개인 영화 추천 repository
     List<RecommendInfoDTO> getRecommendMovieByMemberIds(@Param("memberIds") List<String> memberIds,
@@ -21,8 +24,4 @@ public interface FriendMapper {
     //친구 + 개인 tvShow 추천 repository
     List<RecommendInfoDTO> getRecommendTvShowByMemberIds(@Param("memberIds") List<String> memberIds,
                                                          @Param("recommendType") int recommendType);
-
-    List<RecommendInfoDTO> threadStart(@Param("memberIds") List<String> memberIds,
-                                       @Param("recommendType") int recommendType);
-
 }

@@ -1,6 +1,7 @@
 package avengers.waffle.mapper;
 
 import avengers.waffle.VO.movieDetail.PostResultVO;
+import avengers.waffle.VO.movieDetail.VoteVO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -14,4 +15,7 @@ public interface DetailMapper {
     void updateKct(Integer id,String memberId);
     void deleteKcm(Integer id,String memberId);
     void deleteKct(Integer id,String memberId);
+
+    VoteVO getVote(String id);
+
 }

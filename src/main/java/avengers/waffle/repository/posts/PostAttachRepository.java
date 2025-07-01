@@ -1,7 +1,7 @@
 package avengers.waffle.repository.posts;
 
 import avengers.waffle.entity.PostAttach;
-import avengers.waffle.repository.mapping.attachMapping;
+import avengers.waffle.repository.posts.mapping.attachMapping;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

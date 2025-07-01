@@ -78,14 +78,14 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("{\"code\":\"EXPIRED_ACCESS_TOKEN\", \"message\":\"AccessToken has expired.\"}");
-            response.getWriter().flush();
+            response.getWriter().flush(); // ✅ 추가해보세요
             return;
         } catch (Exception e) {
             // 토큰 변조 또는 기타 오류 → 403
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setContentType("application/json;charset=UTF-8");
             response.getWriter().write("{\"code\":\"INVALID_TOKEN\", \"message\":\"Invalid or tampered token.\"}");
-            response.getWriter().flush();
+            response.getWriter().flush(); // ✅ 추가해보세요
             return;
         }
         //서명이 정상적으로 된경우
