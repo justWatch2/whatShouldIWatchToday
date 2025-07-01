@@ -32,7 +32,7 @@ public class RedisConfig {
     public RedisConnectionFactory cacheRedisConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
         config.setHostName("localhost");
-        config.setPort(6380);
+        config.setPort(6379);
         // 필요하면 비밀번호 설정
         return new LettuceConnectionFactory(config);
     }
