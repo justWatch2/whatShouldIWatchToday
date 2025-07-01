@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="avengers.waffle.mapper.MovieMapper">
+    <!--    <cache/>-->
+    <select id="findMoviesByGenres" resultType="avengers.waffle.dto.mybatis.MoviesDTO">
+        SELECT m.id, m.korean_title, m.poster_path ,m.backdrop_path,m.overview,r.averageRating
+        FROM ratings r
+        STRAIGHT_JOIN (select id,korean_title,poster_path,genres,imdb_id, original_language ,backdrop_path,overview from
+        movies) m
+        on r.tconst = m.imdb_id
+        STRAIGHT_JOIN titles_adult a ON r.tconst = a.tconst
+        WHERE a.is_adult = 0
+        AND r.averageRating > 5.0
+        AND r.numVotes > 100
+
+        <if test="genres != null and genres.size() > 0">
+            AND (
+            <foreach collection="genres" item="genre" separator=" OR ">
+                m.genres LIKE concat('%',#{genre},'%')
+            </foreach>
+            )
+        </if>
+        <if test="isDomestic">
+            AND m.original_language = 'ko'
+        </if>
+        <if test="!isDomestic">
+            AND m.original_language != 'ko'
+        </if>
+        ORDER BY r.numVotes DESC, r.averageRating DESC
+        LIMIT 20
+    </select>
+
+
+    <select id="searchComplexMovie" resultType="avengers.waffle.dto.mybatis.MoviesDTO">
+        SELECT sm.id,sm.korean_title,sm.poster_path, sm.backdrop_path, sm.overview, r.averageRating
+        FROM ratings r
+        STRAIGHT_JOIN (
+        SELECT
+        m.id, m.korean_title, m.poster_path, m.imdb_id, m.backdrop_path, m.overview, m.release_date, m.original_language
+        FROM movies m
+        JOIN titles_adult ta
+        ON m.imdb_id = ta.tconst
+        WHERE
+        YEAR(m.release_date) BETWEEN #{releaseYear[0]} AND #{releaseYear[1]}
+        <if test="adult != null">
+            <choose>
+                <when test="adult">
+                    AND ta.is_adult = 1
+                </when>
+                <otherwise>
+                    AND ta.is_adult = 0
+                </otherwise>
+            </choose>
+        </if>
+        <if test="isDomestic != null">
+            <choose>
+                <when test="isDomestic">
+                    AND m.original_language = 'ko'
+                </when>
+                <otherwise>
+                    AND m.original_language != 'ko'
+                </otherwise>
+            </choose>
+        </if>
+        AND EXISTS (
+        SELECT 1
+        FROM movie_genres mg
+        JOIN movie_genres_list mgl ON mg.genres_id = mgl.genres_id
+        WHERE mg.movies_id = m.id
+        AND mgl.genres IN
+        <foreach item="genre" collection="selectedGenres" open="(" separator="," close=")">
+            #{genre}
+        </foreach>
+        LIMIT 1
+        )
+        ) AS sm
+        ON sm.imdb_id = r.tconst
+        AND r.averageRating BETWEEN #{rating[0]} AND #{rating[1]}
+        ORDER BY r.numVotes DESC, r.averageRating DESC
+        LIMIT 20
+    </select>
+
+    <!-- a,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,a -->
+
+    <sql id="keywordLimit">
+        5
+    </sql>
+    <sql id="numIncludeKeywords">
+        1
+    </sql>
+    <sql id="recommendCandidateLimit">
+        500
+    </sql>
+    <!--회원의 선호 키워드 조회(마이페이지에서 사용할듯-->
+    <select id="getMemberTopKeywords" resultType="Map">
+        WITH individual_member_keywords AS (
+        select mk.keywords_id
+        from movie_wishlist mw
+        join movie_keywords mk on mw.movies_id = mk.movies_id
+        where mw.member_id = #{memberId}   <!--유저 id-->
+        UNION ALL
+        select mk.keywords_id
+        from movie_viewlist mv
+        join movie_keywords mk on mv.movies_id = mk.movies_id
+        where mv.member_id = #{memberId}
+        ),
+        ranked_member_keywords AS (
+        select keywords_id,
+        count(*) AS cnt,
+        DENSE_RANK() over (order by count(*) desc) AS drnk <!--연속된 등수가능 5등이 10개면 10개전부 -->
+        from individual_member_keywords
+        group by keywords_id
+        )
+        select rmk.keywords_id,
+        mkl.keywords AS keywords_name
+        from ranked_member_keywords rmk
+        join movie_keywords_list mkl on rmk.keywords_id = mkl.keywords_id
+        where rmk.drnk <![CDATA[<=]]> 5
+
+        order by rmk.cnt desc , mkl.keywords asc;
+    </select>
+
+
+    <select id="getMovieCandidates" resultType="avengers.waffle.dto.mybatis.UserRecommendMovieResultDTO">
+        <!--1.사용자 선호 키워드 추출하기-->
+        WITH
+        -- 1. 사용자 선호 키워드에 랭킹을 매기는 CTE
+        ranked_user_keywords AS (
+        SELECT
+        kcm.keywords_id,
+        DENSE_RANK() OVER(ORDER BY kcm.keyword_count DESC) AS drnk
+        FROM keyword_count_movie kcm
+        WHERE kcm.member_id = #{userId}
+        ),
+        member_top_keywords AS(
+        select keywords_id
+        from ranked_user_keywords
+        where drnk <![CDATA[<=]]> <include refid="keywordLimit" />
+        ),
+
+        pre_filtered_movies as(
+        select m.id, m.korean_title, m.poster_path, m.backdrop_path, m.overview , m.imdb_id
+        FROM movies m
+        join titles_adult ta On m.imdb_id = ta.tconst
+        <where>
+            1=1
+            <if test="adult != null">
+                <choose>
+                    <when test="adult == true"> and ta.is_adult = 1
+                    </when>
+                    <otherwise> and ta.is_adult = 0
+                    </otherwise>
+                </choose>
+            </if>
+
+            <if test="isDomestic != null"> <choose>
+                <when test="isDomestic == true"> and m.original_language = 'ko'
+                </when>
+                <otherwise> and m.original_language != 'ko'
+                </otherwise>
+            </choose>
+            </if>
+            <if test="selectedGenres != null and !selectedGenres.isEmpty()">
+                and m.id in(
+                select distinct mg.movies_id
+                from movie_genres mg
+                join movie_genres_list mgl on mg.genres_id = mgl.genres_id
+                where mgl.genres IN(
+                <foreach collection="selectedGenres" item="genre"  separator=",">
+                    #{genre}
+                </foreach>
+                )
+                )
+            </if>
+        </where>
+        ),
+        <!--3.이미 봤거나 찜함 영화들(추후제거대상)-->
+        watched_movies AS(
+        select movies_id as watchedMovieId
+        from movie_viewlist
+        where member_id = #{userId}
+        ),
+        <!--4.1차필터된 영화와 사용자 상위 키워드 매칭 -->
+        movies_with_keywords_match as(
+        select
+        pmf.id as movie_id,
+        count(distinct mk_all.keywords_id) as match_count
+        from pre_filtered_movies pmf
+        join movie_keywords mk_all on pmf.id = mk_all.movies_id
+        join member_top_keywords mtk on mk_all.keywords_id = mtk.keywords_id
+        group by pmf.id
+        Having Count(DISTINCT mk_all.keywords_id) <![CDATA[>=]]>  <include refid="numIncludeKeywords" />
+        )
+        SELECT
+        m.id AS movieId,
+        m.korean_title AS koreanTitle,
+        m.poster_path AS posterPath,
+        m.backdrop_path AS backdropPath,
+        m.overview AS overview,
+        r.averageRating AS averageRating,
+        mwkm.match_count AS keywordsRanking,
+        GROUP_CONCAT(mkl.keywords SEPARATOR ',') AS keywordsRaw
+        FROM movies_with_keywords_match mwkm
+        JOIN pre_filtered_movies m ON mwkm.movie_id = m.id
+        JOIN ratings r ON r.tconst = m.imdb_id
+        JOIN movie_keywords mk_join ON m.id = mk_join.movies_id
+        JOIN movie_keywords_list mkl ON mk_join.keywords_id = mkl.keywords_id
+        WHERE m.id NOT IN (SELECT 1 watchedMovieId FROM watched_movies) -- movies_idC -> movies_id로 수정 (CTE 이름과 일치)
+
+        AND m.poster_path IS NOT NULL AND m.poster_path != ''
+        AND m.overview IS NOT NULL AND m.overview != ''
+        GROUP BY
+        m.id
+        ORDER BY
+        keywordsRanking DESC,
+        r.numVotes DESC,
+        r.averageRating DESC
+        LIMIT <include refid="recommendCandidateLimit"/>;
+
+    </select>
+
+
+</mapper>
+
+
+

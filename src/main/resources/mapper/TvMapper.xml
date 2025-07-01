@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="avengers.waffle.mapper.TvMapper">
+
+    <sql id="keywordLimit">50</sql>
+    <sql id="numIncludeKeywords">1</sql>
+    <sql id="recommendCandidateLimit">500</sql>
+
+    <select id="getTvCandidates" resultType="avengers.waffle.dto.mybatis.UserRecommendTVResultDTO">
+        WITH
+        -- 1. 사용자 선호 키워드에 랭킹을 매기는 CTE
+        ranked_user_keywords AS (
+        SELECT
+        kct.keywords_id,
+        DENSE_RANK() OVER(ORDER BY kct.keyword_count DESC) AS drnk
+        FROM keyword_count_tv kct
+        WHERE kct.member_id = #{userId}
+        ),
+
+        -- 2. 랭킹이 설정된 제한 이하인 사용자 상위 키워드만 선택하는 CTE
+        member_top_keywords AS(
+        SELECT keywords_id
+        FROM ranked_user_keywords
+        WHERE drnk <![CDATA[<=]]> <include refid="keywordLimit" />
+        ),
+
+        -- 3. 1차 필터링된 TV 프로그램 (성인 여부, 국내/해외, 장르 필터링)
+        prefiltered_tv AS(
+        SELECT
+        t.id,
+        t.name,
+        t.backdrop_path,
+        t.poster_path,
+        t.vote_average,
+        t.vote_count,
+        t.overview
+        FROM tvshows t
+        WHERE 1=1
+        <if test="adult != null">
+            <choose>
+                <when test="adult == true">AND t.adult = 1</when>
+                <otherwise>AND t.adult = 0</otherwise>
+            </choose>
+        </if>
+        <if test="isDomestic != null">
+            <choose>
+                <when test="isDomestic == true">
+                    AND t.original_language = 'ko' -- `original_language`가 아닌 `origin_country`가 맞다면 수정
+                </when>
+                <otherwise>
+                    AND t.original_language != 'ko'
+                </otherwise>
+            </choose>
+        </if>
+        <if test="selectedGenres != null and !selectedGenres.isEmpty()">
+            AND t.id IN (
+            SELECT DISTINCT tg.tv_shows_id
+            FROM tv_genres tg
+            JOIN tv_genres_list tgl ON tg.genres_id = tgl.genres_id
+            WHERE tgl.genres IN (
+            <foreach collection="selectedGenres" item="genre" separator=",">
+                #{genre}
+            </foreach>
+            )
+            )
+        </if>
+        ),
+
+        -- 4. 이미 봤거나 찜한 TV 프로그램 (최종 추천에서 제외될 대상)
+        watched_tv AS(
+        SELECT tvshows_id AS watchedTv
+        FROM tvshow_viewlist
+        WHERE member_id = #{userId}
+        ),
+
+        -- 5. 1차 필터링된 TV 프로그램과 사용자 상위 키워드 매칭 (공통 키워드 수 계산)
+        tv_with_keywords_match AS (
+        SELECT
+        pmf.id AS tv_shows_id,
+        COUNT(DISTINCT tk.keywords_id) AS match_count
+        FROM prefiltered_tv pmf
+        JOIN tv_keywords tk ON tk.tv_shows_id = pmf.id
+        JOIN member_top_keywords mtk ON mtk.keywords_id = tk.keywords_id
+        GROUP BY pmf.id
+        HAVING COUNT(DISTINCT tk.keywords_id) <![CDATA[>=]]> <include refid="numIncludeKeywords" />
+        )
+
+        -- 6. 최종 TV 쇼 정보 조회 및 정렬
+        SELECT
+        t.id AS id,
+        t.name AS name,
+        t.overview as overview,
+        t.poster_path AS posterPath,    -- DTO 필드명에 맞춤
+        t.backdrop_path AS backdropPath, -- DTO 필드명에 맞춤
+        t.vote_average AS voteAverage,  -- DTO 필드명에 맞춤
+        twkm.match_count AS keywordsRanking,
+        GROUP_CONCAT(tkl.keywords SEPARATOR ',') AS keywordsRaw
+        FROM tv_with_keywords_match twkm
+        JOIN prefiltered_tv t ON twkm.tv_shows_id = t.id -- -> twkm.tv_shows_id로 이미 되어있으나, CTE 정의와 일치시켜 명확화
+        JOIN tv_keywords tk ON t.id = tk.tv_shows_id
+        JOIN tv_keywords_list tkl ON tkl.keywords_id = tk.keywords_id
+        WHERE t.id NOT IN (SELECT watchedTv FROM watched_tv)
+
+        AND t.poster_path IS NOT NULL AND t.poster_path != ''
+        AND t.overview IS NOT NULL AND t.overview != ''
+
+        GROUP BY
+        t.id, t.name, t.overview, t.poster_path, t.backdrop_path, t.vote_average, t.vote_count
+        ORDER BY
+        keywordsRanking DESC,
+        t.vote_count DESC,
+        t.vote_average DESC
+        LIMIT <include refid="recommendCandidateLimit"/>;
+
+    </select>
+</mapper>

@@ -78,7 +78,6 @@ public class SecurityConfig {
                                 .requestMatchers("/user/**").authenticated()  // 이부분은 사용자가 jwt토큰을 들고 요청하면 인증만되어있다고 확인이 된다면 통과 시키는 부분
                                 .requestMatchers("/manager/**").hasAnyRole("MANAGER", "ADMIN")  // 여러 권한중 하나만 있어도 허용
                                 .requestMatchers("/admin/**").hasRole("ADMIN")  //  특정 하나의 권한만 허용
-
                                 .requestMatchers("/api/auth/refresh", "/css/**", "/js/**", "/images/**",
                                         "/join", "/api/join", "/api/non-member/**",
                                         "/api/checkId","/api/signUp","/api/getProfileImg","/img/**","/rec/**").permitAll() // 로그인 페이지, 정적 파일은 모두 허용
