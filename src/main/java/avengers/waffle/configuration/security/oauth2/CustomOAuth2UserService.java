@@ -61,6 +61,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String img_url = oAuth2UserInfo.getProfile_image();
         String memberId = provider + "_" + providerId;
         String role = "ROLE_USER";
+        String name = oAuth2UserInfo.getName();
 
 
         //db에 유저정보가 있는지 확인
@@ -70,6 +71,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .memberId(memberId)
                     .memberPw("") // 소셜 로그인은 비번 없음
                     .roles(role)
+                    .memberName(name)
                     .provider(provider)
                     .providerId(providerId)
                     .imgUrl(img_url)

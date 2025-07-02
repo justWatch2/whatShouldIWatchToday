@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
@@ -34,11 +35,8 @@ public class FileDataUtil {
 	};     //<-- 현재 코드는 활용하지는 않는다.. 얘는 선언이지 기능이 동작하지는 않는다. 절대 미리 예측 금지..
 	
 	//첨부파일 업로드 경로 변수값으로 가져옴 servlet-context.xml
-	private String uploadPath="C:/Users/Admin/Desktop/projectimg";
-
-    public void setUploadPath(String uploadPath) {
-		this.uploadPath = uploadPath;
-	}
+	@Value("${file.uploadPath}")
+	private String uploadPath;
 
 	/**
 	 * 게시물 상세보기에서 첨부파일 다운로드 메서드 구현(공통)

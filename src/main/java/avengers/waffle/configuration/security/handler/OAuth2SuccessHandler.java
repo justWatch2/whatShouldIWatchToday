@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 
 @RequiredArgsConstructor
-public class    OAuth2SuccessHandler implements AuthenticationSuccessHandler {
+public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtProperties jwtProperties;
     private final StringRedisTemplate stringRedisTemplate;

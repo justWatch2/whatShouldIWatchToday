@@ -64,8 +64,10 @@ public class GullController {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return null;
         }
+        String name = GullService.getMemberNameById(id);
         Map<String, Object> map = new HashMap<>();
         map.put("id", id);
+        map.put("name", name);
         return map;
     }
 
@@ -120,11 +122,11 @@ public class GullController {
     @ResponseBody
     public String updatePost(@ModelAttribute PostVO post, MultipartFile[] fileUrl, String[] existingFileUrl) throws IOException {
         System.out.println("수정 도착");
+        System.out.println(post.getNo());
         System.out.println(Arrays.toString(existingFileUrl));
         if (fileUrl != null && fileUrl.length > 0) {
             String[] fileName = fileDataUtil.fileUpload(fileUrl);
             GullService.updatePostAndFile(post, fileName, existingFileUrl);
-
         } else {
             GullService.updatePostAndFile(post, null, existingFileUrl);
         }
