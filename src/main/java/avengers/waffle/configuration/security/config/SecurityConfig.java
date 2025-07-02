@@ -9,6 +9,7 @@ import avengers.waffle.configuration.security.jwt.JwtAuthorizationFilter;
 import avengers.waffle.configuration.security.oauth2.CustomOAuth2UserService;
 import avengers.waffle.configuration.security.oauth2.JwtProperties;
 import avengers.waffle.repository.posts.MovieMemberRepository;
+import avengers.waffle.utils.GetUrlToImage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -35,6 +36,7 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     //private final StringRedisTemplate stringRedisTemplate;
     private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+    private final GetUrlToImage getUrlToImage;
 
     @Qualifier("tokenRedisTemplate")
     private final StringRedisTemplate stringRedisTemplate;
@@ -47,7 +49,7 @@ public class SecurityConfig {
 
     @Bean
     public CustomOAuth2UserService customOAuth2UserService() {
-        return new CustomOAuth2UserService(movieMemberRepository);
+        return new CustomOAuth2UserService(movieMemberRepository,getUrlToImage);
     }
 
     @Bean
