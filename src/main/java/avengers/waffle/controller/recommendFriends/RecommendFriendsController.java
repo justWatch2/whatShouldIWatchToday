@@ -36,9 +36,10 @@ public class RecommendFriendsController {
 
         System.out.println("memberId = " + memberId);
         List<RecommendFriendsInfoDTO> recommendFriendsInfoDTOList = recommendFriendsService.getFriendsInfoFromMovies(memberId);
-        for(RecommendFriendsInfoDTO recommendFriendsInfoDTO : recommendFriendsInfoDTOList) {
-            System.out.println("recommendFriendsInfoDTO = " + recommendFriendsInfoDTO.getName());
-        }
+
+//        if (recommendFriendsInfoDTOList == null) {
+//            return ResponseEntity.status()
+//        }
         return  ResponseEntity.ok(recommendFriendsInfoDTOList);
     }
 
@@ -51,6 +52,9 @@ public class RecommendFriendsController {
         System.out.println("memberId = " + memberId);
         List<RecommendFriendsInfoDTO> recommendFriendsInfoDTOList = recommendFriendsService.getFriendsInfoFromTvshow(memberId);
 
+        if (recommendFriendsInfoDTOList == null) {
+            return ResponseEntity.ok(null);
+        }
         return  ResponseEntity.ok(recommendFriendsInfoDTOList);
     }
 
@@ -78,6 +82,9 @@ public class RecommendFriendsController {
         List<RecommendInfoDTO> recommendInfoDTOList = recommendFriendsService.getMoviesInfo(memberId, recommendRequestDTO, isMovies);
         List<RecommendInfoDTO> result = null;
 
+        recommendInfoDTOList.stream().forEach((nn) ->
+                        System.out.println("bfs돌기전 영화나 드라마 자료자료 " + nn.getTitle())
+                );
         //bfs추천 로직
         if(isMovies){
             //bfs로 영화 추천 로직
