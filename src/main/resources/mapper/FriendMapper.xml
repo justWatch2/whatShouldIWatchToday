@@ -78,7 +78,7 @@
     </select>
 
     <sql id="keywordLimit">
-        20
+        50
     </sql>
 
     <sql id="numIncludeKeywords">
@@ -102,7 +102,7 @@
                 <foreach item="id" collection="memberIds" open="(" separator="," close=")">
                     #{id}
                 </foreach>
-                    and kcm.view_keyword_count IS NULL
+                    and kcm.view_keyword_count = 0
             </when>
             <otherwise>
                 SELECT member_id, keywords_id, keyword_count
@@ -111,7 +111,7 @@
                 <foreach item="id" collection="memberIds" open="(" separator="," close=")">
                     #{id}
                 </foreach>
-                    and kcm.wish_keyword_count IS NULL
+                    and kcm.wish_keyword_count = 0
             </otherwise>
         </choose>
     </sql>
@@ -184,7 +184,7 @@
                 <foreach item="id" collection="memberIds" open="(" separator="," close=")">
                     #{id}
                 </foreach>
-                and kct.view_keyword_count IS NULL
+                and kct.view_keyword_count = 0
             </when>
             <otherwise>
                 SELECT member_id, keywords_id, keyword_count
@@ -193,7 +193,7 @@
                 <foreach item="id" collection="memberIds" open="(" separator="," close=")">
                     #{id}
                 </foreach>
-                and kct.wish_keyword_count IS NULL
+                and kct.wish_keyword_count = 0
             </otherwise>
         </choose>
     </sql>

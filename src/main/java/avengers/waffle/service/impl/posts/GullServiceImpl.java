@@ -121,7 +121,7 @@ public class GullServiceImpl implements IF_GullService {
                 .title(postVO.getTitle())
                 .category(postVO.getCategory())
                 .contents(postVO.getContents())
-                .member(Member.builder().memberId(postVO.getId()).build())
+                .member(em.getReference(Member.class,postVO.getId()))
                 .build();
         postRepository.save(post);
         if (fileUrl != null) {

@@ -50,6 +50,7 @@ public class RefreshTokenController {
     @PostMapping("/api/auth/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
 
+
         System.out.println("refrsh controller 까지는 왔다!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         //1. 쿠키에서 refresh token 꺼내기
         Cookie[] cookies = request.getCookies();
@@ -89,6 +90,9 @@ public class RefreshTokenController {
         }
 
         String memberId = jwt.getClaim("memberId").asString();
+        //마이페이지쪽 소셜로그인 구별 위해서
+        String provider = movieMemberRepository.findByMemberId(memberId).getProvider();
+
         System.out.println("memberId = " + memberId);
         //    2-2	Redis에서 해당 유저의 토큰과 일치하는지 확인
         String value = stringRedisTemplate.opsForValue().get(memberId);
@@ -106,6 +110,7 @@ public class RefreshTokenController {
         String accessToken = JWT.create()
                 .withExpiresAt(new Date(System.currentTimeMillis() + (jwtProperties.getExpirationTime())))  //토큰 만료시간 60000 기준 1분
                 .withClaim("memberId", memberId)
+                .withClaim("provider", provider)
                 .sign(Algorithm.HMAC512(jwtProperties.getSecret()));
 
         //    3-2	(선택) refreshToken도 재발급 후 Redis 갱신
