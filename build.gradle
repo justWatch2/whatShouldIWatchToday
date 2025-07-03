@@ -91,6 +91,9 @@ dependencies {
 
     // Test Lombok
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+    // SSH 터널링
+    implementation 'com.jcraft:jsch:0.1.55'
 }
 
 tasks.named('test') {
