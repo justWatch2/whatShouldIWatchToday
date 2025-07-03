@@ -34,12 +34,13 @@ public class KakaoService implements IF_KakaoService {
 
         for (String rawUuid : uuids) {
             // uuid= 부분 제거
-            String cleanUuid = rawUuid.replaceFirst("^uuid=", "");
+            String redisKey = rawUuid.replaceFirst("^uuid=", "invite:");
             // Redis 키 포맷 맞춤
-            String redisKey = "invite:" + cleanUuid;
 
+            System.out.println("이름 체크 할떄        ㅇㄴㄹㄴㅇㄹ redisKey = " + redisKey);
             String inviterId = stringRedisTemplate.opsForValue().get(redisKey);
 
+            System.out.println("sdlakfjlakfsjalskfjlsdkjfalksklfj   inviterId = " + inviterId);
             if (inviterId != null) {
                 result.put(rawUuid, inviterId);  // key는 원래의 uuid=포함된 값으로 넣어야 프론트에서 매칭됨
             } else {
@@ -52,8 +53,11 @@ public class KakaoService implements IF_KakaoService {
     public String checkUuid(String uuid, String memberId) {
         System.out.println("초대 링크 받고 나서 사이트 접속시 uuid  = " + uuid + " memberId = " + memberId);
 
+        String redisKey = uuid.replaceFirst("^uuid=", "invite:");
         // 1. uuid check redis에서
-        String redisKey = "invite:" + uuid;
+
+        System.out.println("이놈이 범인이야???      redisKey = " + redisKey);
+
         String inviterId = stringRedisTemplate.opsForValue().get(redisKey);
 
         System.out.println("링크통해서 초대한사람id = " + inviterId);
@@ -67,7 +71,7 @@ public class KakaoService implements IF_KakaoService {
         Member inviter = movieMemberRepository.findByMemberId(inviterId);
         if (inviter == null) {
             System.out.println(" 초대한 사람이 없어요!!");
-            stringRedisTemplate.delete(redisKey);
+//            stringRedisTemplate.delete(redisKey);
             return null;
         }
 
@@ -76,7 +80,7 @@ public class KakaoService implements IF_KakaoService {
         List<String> friendList = inviter.getFriendList();
         if (friendList != null && friendList.contains(memberId)){
             System.out.println("이미 친구 입니다.");
-            stringRedisTemplate.delete(redisKey);
+//            stringRedisTemplate.delete(redisKey);
             return null;
         }
 
@@ -90,14 +94,14 @@ public class KakaoService implements IF_KakaoService {
         movieMemberRepository.save(member);
 
         // 2. redis에 있는 uuid 지우기 ( 어차피 어떤경우든 간에 지운다)
-        stringRedisTemplate.delete(redisKey);
+//        stringRedisTemplate.delete(redisKey);
 
         return  ResponseEntity.ok("success").getBody();
     }
 
     public void rejectUuid(String uuid, String memberId){
         String redisKey = "invite:" + uuid;
-        boolean deleted = stringRedisTemplate.delete(redisKey);
+//        boolean deleted = stringRedisTemplate.delete(redisKey);
 
     }
 
