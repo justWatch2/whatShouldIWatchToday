@@ -62,6 +62,9 @@ public class Member implements Serializable{
 
 
     public List<String> getFriendList() {
+        if (this.friendList == null){
+            return new ArrayList<>();
+        }
         if (!this.friendList.isEmpty()) {
             return new ArrayList<>(Arrays.asList(this.friendList.split(","))); //  수정 가능 리스트
         }
