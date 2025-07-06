@@ -2,8 +2,10 @@ package avengers.waffle.mapper;
 
 import avengers.waffle.dto.mybatis.MoviesDTO;
 import avengers.waffle.dto.mybatis.UserRecommendMovieResultDTO;
+import avengers.waffle.dto.responseDTO.ContentResponseDTO;
 import avengers.waffle.dto.searchDTO.ComplexSearchDTO;
 import avengers.waffle.dto.searchDTO.UserRecommendSearchDTO;
+import avengers.waffle.dto.searchDTO.WishWatchSearchDTO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -15,4 +17,6 @@ public interface MovieMapper {
     List<MoviesDTO> searchComplexMovie(ComplexSearchDTO complexSearchDTO);
 
     List<UserRecommendMovieResultDTO>getMovieCandidates(UserRecommendSearchDTO userRecommendSearchDTO);
+
+
 }

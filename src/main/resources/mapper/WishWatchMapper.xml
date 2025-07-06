@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="avengers.waffle.mapper.WishWatchMapper">
+    <select id="findMovieContents"
+            parameterType="avengers.waffle.dto.searchDTO.WishWatchSearchDTO"
+            resultType="avengers.waffle.dto.responseDTO.ContentResponseDTO">
+        select
+            ml.no as no,
+            m.id as id,
+            m.original_title as title,
+            m.poster_path as posterPath,
+            r.averagerating as rating
+        from
+        <choose>
+            <when test="status == 'wish'">movie_wishlist ml</when>
+            <when test="status == 'watched'">movie_viewlist ml</when>
+        </choose>
+        join movies m on ml.movies_id = m.id
+        left join ratings r on r.tconst = m.id
+        where ml.member_id = #{memberId}
+        <if test="cursor != null">
+            AND ml.no &lt; #{cursor}
+        </if>
+        ORDER BY
+        ml.no DESC
+        limit #{limit}
+
+    </select>
+
+
+    <select id="findTvContents"
+            parameterType="avengers.waffle.dto.searchDTO.WishWatchSearchDTO"
+            resultType="avengers.waffle.dto.responseDTO.ContentResponseDTO">
+            select
+                tl.no as no,
+                t.id as id ,
+                t.korean_name as title,
+                t.poster_path as posterPath,
+                t.vote_average aS rating
+            from
+            <choose>
+                <when test="status == 'wish'">tvshow_wishlist tl</when>
+                <when test="status == 'watched'">tvshow_viewlist tl</when>
+            </choose>
+            join tvshows t on t.id = tl.tvshows_id
+            where tl.member_id = #{memberId}
+        <if test="cursor != null">
+            AND tl.no &lt; #{cursor}
+        </if>
+        ORDER BY
+        tl.no DESC
+        LIMIT #{limit}
+    </select>
+</mapper>
