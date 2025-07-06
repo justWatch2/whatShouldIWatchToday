@@ -24,11 +24,21 @@
     </select>
 
     <insert id="addKcm">
-        INSERT INTO keyword_count_movie (member_id, keywords_id, keyword_count)
+        INSERT INTO keyword_count_movie (member_id, keywords_id, keyword_count,wish_keyword_count,view_keyword_count)
         SELECT
         #{memberId} AS member_id,
         mk.keywords_id,
-        1
+        1,
+        <choose>
+            <when test="recommendType == 1">
+                1,
+                0
+            </when>
+            <when test="recommendType == 2">
+                0,
+                1
+            </when>
+        </choose>
         FROM movie_keywords mk
         WHERE mk.movies_id = #{id}
         ON DUPLICATE KEY UPDATE
@@ -44,11 +54,21 @@
     </insert>
 
     <insert id="addKct">
-        INSERT INTO keyword_count_tv (member_id, keywords_id, keyword_count)
+        INSERT INTO keyword_count_tv (member_id, keywords_id, keyword_count,wish_keyword_count,view_keyword_count)
         SELECT
         #{memberId} AS member_id,
         mk.keywords_id,
-        1
+        1,
+        <choose>
+            <when test="recommendType == 1">
+                1,
+                0
+            </when>
+            <when test="recommendType == 2">
+                0,
+                1
+            </when>
+        </choose>
         FROM tv_keywords mk
         WHERE mk.tv_shows_id = #{id}
         ON DUPLICATE KEY UPDATE

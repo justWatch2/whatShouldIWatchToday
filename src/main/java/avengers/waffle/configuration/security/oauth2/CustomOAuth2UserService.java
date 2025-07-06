@@ -6,12 +6,14 @@ import avengers.waffle.configuration.security.auth.PrincipalDetails;
 import avengers.waffle.configuration.security.oauth2.provider.*;
 import avengers.waffle.entity.Member;
 import avengers.waffle.repository.posts.MovieMemberRepository;
+import avengers.waffle.utils.GetUrlToImage;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,9 +21,12 @@ import java.util.Map;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final MovieMemberRepository movieMemberRepository;
+    private final GetUrlToImage getUrlToImage;
 
-    public CustomOAuth2UserService(MovieMemberRepository movieMemberRepository) {
+
+    public CustomOAuth2UserService(MovieMemberRepository movieMemberRepository, GetUrlToImage getUrlToImage) {
         this.movieMemberRepository = movieMemberRepository;
+        this.getUrlToImage = getUrlToImage;
     }
 
     @Override
@@ -58,9 +63,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String provider = oAuth2UserInfo.getProvider();
         String providerId = oAuth2UserInfo.getProviderId();
         String email = oAuth2UserInfo.getEmail();
-        String img_url = oAuth2UserInfo.getProfile_image();
+        String img_url = null;
+        try {
+            if(!provider.equals("facebook")) {
+                img_url = getUrlToImage.getImageUrl(oAuth2UserInfo.getProfile_image());
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         String memberId = provider + "_" + providerId;
         String role = "ROLE_USER";
+        String name = oAuth2UserInfo.getName();
+
+
 
 
         //db에 유저정보가 있는지 확인
@@ -70,6 +85,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .memberId(memberId)
                     .memberPw("") // 소셜 로그인은 비번 없음
                     .roles(role)
+                    .memberName(name)
                     .provider(provider)
                     .providerId(providerId)
                     .imgUrl(img_url)

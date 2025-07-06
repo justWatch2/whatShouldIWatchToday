@@ -85,7 +85,6 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
     public String getProvider(){
         return member.getProvider();
     }
-
     // 추가로 사용자 객체 반환이 필요한 경우
     public Member getUser() {
         return member;

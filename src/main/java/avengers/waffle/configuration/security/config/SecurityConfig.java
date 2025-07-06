@@ -9,6 +9,7 @@ import avengers.waffle.configuration.security.jwt.JwtAuthorizationFilter;
 import avengers.waffle.configuration.security.oauth2.CustomOAuth2UserService;
 import avengers.waffle.configuration.security.oauth2.JwtProperties;
 import avengers.waffle.repository.posts.MovieMemberRepository;
+import avengers.waffle.utils.GetUrlToImage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -35,6 +36,7 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     //private final StringRedisTemplate stringRedisTemplate;
     private final CustomAuthenticationFailureHandler customAuthenticationFailureHandler;
+    private final GetUrlToImage getUrlToImage;
 
     @Qualifier("tokenRedisTemplate")
     private final StringRedisTemplate stringRedisTemplate;
@@ -47,7 +49,7 @@ public class SecurityConfig {
 
     @Bean
     public CustomOAuth2UserService customOAuth2UserService() {
-        return new CustomOAuth2UserService(movieMemberRepository);
+        return new CustomOAuth2UserService(movieMemberRepository,getUrlToImage);
     }
 
     @Bean
@@ -80,7 +82,8 @@ public class SecurityConfig {
                                 .requestMatchers("/admin/**").hasRole("ADMIN")  //  특정 하나의 권한만 허용
                                 .requestMatchers("/api/auth/refresh", "/css/**", "/js/**", "/images/**",
                                         "/join", "/api/join", "/api/non-member/**",
-                                        "/api/checkId","/api/signUp","/api/getProfileImg","/img/**","/rec/**").permitAll() // 로그인 페이지, 정적 파일은 모두 허용
+                                        "/api/checkId","/api/signUp","/api/getProfileImg","/img/**","/rec/**",
+                                        "/api/checkName").permitAll() // 로그인 페이지, 정적 파일은 모두 허용
                                 .requestMatchers("/").permitAll() // 기본 홈 페이지도 허용
                                 .requestMatchers("*").permitAll()
                                 .requestMatchers("/*").permitAll()

@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 
 @RequiredArgsConstructor
-public class    OAuth2SuccessHandler implements AuthenticationSuccessHandler {
+public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtProperties jwtProperties;
     private final StringRedisTemplate stringRedisTemplate;
@@ -37,7 +37,7 @@ public class    OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         String jwtToken = JWT.create()
                 .withSubject(username)
                 .withClaim("memberId", username)
-                .withClaim("provider",provider)
+                .withClaim("provider", provider)
                 .withExpiresAt(new Date(System.currentTimeMillis() + jwtProperties.getExpirationTime()))
                 .sign(Algorithm.HMAC512(jwtProperties.getSecret()));
 

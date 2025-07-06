@@ -1,11 +1,12 @@
-package avengers.waffle.whatshouldiwatchtoday;
+package avengers.waffle.utils;
 
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.stereotype.Component;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,19 +14,18 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
-@SpringBootTest
-public class waffleApplicationTests {
+@Component
+public class GetUrlToImage {
 
     @Value("${file.uploadPath}")
     private String uploadPath;
 
-    @Test
-    void contextLoads() {
-        String imageUrl = "https://lh3.googleusercontent.com/a/ACg8ocJl2uSf7REwxOnQc3egmEuoLP-NqfEeO9sfoZjDtS_3n6C7wsc=s96-c";
-        UUID uid = UUID.randomUUID();
-        String saveName = uid.toString();
+    public String getImageUrl(String imageUrl) throws IOException {
 
-        String OUTPUT_FILE_PATH = uploadPath + "/" +saveName+ ".png";
+        UUID uid = UUID.randomUUID();
+        String saveName = uid.toString()+".png";
+
+        String OUTPUT_FILE_PATH = uploadPath + "/" +saveName;
         String FILE_URL = imageUrl;
 
         try (InputStream in = new URL(FILE_URL).openStream()) {
@@ -37,9 +37,6 @@ public class waffleApplicationTests {
             e.printStackTrace();
         }
 
-        System.out.println("/img/download?filename=" + saveName);
+        return "/img/download?filename=" + saveName;
     }
-
 }
-
-

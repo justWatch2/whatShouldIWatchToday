@@ -121,7 +121,7 @@ public class GullServiceImpl implements IF_GullService {
                 .title(postVO.getTitle())
                 .category(postVO.getCategory())
                 .contents(postVO.getContents())
-                .member(Member.builder().memberId(postVO.getId()).build())
+                .member(em.getReference(Member.class,postVO.getId()))
                 .build();
         postRepository.save(post);
         if (fileUrl != null) {
@@ -145,7 +145,7 @@ public class GullServiceImpl implements IF_GullService {
     public void addReply(ReplyVO replyVO) {
         Reply reply = Reply.builder()
                 .post(Post.builder().no(Integer.parseInt(replyVO.getPostNo())).build())
-                .member(Member.builder().memberId(replyVO.getId()).build())
+                .member(em.getReference(Member.class, replyVO.getId()))
                 .contents(replyVO.getContents())
                 .build();
         replyRepository.save(reply);
@@ -208,7 +208,12 @@ public class GullServiceImpl implements IF_GullService {
                 for (String existFile : existFiles) {
                     postAttachRepository.deleteByFileUrl(existFile);
                 }
+            }else{
+                for (String existFile : existFiles) {
+                    postAttachRepository.deleteByFileUrl(existFile);
+                }
             }
+
         }
 //            postAttachRepository.deleteByPost_no(postVO.getNo());
         if (fileUrl != null) {

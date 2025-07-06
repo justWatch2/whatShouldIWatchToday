@@ -25,28 +25,28 @@ public class Post extends BaseEntity implements Serializable { // 게시글
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer no;
 
-    @Column(name="category", nullable = false, length = 10)
+    @Column(name="category", length = 10)
     private String category;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", referencedColumnName = "member_id", nullable = false) // 작성자 아이디
     Member member;
 
-    @Column(name = "title", nullable = false, length = 50) // 제목
+    @Column(name = "title", length = 50) // 제목
     private String title;
 
-    @Column(name = "contents", nullable = false, columnDefinition = "TEXT") // 내용
+    @Column(name = "contents", columnDefinition = "TEXT") // 내용
     private String contents;
 
-    @Column(name = "count", nullable = false, length = 5) // 조회수
+    @Column(name = "count", length = 5) // 조회수
     @ColumnDefault("0")
     private int count;
 
-    @Column(name = "like_count", nullable = false, length = 5) // 좋아요
+    @Column(name = "like_count", length = 5) // 좋아요
     @ColumnDefault("0")
     private int likeCount;
 
-    @Column(name = "popularity", nullable = false, length = 5)
+    @Column(name = "popularity", length = 5)
     @ColumnDefault("0")
     private int popularity;
 

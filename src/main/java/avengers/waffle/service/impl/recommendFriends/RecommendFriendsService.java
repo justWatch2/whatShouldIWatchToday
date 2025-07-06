@@ -6,6 +6,7 @@ import avengers.waffle.VO.recommendFriends.RecommendRequestDTO;
 import avengers.waffle.mapper.FriendMapper;
 import avengers.waffle.repository.friends.FriendsRepository;
 import avengers.waffle.service.IF.recommendFriends.IF_RecommendFriendsService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,9 @@ public class RecommendFriendsService implements IF_RecommendFriendsService {
         String friends = friendsRepository.getFriendsIdByMemberId(memberId);
         System.out.println("recommendFriends = " + friends);
 
+        if (friends == null) {
+            return null;
+        }
         List<String> friendIds = Arrays.asList(friends.split(","));
 
         for (String friendId : friendIds) {
@@ -31,9 +35,8 @@ public class RecommendFriendsService implements IF_RecommendFriendsService {
         }
 
         //시간초 떄문에 변경
-        List<RecommendFriendsInfoDTO> result = friendMapper.getFriendsInfoByMemberIdFromMovies(friendIds);
 
-        return result;
+        return friendMapper.getFriendsInfoByMemberIdFromMovies(friendIds);
     }
 
     //친구 목록 && 친구별 tvShow 찜 수 시청한 작푹수 불러오기
@@ -41,6 +44,9 @@ public class RecommendFriendsService implements IF_RecommendFriendsService {
         String friends = friendsRepository.getFriendsIdByMemberId(memberId);
         System.out.println("recommendFriends = " + friends);
 
+        if (friends == null) {
+            return null;
+        }
         List<String> friendIds = Arrays.asList(friends.split(","));
 
         for (String friendId : friendIds) {
@@ -75,8 +81,14 @@ public class RecommendFriendsService implements IF_RecommendFriendsService {
                 memberIds.add(userId);
                 recommendType = 2;
                 if (isMovies) {
+                    System.out.println("영화 클릭했다");
                     moviesInfoDTOList = friendMapper.getRecommendMovieByMemberIds(memberIds, recommendType);
+                    System.out.println("moviesInfoDTOList = " + moviesInfoDTOList);
+                    for ( RecommendInfoDTO moviesInfoDTOLists :  moviesInfoDTOList){
+                        System.out.println(" 쿼리문 돌고나서 moviesInfoDTOLists.getTitle() = " + moviesInfoDTOLists.getTitle());
+                    }
                 }else{
+                    System.out.println("드라마 클릭했다");
                     moviesInfoDTOList = friendMapper.getRecommendTvShowByMemberIds(memberIds, recommendType);
                 }
         } else if ("watched".equals(recommendRequestDTO.getRecommendOption())) {
@@ -91,6 +103,9 @@ public class RecommendFriendsService implements IF_RecommendFriendsService {
                 moviesInfoDTOList = friendMapper.getRecommendTvShowByMemberIds(memberIds, recommendType);
             }
         }
+
+        
+        System.out.println(" 친구 추천 부분에서 결과 값이 나왔다 bfs돌고 나서 " );
         return moviesInfoDTOList;
     }
 
