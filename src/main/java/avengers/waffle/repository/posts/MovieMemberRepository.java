@@ -14,4 +14,6 @@ public interface MovieMemberRepository extends JpaRepository<Member, String> {
     Member findByMemberId(String memberId);
     boolean existsByMemberId(String id);
     boolean existsByMemberName(String name);
+
+    String memberId(String memberId);
 }

@@ -45,6 +45,12 @@ public class UserInfoController {
             HttpServletRequest request) {
         String authorizationHeader = request.getHeader("Authorization");
         String memberId = getMemberId.getMemberId(authorizationHeader);
+        System.out.println("!#!+@#+!#@+#!+@#+!@+$!+@$+!@%+!@+%!+@%+@@+%@%+%@+");
+        System.out.println("!#!+@#+!#@+#!+@#+!@+$!+@$+!@%+!@+%!+@%+@@+%@%+%@+");
+        System.out.println("!#!+@#+!#@+#!+@#+!@+$!+@$+!@%+!@+%!+@%+@@+%@%+%@+");
+
+        System.out.println(memberId);
+
         mypageService.updateMyProfile(memberId, requestDTO, imageFile);
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);

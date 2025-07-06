@@ -4,7 +4,7 @@
 <mapper namespace="avengers.waffle.mapper.MovieMapper">
     <!--    <cache/>-->
     <select id="findMoviesByGenres" resultType="avengers.waffle.dto.mybatis.MoviesDTO">
-        SELECT m.id, m.korean_title, m.poster_path ,m.backdrop_path,m.overview,r.averageRating
+        SELECT m.id, m.korean_title, m.poster_path ,m.backdrop_path,m.overview,r.averageRating,"movie"
         FROM ratings r
         STRAIGHT_JOIN (select id,korean_title,poster_path,genres,imdb_id, original_language ,backdrop_path,overview from
         movies) m
@@ -33,7 +33,7 @@
 
 
     <select id="searchComplexMovie" resultType="avengers.waffle.dto.mybatis.MoviesDTO">
-        SELECT sm.id,sm.korean_title,sm.poster_path, sm.backdrop_path, sm.overview, r.averageRating
+        SELECT sm.id,sm.korean_title,sm.poster_path, sm.backdrop_path, sm.overview, r.averageRating ,"movie"
         FROM ratings r
         STRAIGHT_JOIN (
         SELECT

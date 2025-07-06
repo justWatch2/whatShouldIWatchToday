@@ -32,11 +32,12 @@ public class    OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
         String username = principalDetails.getUsername();
-
+        String provider = principalDetails.getProvider();
 
         String jwtToken = JWT.create()
                 .withSubject(username)
                 .withClaim("memberId", username)
+                .withClaim("provider",provider)
                 .withExpiresAt(new Date(System.currentTimeMillis() + jwtProperties.getExpirationTime()))
                 .sign(Algorithm.HMAC512(jwtProperties.getSecret()));
 

@@ -15,4 +15,6 @@ public class MoviesDTO {
     private String backdrop_path;
     private String overview;
     private float averageRating;
+    private String movie;
+
 }

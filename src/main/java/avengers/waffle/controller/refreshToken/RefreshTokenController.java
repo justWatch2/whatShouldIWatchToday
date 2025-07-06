@@ -25,6 +25,8 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.Date;
 
+//import static avengers.waffle.repository.posts.mapping.PostMapping.memberId;
+
 @Controller
 @RequiredArgsConstructor
 public class RefreshTokenController {
@@ -88,8 +90,11 @@ public class RefreshTokenController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired refresh token");
         }
 
+
         String memberId = jwt.getClaim("memberId").asString();
-        System.out.println("memberId = " + memberId);
+
+        String provider = movieMemberRepository.findByMemberId(memberId).getProvider();
+        
         //    2-2	Redis에서 해당 유저의 토큰과 일치하는지 확인
         String value = stringRedisTemplate.opsForValue().get(memberId);
         if (value != null) {
@@ -106,6 +111,7 @@ public class RefreshTokenController {
         String accessToken = JWT.create()
                 .withExpiresAt(new Date(System.currentTimeMillis() + (jwtProperties.getExpirationTime())))  //토큰 만료시간 60000 기준 1분
                 .withClaim("memberId", memberId)
+                .withClaim("provider",provider)
                 .sign(Algorithm.HMAC512(jwtProperties.getSecret()));
 
         //    3-2	(선택) refreshToken도 재발급 후 Redis 갱신

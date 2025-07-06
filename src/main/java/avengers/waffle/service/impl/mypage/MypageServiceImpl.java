@@ -19,7 +19,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class MypageMember implements If_MypageService {
+public class MypageServiceImpl implements If_MypageService {
     private final MovieMemberRepository movieMemberRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final FileDataUtil fileDataUtil;
@@ -46,10 +46,6 @@ public class MypageMember implements If_MypageService {
         Member member = movieMemberRepository.findByMemberId(userId);
         if (member == null) {
             throw new UsernameNotFoundException("유저를 찾을 수 없습니다: " + userId);
-        }
-
-        if (!passwordEncoder.matches(requestDTO.getCurrentPassword(), member.getMemberPw())) {
-            throw new BadCredentialsException("기존 비밀번호가 일치하지 않습니다.");
         }
 
         try {
