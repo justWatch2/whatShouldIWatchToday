@@ -197,7 +197,7 @@ public class RecommendFriendsService implements IF_RecommendFriendsService {
         List<RecommendInfoDTO> finalRecommendations = new ArrayList<>();
 
         int recommendPerStart = recommendSize / topNStarts.size();
-
+    
         for (RecommendInfoDTO startMovie : topNStarts) {
             int startId = startMovie.getMovieId();
             System.out.println(" 시작 노드 돌아가는거 숫자 체크" );

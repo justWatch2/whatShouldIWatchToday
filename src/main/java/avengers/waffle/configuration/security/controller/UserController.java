@@ -21,7 +21,7 @@ public class UserController {
 
     @GetMapping("/")
     public String index(){
-        return "main";
+        return "index";
     }
 
 

@@ -11,7 +11,7 @@
     <select id="selectFriendsByMemberId" resultType="avengers.waffle.dto.userDTO.FriendDTO" parameterType="map">
         SELECT m.member_id AS memberId, m.member_name AS memberName, m.img_url as imgUrl
         FROM member m
-        WHERE m.member_id IN
+        WHERE m.member_name IN
         <foreach item="friendId" collection="friendIds" open="(" separator="," close=")">
             #{friendId}
         </foreach>

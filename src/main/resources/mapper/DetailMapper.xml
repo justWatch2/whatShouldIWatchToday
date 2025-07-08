@@ -69,8 +69,8 @@
                 1
             </when>
         </choose>
-        FROM tv_keywords mk
-        WHERE mk.tv_shows_id = #{id}
+        FROM tvshow_keywords mk
+        WHERE mk.tv_show_id = #{id}
         ON DUPLICATE KEY UPDATE
         keyword_count = keyword_count + 1
         <choose>
@@ -94,11 +94,11 @@
 
     <update id="updateKct">
         UPDATE keyword_count_tv kcm
-            JOIN tv_keywords mk ON kcm.keywords_id = mk.keywords_id
+            JOIN tvshow_keywords mk ON kcm.keywords_id = mk.keywords_id
         SET
             kcm.keyword_count = kcm.keyword_count - 1
         WHERE kcm.member_id = #{memberId}
-          AND mk.tv_shows_id = #{id}
+          AND mk.tv_show_id = #{id}
     </update>
 
     <delete id="deleteKcm">
@@ -114,7 +114,7 @@
         DELETE FROM keyword_count_tv
         WHERE member_id = #{memberId}
           AND keywords_id IN (
-            SELECT keywords_id FROM tv_keywords WHERE tv_shows_id = #{id}
+            SELECT keywords_id FROM tvshow_keywords WHERE tv_show_id = #{id}
         )
           AND keyword_count <![CDATA[<=]]> 0;
     </delete>

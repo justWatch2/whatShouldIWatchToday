@@ -43,7 +43,7 @@
                 <when test="status == 'wish'">tvshow_wishlist tl</when>
                 <when test="status == 'watched'">tvshow_viewlist tl</when>
             </choose>
-            join tvshows t on t.id = tl.tvshows_id
+            join tvshows t on t.id = tl.tv_shows_id
             where tl.member_id = #{memberId}
         <if test="cursor != null">
             AND tl.no &lt; #{cursor}

@@ -16,10 +16,12 @@ public class FriendService {
 
     public List<FriendDTO> getFriends(String memberId) {
         String friendList = friendListMapper.selectFriendList(memberId);
+        System.out.println(friendList);
         List<String> friendIds = (friendList != null) ? Arrays.asList(friendList.split(",")) : Collections.emptyList();
         if (friendIds.isEmpty()) {
             return Collections.emptyList(); // DB 조회 없이 즉시 종료
         }
+        System.out.println(friendIds.size());
         Map<String, Object> params = new HashMap<>();
         params.put("memberId", memberId);
         params.put("friendIds", friendIds);
