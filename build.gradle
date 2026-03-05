@@ -43,6 +43,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'        // from file 1
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-authorization-server' // from file 1
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'            // from file 1
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'          // from file 1
     implementation 'org.springframework.boot:spring-boot-starter-web-services'      // from file 1

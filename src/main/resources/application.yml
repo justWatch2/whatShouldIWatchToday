@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mariadb://localhost:3306/waffle}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: ${RABBIT_PORT:5672}
+    username: ${RABBIT_USERNAME:guest}
+    password: ${RABBIT_PASSWORD:guest}
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 1000
+          max-interval: 10000
+          multiplier: 2.0
+          max-attempts: 5
+
+app:
+  recommendation:
+    rabbit:
+      exchange: ${RABBIT_EXCHANGE:exchange}
+      queue: ${RABBIT_QUEUE:queue}
+      routing-key: ${RABBIT_ROUTING_KEY:queue}
+      dlx: ${RABBIT_DLX:deadExchange}
+      dlq: ${RABBIT_DLQ:deadQueue}
+      dlq-routing-key: ${RABBIT_DLQ_ROUTING_KEY:deadQueue}
+    redis-channel: ${RECOMMENDATION_REDIS_CHANNEL:recommendation.result}
+    websocket:
+      allowed-origins: ${RECOMMENDATION_WS_ALLOWED_ORIGINS:*}

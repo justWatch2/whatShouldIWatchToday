@@ -83,6 +83,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/auth/refresh", "/css/**", "/js/**", "/images/**",
                                         "/join", "/api/join", "/api/non-member/**","/static/**",
                                         "/api/checkId","/api/signUp","/api/getProfileImg","/img/**","/rec/**",
+                                        "/ws/**",
                                         "/api/checkName").permitAll() // 로그인 페이지, 정적 파일은 모두 허용
                                 .requestMatchers("/").permitAll() // 기본 홈 페이지도 허용
                                 .requestMatchers("*").permitAll()

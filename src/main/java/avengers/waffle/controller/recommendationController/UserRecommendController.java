@@ -1,8 +1,10 @@
 package avengers.waffle.controller.recommendationController;
 
 
-
+import avengers.waffle.configuration.messaging.UserRecommendJobMessage;
+import avengers.waffle.configuration.messaging.outbox.OutboxService;
 import avengers.waffle.dto.requestDTO.UserRecommendRequestDTO;
+import avengers.waffle.dto.responseDTO.UserRecommendAsyncResponseDTO;
 import avengers.waffle.dto.responseDTO.UserRecommendResponseDTO;
 import avengers.waffle.service.recommendationService.UserRecommendService;
 import avengers.waffle.utils.GetMemberId;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserRecommendController {
     private final UserRecommendService userRecommendService;
     private final GetMemberId getMemberId;
+    private final OutboxService outboxService;
 
     @PostMapping("/userrec")
     public ResponseEntity<UserRecommendResponseDTO> userRecommendMovies(
@@ -34,6 +37,31 @@ public class UserRecommendController {
 
         log.info("***** userRecommendMovies requestDTO: {}", requestDTO);
             return userRecommend(requestDTO);
+    }
+
+    @PostMapping("/userrec/async")
+    public ResponseEntity<UserRecommendAsyncResponseDTO> userRecommendMoviesAsync(
+            @RequestBody UserRecommendRequestDTO requestDTO, HttpServletRequest request) throws Exception {
+        String authorizationHeader = request.getHeader("Authorization");
+        String memberId = getMemberId.getMemberId(authorizationHeader);
+        requestDTO.setUserId(memberId);
+
+        String requestId = java.util.UUID.randomUUID().toString();
+        UserRecommendJobMessage msg = UserRecommendJobMessage.builder()
+                .requestId(requestId)
+                .userId(memberId)
+                .mediaType(requestDTO.getMediaType())
+                .region(requestDTO.getRegion())
+                .ageRating(requestDTO.getAgeRating())
+                .selectedGenres(requestDTO.getSelectedGenres())
+                .build();
+
+        outboxService.saveRecommendMessage(msg);
+
+
+
+        return ResponseEntity.accepted()
+                .body(UserRecommendAsyncResponseDTO.builder().requestId(requestId).build());
     }
 
 
