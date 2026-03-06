@@ -1,9 +1,11 @@
-package avengers.waffle.websocket;
+package avengers.waffle.configuration.websocket;
 
+import avengers.waffle.configuration.messaging.worker.woutbox.OutboxResultRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -15,12 +17,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
+@Profile("web")
 @RequiredArgsConstructor
 @Slf4j
 public class RecommendationWebSocketHandler extends TextWebSocketHandler {
 
     private final RecommendationWebSocketRegistry registry;
     private final ObjectMapper objectMapper;
+    private final OutboxResultRepository outboxResultRepository;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws IOException {
@@ -42,6 +46,17 @@ public class RecommendationWebSocketHandler extends TextWebSocketHandler {
         }
 
         String type = root.path("type").asText("");
+        if ("result_ack".equals(type)) {
+            String requestId = root.path("requestId").asText("");
+            if (requestId.isBlank()) {
+                session.sendMessage(new TextMessage("{\"type\":\"error\",\"message\":\"missing_requestId\"}"));
+                return;
+            }
+            outboxResultRepository.deleteById(requestId);
+            session.sendMessage(new TextMessage("{\"type\":\"ack\",\"requestId\":\"" + requestId + "\"}"));
+            return;
+        }
+
         if (!"bind".equals(type)) {
             session.sendMessage(new TextMessage("{\"type\":\"error\",\"message\":\"unknown_type\"}"));
             return;

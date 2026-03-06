@@ -24,6 +24,9 @@ public class OutboxService {
         Outbox outbox = Outbox.builder()
                 .eventType("USER_RECOMMEND_REQUEST")
                 .payload(objectMapper.writeValueAsString(msg))
+
+
+
                 .status("NEW")
                 .retryCount(0)
                 .createdAt(LocalDateTime.now())

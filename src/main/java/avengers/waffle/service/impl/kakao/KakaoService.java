@@ -4,6 +4,7 @@ import avengers.waffle.entity.Member;
 import avengers.waffle.repository.posts.MovieMemberRepository;
 import avengers.waffle.service.IF.kakao.IF_KakaoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,13 +20,17 @@ public class KakaoService implements IF_KakaoService {
     private final StringRedisTemplate stringRedisTemplate;
     private final MovieMemberRepository movieMemberRepository;
 
+    @Value("${app.invite.base-url:http://localhost:3000}")
+    private String inviteBaseUrl;
+
     public String createURL(String memberId) {
         String uuid = UUID.randomUUID().toString();
         System.out.println(memberId + " asssssafasdfafdafasdff");
         stringRedisTemplate.opsForValue().set("invite:" + uuid, memberId, 7, TimeUnit.DAYS);
 
         //이부분에 링크 주소를 바꿔주면된다.
-        String inviteUrl = "http://localhost:3000/?uuid=" + uuid;
+        String base = inviteBaseUrl.endsWith("/") ? inviteBaseUrl.substring(0, inviteBaseUrl.length() - 1) : inviteBaseUrl;
+        String inviteUrl = base + "/?uuid=" + uuid;
         return inviteUrl;
     }
 

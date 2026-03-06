@@ -1,34 +1,36 @@
 package avengers.waffle.configuration.redis;
 
-import avengers.waffle.configuration.messaging.RecommendationResultSubscriber;
+
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 
 @Configuration
+@Profile("web")
 public class RedisPubSubConfig {
 
     @Value("${app.recommendation.redis-channel:recommendation.result}")
-    private String recommendationResultChannel;
+    private String resultChannel;
 
     @Bean
-    public ChannelTopic recommendationResultTopic() {
-        return new ChannelTopic(recommendationResultChannel);
+    public ChannelTopic resultTopic() {
+        return new ChannelTopic(resultChannel);
     }
 
     @Bean
-    public RedisMessageListenerContainer recommendationResultListenerContainer(
+    public RedisMessageListenerContainer redisMessageListenerContainer(
             @Qualifier("cacheRedisConnectionFactory") RedisConnectionFactory redisConnectionFactory,
-            RecommendationResultSubscriber recommendationResultSubscriber,
-            ChannelTopic recommendationResultTopic
+            ResultSubscriber resultSubscriber,
+            ChannelTopic resultTopic
     ) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(redisConnectionFactory);
-        container.addMessageListener(recommendationResultSubscriber, recommendationResultTopic);
+        container.addMessageListener(resultSubscriber, resultTopic);
         return container;
     }
 }

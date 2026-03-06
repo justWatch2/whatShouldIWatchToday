@@ -12,6 +12,7 @@ import avengers.waffle.repository.posts.MovieMemberRepository;
 import avengers.waffle.utils.GetUrlToImage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -40,6 +41,9 @@ public class SecurityConfig {
 
     @Qualifier("tokenRedisTemplate")
     private final StringRedisTemplate stringRedisTemplate;
+
+    @Value("${app.cors.allowed-origins:*}")
+    private String allowedOrigins;
     //Spring Boot 3.x 이상에서는 AuthenticationManager를 직접 빌드해서 넣어줘야 필터에서 사용할 수 있음.
     //@Bean으로 분리해 두면 다른 클래스에서도 재사용 가능해서 더 좋다.
     @Bean
@@ -106,8 +110,12 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.addAllowedOrigin("http://localhost:3000");
-        configuration.addAllowedOrigin("http://localhost:5173");
+        for (String origin : allowedOrigins.split(",")) {
+            String trimmed = origin.trim();
+            if (!trimmed.isEmpty()) {
+                configuration.addAllowedOriginPattern(trimmed);
+            }
+        }
         //.allowedOriginPatterns("*")  // ✅ Spring Boot 2.4 이상에서 지원
         configuration.addAllowedHeader("*");
         configuration.addAllowedMethod("*");

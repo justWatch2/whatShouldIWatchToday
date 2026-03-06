@@ -1,9 +1,9 @@
 package avengers.waffle.configuration.redis;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
@@ -13,14 +13,23 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 @Configuration
 public class RedisConfig {
 
+    @Value("${spring.data.redis.host}")
+    private String redisHost;
+
+    @Value("${spring.data.redis.port}")
+    private int redisPort;
+
+    private RedisStandaloneConfiguration baseConfig() {
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
+        config.setHostName(redisHost);
+        config.setPort(redisPort);
+        return config;
+    }
+
     // --- Refresh Token 용 RedisTemplate (DB port 6379) ---
     @Bean
     public RedisConnectionFactory tokenRedisConnectionFactory() {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        config.setHostName("localhost");
-        config.setPort(6379);
-        // 필요하면 비밀번호 설정
-        return new LettuceConnectionFactory(config);
+        return new LettuceConnectionFactory(baseConfig());
     }
     @Bean
     public StringRedisTemplate tokenRedisTemplate(@Qualifier("tokenRedisConnectionFactory") RedisConnectionFactory redisConnectionFactory) {
@@ -30,11 +39,7 @@ public class RedisConfig {
     // --- Search Cache 용 RedisTemplate (DB port 6380) ---
     @Bean
     public RedisConnectionFactory cacheRedisConnectionFactory() {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        config.setHostName("localhost");
-        config.setPort(6379);
-        // 필요하면 비밀번호 설정
-        return new LettuceConnectionFactory(config);
+        return new LettuceConnectionFactory(baseConfig());
     }
 //    @Bean
 //    public RedisTemplate<String, Object> cacheRedisTemplate() {
@@ -46,10 +51,19 @@ public class RedisConfig {
 //    }
 
     @Bean
-    @Primary
     public RedisTemplate<String, Object> redisTemplate(@Qualifier("cacheRedisConnectionFactory") RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory);
         return template;
     }
+
+    @Bean
+    public RedisTemplate<String, String> pubSubRedisTemplate(
+            @Qualifier("cacheRedisConnectionFactory") RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, String> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        return template;
+    }
+
+
 }

@@ -31,6 +31,10 @@ spring:
           max-attempts: 5
 
 app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:*}
+  invite:
+    base-url: ${INVITE_BASE_URL:http://localhost:3000}
   recommendation:
     rabbit:
       exchange: ${RABBIT_EXCHANGE:exchange}

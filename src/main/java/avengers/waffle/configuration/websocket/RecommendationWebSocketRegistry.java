@@ -1,13 +1,14 @@
-package avengers.waffle.websocket;
+package avengers.waffle.configuration.websocket;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@Profile("web")
 public class RecommendationWebSocketRegistry {
 
     private final ConcurrentHashMap<String, WebSocketSession> requestToSession = new ConcurrentHashMap<>();
