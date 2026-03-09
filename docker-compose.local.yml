@@ -2,7 +2,9 @@
 
 services:
   backend-web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.local
     container_name: backend-web-local
     environment:
       - SPRING_PROFILES_ACTIVE=web
@@ -15,7 +17,9 @@ services:
       - rabbitmq
 
   backend-worker:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.local
     container_name: backend-worker-local
     environment:
       - SPRING_PROFILES_ACTIVE=worker

@@ -46,3 +46,6 @@ app:
     redis-channel: ${RECOMMENDATION_REDIS_CHANNEL:recommendation.result}
     websocket:
       allowed-origins: ${RECOMMENDATION_WS_ALLOWED_ORIGINS:*}
+
+file:
+  uploadPath: ${FILE_UPLOAD_PATH:/app/uploads}

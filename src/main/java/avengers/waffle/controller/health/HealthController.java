@@ -1,4 +1,4 @@
-﻿package avengers.waffle.controller.health;
+package avengers.waffle.controller.health;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
