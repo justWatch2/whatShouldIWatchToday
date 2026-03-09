@@ -1,0 +1,74 @@
+﻿version: "3.8"
+
+services:
+  nginx:
+    image: nginx:1.25
+    container_name : nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./deploy/nginx/certs:/etc/nginx/certs:ro
+
+    depends_on:
+      - backend-web
+    networks:
+      - appnet
+
+  backend-web:
+    image: ${BACK_IMAGE}
+    container_name : backend-web
+    environment:
+      - SPRING_PROFILES_ACTIVE=web
+
+    env_file:
+      - ./deploy/env/web.env
+
+    networks:
+      - appnet
+
+    depends_on:
+      - redis
+      - rabbitmq
+
+  backend-worker:
+    image: ${BACK_IMAGE}
+    container_name : backend-worker
+    environment:
+      - SPRING_PROFILES_ACTIVE=worker
+    env_file:
+      - ./deploy/env/worker.env
+    networks:
+      - appnet
+    depends_on:
+      - redis
+      - rabbitmq
+
+  redis:
+    image: redis:7
+    container_name : redis
+    volumes:
+      - redis-data:/data
+    networks:
+      - appnet
+
+  rebbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    ports:
+      - "15672:15672"
+    networks:
+      - appnet
+
+networks:
+  appnet:
+    driver: bridge
+
+volumes:
+  redis-data:
+  rabbitmq-data:
+
+

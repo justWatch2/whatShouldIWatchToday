@@ -1,0 +1,43 @@
+﻿version: "3.8"
+
+services:
+  backend-web:
+    build: .
+    container_name: backend-web-local
+    environment:
+      - SPRING_PROFILES_ACTIVE=web
+    env_file:
+      - ./deploy/env/web.env.local
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+      - rabbitmq
+
+  backend-worker:
+    build: .
+    container_name: backend-worker-local
+    environment:
+      - SPRING_PROFILES_ACTIVE=worker
+    env_file:
+      - ./deploy/env/worker.env.local
+    depends_on:
+      - redis
+      - rabbitmq
+
+  redis:
+    image: redis:7
+    container_name: redis-local
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-local
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+networks:
+  default:
+    name: whatshouldiwatch-local

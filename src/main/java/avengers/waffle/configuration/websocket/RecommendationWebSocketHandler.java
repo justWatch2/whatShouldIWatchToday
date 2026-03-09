@@ -31,7 +31,10 @@ public class RecommendationWebSocketHandler extends TextWebSocketHandler {
         Map<String, String> payload = new HashMap<>();
         payload.put("type", "session");
         payload.put("sessionId", session.getId());
-        session.sendMessage(new TextMessage(objectMapper.writeValueAsString(payload)));
+        session.sendMessage(new TextMessage(objectMapper.writeValueAsString(payload))
+
+
+         );
     }
 
     @Override
