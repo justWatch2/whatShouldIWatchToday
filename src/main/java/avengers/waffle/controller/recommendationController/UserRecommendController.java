@@ -56,9 +56,11 @@ public class UserRecommendController {
                 .selectedGenres(requestDTO.getSelectedGenres())
                 .build();
 
+        log.info("비동기 추천 요청 수신! requestId: {}, memberId: {}, mediaType: {}",
+                requestId, memberId, requestDTO.getMediaType());
         outboxService.saveRecommendMessage(msg);
 
-
+        log.info("비동기 추천 요청 응답 반환! requestId: {}", requestId);
 
         return ResponseEntity.accepted()
                 .body(UserRecommendAsyncResponseDTO.builder().requestId(requestId).build());

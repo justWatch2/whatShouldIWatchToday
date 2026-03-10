@@ -33,50 +33,53 @@
 
 
     <select id="searchComplexMovie" resultType="avengers.waffle.dto.mybatis.MoviesDTO">
-        SELECT sm.id,sm.korean_title,sm.poster_path, sm.backdrop_path, sm.overview, r.averageRating ,"movie"
-        FROM ratings r
-        STRAIGHT_JOIN (
-        SELECT
-        m.id, m.korean_title, m.poster_path, m.imdb_id, m.backdrop_path, m.overview, m.release_date, m.original_language
-        FROM movies m
-        JOIN titles_adult ta
-        ON m.imdb_id = ta.tconst
-        WHERE
-        YEAR(m.release_date) BETWEEN #{releaseYear[0]} AND #{releaseYear[1]}
-        <if test="adult != null">
-            <choose>
-                <when test="adult">
-                    AND ta.is_adult = 1
-                </when>
-                <otherwise>
-                    AND ta.is_adult = 0
-                </otherwise>
-            </choose>
-        </if>
-        <if test="isDomestic != null">
-            <choose>
-                <when test="isDomestic">
-                    AND m.original_language = 'ko'
-                </when>
-                <otherwise>
-                    AND m.original_language != 'ko'
-                </otherwise>
-            </choose>
-        </if>
-        AND EXISTS (
-        SELECT 1
-        FROM movie_genres mg
-        JOIN movie_genres_list mgl ON mg.genres_id = mgl.genres_id
-        WHERE mg.movies_id = m.id
-        AND mgl.genres IN
-        <foreach item="genre" collection="selectedGenres" open="(" separator="," close=")">
-            #{genre}
-        </foreach>
-        LIMIT 1
+        WITH genre_movies AS (
+            SELECT DISTINCT mg.movies_id
+            FROM movie_genres mg
+            JOIN movie_genres_list mgl
+                ON mgl.genres_id = mg.genres_id
+            <if test="selectedGenres != null and !selectedGenres.isEmpty()">
+                WHERE mgl.genres IN
+                <foreach item="genre" collection="selectedGenres" open="(" separator="," close=")">
+                    #{genre}
+                </foreach>
+            </if>
+        ),
+        filtered_movies AS (
+            SELECT m.id, m.imdb_id, m.korean_title, m.poster_path, m.backdrop_path, m.overview
+            FROM genre_movies gm
+            JOIN movies m
+                ON m.id = gm.movies_id
+            JOIN titles_adult ta
+                ON ta.tconst = m.imdb_id
+            WHERE m.release_date >= STR_TO_DATE(CONCAT(#{releaseYear[0]}, '-01-01'), '%Y-%m-%d')
+              AND m.release_date <![CDATA[<]]> DATE_ADD(STR_TO_DATE(CONCAT(#{releaseYear[1]}, '-01-01'), '%Y-%m-%d'), INTERVAL 1 YEAR)
+            <if test="adult != null">
+                <choose>
+                    <when test="adult">
+                        AND ta.is_adult = 1
+                    </when>
+                    <otherwise>
+                        AND ta.is_adult = 0
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="isDomestic != null">
+                <choose>
+                    <when test="isDomestic">
+                        AND m.original_language = 'ko'
+                    </when>
+                    <otherwise>
+                        AND m.original_language != 'ko'
+                    </otherwise>
+                </choose>
+            </if>
         )
-        ) AS sm
-        ON sm.imdb_id = r.tconst
-        AND r.averageRating BETWEEN #{rating[0]} AND #{rating[1]}
+        SELECT fm.id, fm.korean_title, fm.poster_path, fm.backdrop_path, fm.overview, r.averageRating, "movie"
+        FROM filtered_movies fm
+        JOIN ratings r
+            ON r.tconst = fm.imdb_id
+        WHERE r.averageRating BETWEEN #{rating[0]} AND #{rating[1]}
         ORDER BY r.numVotes DESC, r.averageRating DESC
         LIMIT 20
     </select>

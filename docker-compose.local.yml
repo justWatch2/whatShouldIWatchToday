@@ -42,6 +42,52 @@ services:
       - "5672:5672"
       - "15672:15672"
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus-local
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--web.enable-remote-write-receiver"
+      - "--storage.tsdb.retention.time=15d"
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  influxdb:
+    image: influxdb:1.8
+    container_name: influxdb-local
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=k6
+      - INFLUXDB_HTTP_AUTH_ENABLED=false
+    volumes:
+      - influxdb-data:/var/lib/influxdb
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana-local
+    depends_on:
+      - prometheus
+      - influxdb
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+
 networks:
   default:
     name: whatshouldiwatch-local
+
+volumes:
+  prometheus-data:
+  influxdb-data:
+  grafana-data:

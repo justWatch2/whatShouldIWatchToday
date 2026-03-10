@@ -49,6 +49,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'          // from file 1
     implementation 'org.springframework.boot:spring-boot-starter-web-services'      // from file 1
     implementation 'org.springframework.boot:spring-boot-starter-webflux'            // from file 1
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'             // from file 1
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 

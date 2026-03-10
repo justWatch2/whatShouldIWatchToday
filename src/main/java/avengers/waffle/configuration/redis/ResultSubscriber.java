@@ -31,17 +31,21 @@ public class ResultSubscriber implements MessageListener {
     @Override
     public void onMessage(Message message, byte[] pattern) {
         String requestId = new String(message.getBody(), StandardCharsets.UTF_8);
+        log.info("redis pub/sub 수신! requestId: {}", requestId);
         if (requestId.isBlank()) {
             return;
         }
 
         Optional<OutboxResult> outboxResult = outboxResultRepository.findById(requestId);
         if (outboxResult.isEmpty()) {
+            log.warn("outbox_result 조회 실패! requestId: {}", requestId);
             return;
         }
+        log.info("outbox_result 조회 성공! requestId: {}", requestId);
 
         WebSocketSession session = registry.getSession(requestId);
         if (session == null || !session.isOpen()) {
+            log.warn("웹소켓 세션 없음/종료 상태! requestId: {}", requestId);
             return;
         }
 
@@ -51,6 +55,7 @@ public class ResultSubscriber implements MessageListener {
             wrapper.put("requestId", requestId);
             wrapper.put("data", objectMapper.readTree(outboxResult.get().getPayload()));
             session.sendMessage(new TextMessage(objectMapper.writeValueAsString(wrapper)));
+            log.info("웹소켓 결과 push 완료! requestId: {}", requestId);
         } catch (Exception ex) {
             log.warn("Failed to push result requestId={}", requestId, ex);
         }

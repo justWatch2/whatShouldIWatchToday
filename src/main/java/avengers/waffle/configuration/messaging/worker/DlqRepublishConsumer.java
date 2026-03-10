@@ -2,6 +2,7 @@ package avengers.waffle.configuration.messaging.worker;
 
 import avengers.waffle.configuration.messaging.UserRecommendJobMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Profile("worker")
 @RequiredArgsConstructor
+@Slf4j
 public class DlqRepublishConsumer {
 
     private final RabbitTemplate rabbitTemplate;
@@ -23,6 +25,7 @@ public class DlqRepublishConsumer {
 
     @RabbitListener (queues = "${app.recommendation.rabbit.dlq:deadQueue}")
     public void handleDlq(UserRecommendJobMessage msg){
+        log.warn("DLQ 메시지 재발행! requestId: {}, mediaType: {}", msg.getRequestId(), msg.getMediaType());
         rabbitTemplate.convertAndSend(exchangeName, routingKey, msg);
     }
 }

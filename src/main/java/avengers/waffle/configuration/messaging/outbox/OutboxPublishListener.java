@@ -4,6 +4,7 @@ import avengers.waffle.configuration.messaging.UserRecommendJobMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.connection.CorrelationData;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +16,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Component
 @Profile("web")
 @RequiredArgsConstructor
+@Slf4j
 public class OutboxPublishListener {
     private final OutboxRepository outboxRepository;
     private final ObjectMapper objectMapper;
@@ -35,7 +37,10 @@ public class OutboxPublishListener {
                 objectMapper.readValue(outbox.getPayload(), UserRecommendJobMessage.class);
 
         CorrelationData data = new CorrelationData(outbox.getId().toString());
+        log.info("rabbitmq 발행 시도! requestId: {}, outboxId: {}, exchange: {}, routingKey: {}",
+                msg.getRequestId(), outbox.getId(), exchangeName, routingKey);
         rabbitTemplate.convertAndSend(exchangeName, routingKey,msg,data);
+        log.info("rabbitmq 발행 완료! requestId: {}, outboxId: {}", msg.getRequestId(), outbox.getId());
 
     }
 }

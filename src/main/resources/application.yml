@@ -2,7 +2,7 @@ spring:
   datasource:
     url: ${DB_URL:jdbc:mariadb://localhost:3306/waffle}
     username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:}
+    password: ${DB_PASSWORD:1676}
     driver-class-name: org.mariadb.jdbc.Driver
   jpa:
     hibernate:
@@ -30,6 +30,9 @@ spring:
           multiplier: 2.0
           max-attempts: 5
 
+mybatis:
+  mapper-locations: classpath:/mapper/*.xml
+
 app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:*}
@@ -49,3 +52,15 @@ app:
 
 file:
   uploadPath: ${FILE_UPLOAD_PATH:/app/uploads}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: waffle
