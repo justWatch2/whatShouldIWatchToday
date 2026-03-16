@@ -25,9 +25,6 @@ public class UserRecommendServiceImpl implements UserRecommendService {
 
     @Override
     public UserRecommendResponseDTO memberRecommend(UserRecommendRequestDTO requestDTO) {
-
-
-        System.out.println("emfdjhdhasd123123!@#!@#!2312#!@$!@$!@$!@$");
         UserRecommendSearchDTO userRecommendSearchDTO = UserRecommendSearchDTO.builder()
                 .userId(requestDTO.getUserId())
                 .isDomestic(requestDTO.getRegion().equals("domestic"))
@@ -43,14 +40,12 @@ public class UserRecommendServiceImpl implements UserRecommendService {
 
         if (requestDTO.getMediaType().equals("movie")) {
             List<UserRecommendMovieResultDTO> candidateMovies = movieRepository.getMovieCandidates(userRecommendSearchDTO);
-            System.out.println("candidate arrive");
             List<UserRecommendMovieResultDTO> finalUserRecommend = bfsRecommendForMovies(candidateMovies, maxDepth, recommendSize, topNStartItems);
             responseBuilder.userSelectedList(finalUserRecommend); // 영화 목록
         } else if (requestDTO.getMediaType().equals("tv")) {
             // !!! TV 추천 로직 추가 !!!
             log.info("userRecommendSearchDTO={}", userRecommendSearchDTO);
             List<UserRecommendTVResultDTO> candidateTvs = tvRepository.getTvCandidates(userRecommendSearchDTO); // TvMapper 사용
-            log.info("11111111111111111111111111111111111");
             log.info("Found {} tv", candidateTvs.size());
             List<UserRecommendTVResultDTO> finalUserRecommend = bfsRecommendForTvs(candidateTvs, maxDepth, recommendSize, topNStartItems);
             responseBuilder.userSelectedList(finalUserRecommend); // TV 목록

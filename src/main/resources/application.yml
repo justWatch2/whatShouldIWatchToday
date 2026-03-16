@@ -49,6 +49,18 @@ app:
     redis-channel: ${RECOMMENDATION_REDIS_CHANNEL:recommendation.result}
     websocket:
       allowed-origins: ${RECOMMENDATION_WS_ALLOWED_ORIGINS:*}
+  worker:
+    backpressure:
+      enabled: ${APP_WORKER_BACKPRESSURE_ENABLED:true}
+      check-interval-ms: ${APP_WORKER_BACKPRESSURE_CHECK_INTERVAL_MS:1000}
+      listener-id: ${APP_WORKER_BACKPRESSURE_LISTENER_ID:userRecommendJobConsumer}
+      pause-threshold: ${APP_WORKER_BACKPRESSURE_PAUSE_THRESHOLD:75.0}
+      resume-threshold: ${APP_WORKER_BACKPRESSURE_RESUME_THRESHOLD:60.0}
+      high-usage-threshold: ${APP_WORKER_BACKPRESSURE_HIGH_USAGE_THRESHOLD:65.0}
+      normal-usage-threshold: ${APP_WORKER_BACKPRESSURE_NORMAL_USAGE_THRESHOLD:45.0}
+      high-usage-concurrency: ${APP_WORKER_BACKPRESSURE_HIGH_USAGE_CONCURRENCY:12}
+      normal-usage-concurrency: ${APP_WORKER_BACKPRESSURE_NORMAL_USAGE_CONCURRENCY:24}
+      low-usage-concurrency: ${APP_WORKER_BACKPRESSURE_LOW_USAGE_CONCURRENCY:37}
 
 file:
   uploadPath: ${FILE_UPLOAD_PATH:/app/uploads}

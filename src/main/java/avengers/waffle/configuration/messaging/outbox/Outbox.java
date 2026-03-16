@@ -16,8 +16,7 @@ import java.time.LocalDateTime;
 public class Outbox {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String requestId;
 
     private String eventType;
 

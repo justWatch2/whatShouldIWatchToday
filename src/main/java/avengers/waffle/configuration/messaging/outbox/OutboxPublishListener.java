@@ -31,16 +31,16 @@ public class OutboxPublishListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onOutboxCreated(OutboxCreatedEvent event) throws JsonProcessingException {
-        Outbox outbox = outboxRepository.findById(event.getOutboxId()).orElseThrow();
+        Outbox outbox = outboxRepository.findById(event.getRequestId()).orElseThrow();
 
         UserRecommendJobMessage msg =
                 objectMapper.readValue(outbox.getPayload(), UserRecommendJobMessage.class);
 
-        CorrelationData data = new CorrelationData(outbox.getId().toString());
-        log.info("rabbitmq 발행 시도! requestId: {}, outboxId: {}, exchange: {}, routingKey: {}",
-                msg.getRequestId(), outbox.getId(), exchangeName, routingKey);
+        CorrelationData data = new CorrelationData(outbox.getRequestId());
+        log.info("rabbitmq 발행 시도! requestId: {}, exchange: {}, routingKey: {}",
+                msg.getRequestId(), exchangeName, routingKey);
         rabbitTemplate.convertAndSend(exchangeName, routingKey,msg,data);
-        log.info("rabbitmq 발행 완료! requestId: {}, outboxId: {}", msg.getRequestId(), outbox.getId());
+        log.info("rabbitmq 발행 완료! requestId: {}", msg.getRequestId());
 
     }
 }

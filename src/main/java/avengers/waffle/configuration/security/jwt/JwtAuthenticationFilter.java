@@ -42,8 +42,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     // 이 메서드는 jwt발급을 위해서 한번만 콜된다.
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        System.out.println("로그인 시도: JwtAuthenticationFilter");
-
         if (!request.getMethod().equals("POST")) {
             throw new AuthenticationServiceException("Authentication method not supported: " + request.getMethod());
         }
@@ -99,13 +97,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        System.out.println("successfulAuthentication 인증이 완료되었다는 뜻");
-
         PrincipalDetails principalDetails = (PrincipalDetails) authResult.getPrincipal();
-        System.out.println("principalDetails.getUsername() = " + principalDetails.getUsername());
         //RSA방식은 아니고 hash암호 방식
         String accessToken = JWT.create()
-                .withExpiresAt(new Date(System.currentTimeMillis() + (jwtProperties.getExpirationTime()/6)))  //토큰 만료시간 60000 기준 1분
+                .withExpiresAt(new Date(System.currentTimeMillis() + jwtProperties.getExpirationTime()))
 //                .withClaim("id",principalDetails.getId())  //withClaim은 키 벨류값설
                 .withClaim("memberId", principalDetails.getUsername())
                 .sign(Algorithm.HMAC512(jwtProperties.getSecret()));
@@ -143,7 +138,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         //Value: abcd1234...  (실제 JWT 리프레시 토큰)
         //TTL:   14일 (1209600초)    TimeUnit.DAYs -> 일 의미함!
 
-        System.out.println("cookie.toString() = " + cookie.toString());
         // 응답 헤더에 넣기 클라이언트도 가지고 있어야 되기 때문임
         response.addHeader("Set-Cookie", cookie.toString());
 

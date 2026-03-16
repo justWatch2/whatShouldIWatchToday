@@ -4,11 +4,11 @@ import lombok.Getter;
 
 @Getter
 public class OutboxCreatedEvent {
-    private final Long outboxId;
+    private final String requestId;
 
 
-    public OutboxCreatedEvent(Long outboxId) {
-        this.outboxId = outboxId;
+    public OutboxCreatedEvent(String requestId) {
+        this.requestId = requestId;
     }
 
 }

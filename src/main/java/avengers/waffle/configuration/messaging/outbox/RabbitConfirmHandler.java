@@ -33,22 +33,26 @@ public class RabbitConfirmHandler {
 
         if(data == null) return;
 
-        Long outboxId = Long.valueOf(data.getId());
+        String requestId = data.getId();
 
         if(ack){
-            log.info("rabbitmq confirm 성공! outboxId: {}", outboxId);
-            outboxRepository.deleteById(outboxId);
-            log.info("outbox 삭제 완료! outboxId: {}", outboxId);
+            log.info("rabbitmq confirm 성공! requestId: {}", requestId);
+            outboxRepository.findById(requestId).ifPresent(outbox -> {
+                outbox.setStatus("SENT");
+                outboxRepository.save(outbox);
+                log.info("outbox SENT 처리! requestId: {}", requestId);
+            });
+            log.info("outbox confirm 처리 완료(삭제 안 함)! requestId: {}", requestId);
         }else{
-            log.warn("rabbitmq confirm 실패! outboxId: {}, cause: {}", outboxId, cause);
-            outboxRepository.findById(outboxId).ifPresent(outbox -> {
-                if(outbox.getRetryCount() > MAX_RETRY){
+            log.warn("rabbitmq confirm 실패! requestId: {}, cause: {}", requestId, cause);
+            outboxRepository.findById(requestId).ifPresent(outbox -> {
+                if(outbox.getRetryCount() >= MAX_RETRY){
 
-                    outbox.setStatus("FAILED");
-                    outbox.setRetryCount(outbox.getRetryCount() + 1);
-                    outboxRepository.save(outbox);
-                    log.error("outbox 재시도 초과로 FAILED 처리! outboxId: {}, retryCount: {}",
-                            outbox.getId(), outbox.getRetryCount());
+                    outboxRepository.deleteById(requestId);
+//                    outbox.setRetryCount(outbox.getRetryCount() + 1);
+
+                    log.error("outbox 재시도 초과로 FAILED 처리! requestId: {}, retryCount: {}",
+                            outbox.getRequestId(), outbox.getRetryCount());
                     return;
                 }
 
@@ -58,16 +62,16 @@ public class RabbitConfirmHandler {
                     outbox.setRetryCount(outbox.getRetryCount() + 1);
                     outboxRepository.save(outbox);
 
-                    CorrelationData retryData = new CorrelationData(outbox.getId().toString());
-                    log.warn("rabbitmq 재발행 시도! requestId: {}, outboxId: {}, retryCount: {}",
-                            msg.getRequestId(), outbox.getId(), outbox.getRetryCount());
+                    CorrelationData retryData = new CorrelationData(outbox.getRequestId());
+                    log.warn("rabbitmq 재발행 시도! requestId: {}, retryCount: {}",
+                            msg.getRequestId(), outbox.getRetryCount());
                     rabbitTemplate.convertAndSend(exchangeName ,  routingKey, msg, retryData);
                 }catch(Exception e){
-                    outbox.setStatus("FAILED");
+//                    outbox.setStatus("FAILED");
                     outbox.setRetryCount(outbox.getRetryCount() + 1);
                     outboxRepository.save(outbox);
-                    log.error("rabbitmq 재발행 중 예외로 FAILED 처리! outboxId: {}, retryCount: {}",
-                            outbox.getId(), outbox.getRetryCount(), e);
+                    log.error("rabbitmq 재발행 중 예외로 FAILED 처리! requestId: {}, retryCount: {}",
+                            outbox.getRequestId(), outbox.getRetryCount(), e);
                 }
             });
         }

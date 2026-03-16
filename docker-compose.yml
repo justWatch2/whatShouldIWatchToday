@@ -1,5 +1,3 @@
-﻿version: "3.8"
-
 services:
   nginx:
     image: nginx:1.25
@@ -17,7 +15,7 @@ services:
       - appnet
 
   backend-web:
-    image: ${BACK_IMAGE}
+    image: ${BACK_IMAGE:-backend:latest}
     container_name : backend-web
     environment:
       - SPRING_PROFILES_ACTIVE=web
@@ -33,7 +31,7 @@ services:
       - rabbitmq
 
   backend-worker:
-    image: ${BACK_IMAGE}
+    image: ${BACK_IMAGE:-backend:latest}
     container_name : backend-worker
     environment:
       - SPRING_PROFILES_ACTIVE=worker
@@ -53,7 +51,7 @@ services:
     networks:
       - appnet
 
-  rebbitmq:
+  rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
     volumes:
@@ -70,5 +68,4 @@ networks:
 volumes:
   redis-data:
   rabbitmq-data:
-
 

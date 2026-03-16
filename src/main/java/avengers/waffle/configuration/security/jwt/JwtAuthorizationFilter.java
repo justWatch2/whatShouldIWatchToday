@@ -39,10 +39,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        System.out.println("인가 시작!!!");
-
         String jwtHeader = request.getHeader("Authorization");
-        System.out.println("jwtHeader = " + jwtHeader);
 
         //refresh Token을 위해서
         String uri = request.getRequestURI();
@@ -90,8 +87,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         }
         //서명이 정상적으로 된경우
         if (memberId != null) {
-            System.out.println(" 인가쪽 제대로 시행된다는거지");
-            System.out.println("memberId = " + memberId);
             // 이부분에서 username이 db에 있으면 찾아지는거니까 인증이됨
             Member userEntity = movieMemberRepository.findByMemberId(memberId);
 
